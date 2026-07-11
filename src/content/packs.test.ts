@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CONTENT_PACKS, getColor, getShape, type ColorId, type ShapeId } from "./packs";
+import { CONTENT_PACKS, type ColorId, getColor, getShape, type ShapeId } from "./packs";
 
 describe("content packs", () => {
   it("turns the same scene into mode-specific parent cues", () => {
