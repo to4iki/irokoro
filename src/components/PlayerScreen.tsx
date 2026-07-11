@@ -54,6 +54,7 @@ export function PlayerScreen({
       data-paused={state.status === "paused"}
       style={style}
     >
+      <h1 className="sr-only">{pack.title}</h1>
       <header className="player-header">
         <div className="player-brand">
           <span aria-hidden="true">●</span>
