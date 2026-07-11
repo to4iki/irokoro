@@ -1,12 +1,12 @@
 import { FINISH_SUGGESTIONS } from "../content/packs";
 
 type FinishScreenProps = {
-  lastSceneIndex: number;
+  sceneIndex: number;
   onReset: () => void;
 };
 
-export function FinishScreen({ lastSceneIndex, onReset }: FinishScreenProps) {
-  const suggestion = FINISH_SUGGESTIONS[lastSceneIndex % FINISH_SUGGESTIONS.length];
+export function FinishScreen({ sceneIndex, onReset }: FinishScreenProps) {
+  const suggestion = FINISH_SUGGESTIONS[sceneIndex % FINISH_SUGGESTIONS.length];
 
   return (
     <main className="finish-screen">

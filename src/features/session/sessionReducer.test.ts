@@ -61,7 +61,7 @@ describe("sessionReducer", () => {
     expect(finished).toMatchObject({
       status: "finished",
       preferences: { soundEnabled: false },
-      lastSceneIndex: 0,
+      sceneIndex: 0,
     });
   });
 

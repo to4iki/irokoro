@@ -7,23 +7,8 @@ type AudioContextFactory = () => AudioContext;
 
 const MASTER_GAIN = 0.04;
 
-function createBrowserAudioContext(): AudioContext {
-  const AudioContextClass =
-    window.AudioContext ??
-    (
-      window as typeof window & {
-        webkitAudioContext?: typeof AudioContext;
-      }
-    ).webkitAudioContext;
-
-  if (!AudioContextClass) {
-    throw new DOMException("Web Audio is unavailable.");
-  }
-  return new AudioContextClass();
-}
-
 export function createChime(
-  createContext: AudioContextFactory = createBrowserAudioContext,
+  createContext: AudioContextFactory = () => new AudioContext(),
 ): ChimeController | null {
   try {
     const context = createContext();

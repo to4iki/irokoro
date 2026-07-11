@@ -22,11 +22,7 @@ type SceneStyle = CSSProperties & {
 
 function formatRemaining(remainingMs: number): string {
   const seconds = Math.ceil(remainingMs / 1_000);
-  const minutes = Math.floor(seconds / 60);
-  const secondsPart = seconds % 60;
-  return minutes > 0
-    ? `${minutes}:${secondsPart.toString().padStart(2, "0")}`
-    : `0:${secondsPart.toString().padStart(2, "0")}`;
+  return `${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, "0")}`;
 }
 
 export function PlayerScreen({
@@ -93,7 +89,7 @@ export function PlayerScreen({
         </div>
       )}
 
-      <nav aria-label="再生コントロール" className="player-controls">
+      <div className="player-controls">
         <button
           className="control-button"
           onClick={state.status === "playing" ? onPause : onResume}
@@ -110,7 +106,7 @@ export function PlayerScreen({
           <span aria-hidden="true">■</span>
           おしまい
         </button>
-      </nav>
+      </div>
     </main>
   );
 }

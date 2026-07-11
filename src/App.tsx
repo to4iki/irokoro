@@ -18,16 +18,7 @@ export default function App({ sequence = DEFAULT_SEQUENCE }: AppProps) {
   const audioRef = useRef<ChimeController | null>(null);
   const reducedMotion = useReducedMotion();
 
-  if (sequence.length === 0) {
-    throw new RangeError("At least one scene is required.");
-  }
-
-  const sceneIndex =
-    state.status === "playing" || state.status === "paused"
-      ? state.sceneIndex
-      : state.status === "finished"
-        ? state.lastSceneIndex
-        : 0;
+  const sceneIndex = state.status === "setup" ? 0 : state.sceneIndex;
   const scene = sequence[sceneIndex % sequence.length];
 
   if (!scene) {
@@ -48,8 +39,9 @@ export default function App({ sequence = DEFAULT_SEQUENCE }: AppProps) {
     return () => window.clearInterval(timer);
   }, [status, deadline]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scene.id re-arms the timer for every new scene, even when consecutive durations are equal
   useEffect(() => {
-    if (status !== "playing" || scene.id.length === 0) {
+    if (status !== "playing") {
       return;
     }
 
@@ -97,7 +89,7 @@ export default function App({ sequence = DEFAULT_SEQUENCE }: AppProps) {
   if (state.status === "finished") {
     return (
       <FinishScreen
-        lastSceneIndex={state.lastSceneIndex}
+        sceneIndex={state.sceneIndex}
         onReset={() => dispatch({ type: "RESET" })}
       />
     );

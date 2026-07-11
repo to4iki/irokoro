@@ -9,22 +9,16 @@ export type Scene = {
 
 type SequenceOptions = {
   length: number;
+  /** Must return values in [0, 1), like Math.random. */
   random?: () => number;
 };
 
-function unitInterval(value: number): number {
-  if (!Number.isFinite(value)) {
-    return 0;
-  }
-  return value - Math.floor(value);
-}
-
-function initialIndex(size: number, random: () => number): number {
-  return Math.floor(unitInterval(random()) * size);
+function randomIndex(size: number, random: () => number): number {
+  return Math.floor(random() * size);
 }
 
 function differentIndex(previous: number, size: number, random: () => number): number {
-  const offset = 1 + Math.floor(unitInterval(random()) * (size - 1));
+  const offset = 1 + Math.floor(random() * (size - 1));
   return (previous + offset) % size;
 }
 
@@ -37,8 +31,8 @@ export function createSceneSequence({
   }
 
   const scenes: Scene[] = [];
-  let colorIndex = initialIndex(COLORS.length, random);
-  let shapeIndex = initialIndex(SHAPES.length, random);
+  let colorIndex = randomIndex(COLORS.length, random);
+  let shapeIndex = randomIndex(SHAPES.length, random);
 
   for (let index = 0; index < length; index += 1) {
     if (index > 0) {
@@ -56,7 +50,7 @@ export function createSceneSequence({
       id: `${index}-${color.id}-${shape.id}`,
       colorId: color.id,
       shapeId: shape.id,
-      durationMs: 4_000 + Math.floor(unitInterval(random()) * 2_001),
+      durationMs: 4_000 + Math.floor(random() * 2_001),
     });
   }
 

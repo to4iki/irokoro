@@ -32,7 +32,7 @@ type PausedState = {
 type FinishedState = {
   status: "finished";
   preferences: SessionPreferences;
-  lastSceneIndex: number;
+  sceneIndex: number;
 };
 
 export type SessionState = SetupState | PlayingState | PausedState | FinishedState;
@@ -66,7 +66,7 @@ function finish(state: PlayingState | PausedState): FinishedState {
   return {
     status: "finished",
     preferences: state.preferences,
-    lastSceneIndex: state.sceneIndex,
+    sceneIndex: state.sceneIndex,
   };
 }
 
