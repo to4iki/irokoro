@@ -704,7 +704,7 @@
   }
 
   .player-screen[data-paused="true"] .scene {
-    opacity: 0.3;
+    opacity: 0;
   }
 
   .finish-screen {
