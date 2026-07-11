@@ -1,0 +1,396 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #fff8ec;
+  --color-paper: rgb(255 255 255 / 88%);
+  --color-ink: #173451;
+  --color-muted: #536877;
+  --color-coral: #ec7151;
+  --color-sunny: #f4c94b;
+  --color-mint: #5abf9d;
+  --color-line: rgb(23 52 81 / 12%);
+  --font-sans:
+    "Hiragino Maru Gothic ProN", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo",
+    system-ui, sans-serif;
+  --shadow-soft: 0 24px 70px rgb(42 65 75 / 14%);
+}
+
+@layer base {
+  html {
+    min-width: 320px;
+    overscroll-behavior: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    min-width: 320px;
+    overflow-x: hidden;
+    overscroll-behavior: none;
+    touch-action: manipulation;
+    background: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  button,
+  label {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button {
+    touch-action: manipulation;
+  }
+
+  button:focus-visible {
+    outline: 3px solid #0b6fa4;
+    outline-offset: 3px;
+  }
+
+  :where(input:focus-visible + span, input:focus-visible + .switch-track) {
+    outline: 3px solid #0b6fa4;
+    outline-offset: 3px;
+  }
+
+  fieldset {
+    min-width: 0;
+  }
+}
+
+/* Decorative / animation-heavy pieces stay as CSS */
+@layer components {
+  .brand-mark {
+    position: relative;
+    flex: 0 0 auto;
+    width: 58px;
+    aspect-ratio: 1;
+    border-radius: 18px;
+    background: var(--color-ink);
+    box-shadow: 0 8px 22px rgb(23 52 81 / 20%);
+    rotate: -3deg;
+  }
+
+  .brand-mark span {
+    position: absolute;
+    display: block;
+  }
+
+  .brand-mark span:nth-child(1) {
+    top: 11px;
+    left: 10px;
+    width: 19px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--color-sunny);
+  }
+
+  .brand-mark span:nth-child(2) {
+    right: 9px;
+    bottom: 10px;
+    width: 20px;
+    aspect-ratio: 1;
+    border-radius: 5px;
+    background: var(--color-coral);
+    rotate: 12deg;
+  }
+
+  .brand-mark span:nth-child(3) {
+    bottom: 10px;
+    left: 8px;
+    width: 14px;
+    height: 18px;
+    background: var(--color-mint);
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  }
+
+  .setup-orb {
+    position: absolute;
+    z-index: -1;
+    width: clamp(120px, 25vw, 260px);
+    aspect-ratio: 1;
+    opacity: 0.72;
+  }
+
+  .setup-orb--circle {
+    top: -8%;
+    right: -4%;
+    border-radius: 50%;
+    background: #ef8b6e;
+  }
+
+  .setup-orb--triangle {
+    bottom: -11%;
+    left: -5%;
+    background: #73b8d4;
+    clip-path: polygon(50% 0%, 100% 100%, 0 100%);
+    rotate: -14deg;
+  }
+
+  .player-screen {
+    background: var(--scene-background);
+    transition: background-color 900ms ease;
+  }
+
+  .player-screen::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background:
+      radial-gradient(circle at 16% 20%, rgb(255 255 255 / 13%), transparent 27%),
+      radial-gradient(circle at 85% 77%, rgb(0 0 0 / 10%), transparent 31%);
+    content: "";
+    pointer-events: none;
+  }
+
+  .player-screen > progress {
+    z-index: 2;
+    width: 100%;
+    height: 4px;
+    margin-top: 11px;
+    overflow: hidden;
+    border: 0;
+    border-radius: 99px;
+    background: rgb(0 0 0 / 18%);
+    appearance: none;
+  }
+
+  .player-screen > progress::-webkit-progress-bar {
+    background: rgb(0 0 0 / 18%);
+  }
+
+  .player-screen > progress::-webkit-progress-value {
+    border-radius: 99px;
+    background: rgb(255 255 255 / 78%);
+    transition: width 250ms linear;
+  }
+
+  .player-screen > progress::-moz-progress-bar {
+    border-radius: 99px;
+    background: rgb(255 255 255 / 78%);
+  }
+
+  .visual-shape {
+    position: relative;
+    width: 78%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: var(--shape-color);
+    filter: drop-shadow(0 22px 22px rgb(0 0 0 / 20%));
+    will-change: opacity, transform;
+  }
+
+  .visual-shape::after {
+    position: absolute;
+    inset: -40%;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      rgb(255 255 255 / 12%) 40%,
+      rgb(255 255 255 / 62%) 50%,
+      rgb(255 255 255 / 12%) 60%,
+      transparent 70%
+    );
+    content: "";
+    translate: -65% 0;
+  }
+
+  .visual-shape--circle {
+    border-radius: 50%;
+  }
+
+  .visual-shape--triangle {
+    clip-path: polygon(50% 4%, 97% 92%, 3% 92%);
+  }
+
+  .visual-shape--square {
+    border-radius: 18%;
+    rotate: -4deg;
+  }
+
+  .visual-shape--star {
+    clip-path: polygon(
+      50% 2%,
+      61% 35%,
+      96% 35%,
+      68% 56%,
+      79% 90%,
+      50% 70%,
+      21% 90%,
+      32% 56%,
+      4% 35%,
+      39% 35%
+    );
+  }
+
+  .finish-illustration {
+    position: relative;
+    height: 150px;
+    margin: -4px -4px 18px;
+    overflow: hidden;
+    border-radius: 24px;
+    background: linear-gradient(#bfe2ec, #f4e9ba);
+  }
+
+  .finish-sun {
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    width: 54px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #efb936;
+    box-shadow: 0 0 0 12px rgb(255 231 142 / 34%);
+    translate: -50% 0;
+  }
+
+  .finish-hill {
+    position: absolute;
+    right: -15%;
+    bottom: -72%;
+    left: -15%;
+    aspect-ratio: 2;
+    border-radius: 50%;
+  }
+
+  .finish-hill--back {
+    bottom: -55%;
+    background: #78b89c;
+    rotate: -4deg;
+  }
+
+  .finish-hill--front {
+    right: -22%;
+    bottom: -74%;
+    left: -2%;
+    background: #4d927b;
+    rotate: 8deg;
+  }
+}
+
+@layer motion {
+  .visual-shape {
+    animation:
+      scene-enter 1000ms cubic-bezier(0.22, 1, 0.36, 1) both,
+      shape-drift 6.5s ease-in-out 900ms var(--shimmer-iterations) alternate both;
+  }
+
+  .visual-shape::after {
+    animation: shimmer 5.5s ease-in-out 400ms var(--shimmer-iterations) alternate both;
+  }
+
+  .scene-cue {
+    animation: cue-enter 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .finish-illustration {
+    animation: finish-rise 800ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .player-screen[data-paused="true"] .visual-shape,
+  .player-screen[data-paused="true"] .visual-shape::after {
+    animation-play-state: paused;
+  }
+
+  .player-screen[data-paused="true"] .scene {
+    opacity: 0;
+  }
+
+  @keyframes scene-enter {
+    from {
+      opacity: 0;
+      scale: 0.78;
+      translate: 0 18px;
+    }
+    to {
+      opacity: 1;
+      scale: 1;
+      translate: 0 0;
+    }
+  }
+
+  @keyframes scene-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes cue-enter {
+    from {
+      opacity: 0;
+      translate: 0 10px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  @keyframes shape-drift {
+    from {
+      transform: translate3d(-5%, 3%, 0) scale(0.94) rotate(-4deg);
+    }
+    to {
+      transform: translate3d(5%, -4%, 0) scale(1.06) rotate(4deg);
+    }
+  }
+
+  @keyframes shimmer {
+    from {
+      translate: -70% 0;
+      opacity: 0.55;
+    }
+    to {
+      translate: 70% 0;
+      opacity: 1;
+    }
+  }
+
+  @keyframes finish-rise {
+    from {
+      opacity: 0;
+      translate: 0 12px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  .player-screen[data-motion="reduced"] .visual-shape {
+    animation: scene-fade 900ms ease both;
+  }
+
+  .player-screen[data-motion="reduced"] .visual-shape::after {
+    animation: none;
+    opacity: 0.1;
+    translate: 0;
+  }
+
+  .player-screen[data-motion="reduced"] .scene-cue {
+    animation: scene-fade 700ms ease both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .player-screen {
+      transition: none;
+    }
+
+    .visual-shape {
+      animation: scene-fade 900ms ease both;
+    }
+
+    .visual-shape::after,
+    .finish-illustration {
+      animation: none;
+    }
+
+    .scene-cue {
+      animation: scene-fade 700ms ease both;
+    }
+  }
+}

@@ -10,15 +10,31 @@ JavaScriptランタイムとツールキットには Bun、デプロイ先には
 
 ## 技術スタック
 
-TODO
-
-## ディレクトリ構造
-
-TODO
+- React 19: UI
+- Vite 8 + TypeScript 7: 開発サーバー、ビルド、型検査
+- Tailwind CSS v4（`@tailwindcss/vite`）: レイアウト・トークン・ユーティリティ
+- Cloudflare 公式 Vite プラグイン: Workers Static Assets
+- Vitest + React Testing Library + fast-check: 単体・コンポーネント・プロパティベーステスト
+- Biome: リンター、フォーマッター、import 整理
+- Web Audio API: 外部音源を使わないチャイム合成
 
 ## 開発コマンド
 
-TODO
+- `bun run dev` - Cloudflare ランタイムを含む Vite 開発サーバー
+- `bun run check` - 型検査、Biome、単体テスト
+- `bun run build` - 型検査と production build
+- `bun run deploy:dry-run` - 実デプロイなしの Cloudflare 検証
+
+## ルール
+
+実装・レビュー・リファクタリングでは、関連ドキュメントを読んでから進める。
+
+- [product-spec.md](./docs/product-spec.md) — 安全制約・セッション要件
+- [architecture.md](./docs/architecture.md) — 画面遷移・ディレクトリ・責務
+- [code-style.md](./docs/code-style.md) — 命名・ファイル構成
+- [testing.md](./docs/testing.md) — テストの選定方針
+
+状態遷移やタイミングの変更は、[testing.md](./docs/testing.md) に従い先に失敗テストを追加する。
 
 ## Cursor Cloud specific instructions
 
