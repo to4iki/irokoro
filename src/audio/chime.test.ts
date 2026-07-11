@@ -80,6 +80,26 @@ describe("createChime", () => {
 
     await chime?.dispose();
     expect(context.close).toHaveBeenCalledOnce();
+    chime?.play();
+    await chime?.dispose();
+    expect(context.oscillators).toHaveLength(2);
+    expect(context.close).toHaveBeenCalledOnce();
+  });
+
+  it("does not resume a running context or play into a closed one", async () => {
+    const runningContext = new FakeAudioContext();
+    runningContext.state = "running";
+    createChime(() => runningContext as unknown as AudioContext);
+    expect(runningContext.resume).not.toHaveBeenCalled();
+
+    const closedContext = new FakeAudioContext();
+    closedContext.state = "closed";
+    const chime = createChime(() => closedContext as unknown as AudioContext);
+    chime?.play();
+    await chime?.dispose();
+
+    expect(closedContext.oscillators).toHaveLength(0);
+    expect(closedContext.close).not.toHaveBeenCalled();
   });
 
   it("degrades silently when Web Audio is unavailable", () => {

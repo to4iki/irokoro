@@ -122,4 +122,17 @@ describe("sessionReducer", () => {
       }),
     ).toBe(playing);
   });
+
+  it("ignores duplicate lifecycle actions and finishes when pausing at the deadline", () => {
+    const playing = sessionReducer(createInitialState(), {
+      type: "START",
+      now: 0,
+    });
+
+    expect(sessionReducer(playing, { type: "START", now: 1_000 })).toBe(playing);
+    expect(sessionReducer(playing, { type: "RESET" })).toBe(playing);
+    expect(sessionReducer(playing, { type: "PAUSE", now: 60_000 })).toMatchObject({
+      status: "finished",
+    });
+  });
 });

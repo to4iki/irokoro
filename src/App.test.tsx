@@ -69,6 +69,22 @@ describe("App", () => {
     expect(chime.play).toHaveBeenCalledOnce();
   });
 
+  it("applies optional choices and disposes audio after an early finish", () => {
+    render(<App sequence={TEST_SEQUENCE} />);
+
+    fireEvent.click(screen.getByRole("radio", { name: "かたち" }));
+    fireEvent.click(screen.getByRole("radio", { name: "3分" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "音をつける" }));
+    fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
+
+    expect(screen.getByRole("main", { name: "かたちの再生画面" })).toBeVisible();
+    expect(screen.getByText("まる、みつけた")).toBeVisible();
+
+    fireEvent.click(screen.getByRole("button", { name: "おしまい" }));
+
+    expect(chime.dispose).toHaveBeenCalledOnce();
+  });
+
   it("freezes both countdown and scene while paused, then finishes without repeating", () => {
     render(<App sequence={TEST_SEQUENCE} />);
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
