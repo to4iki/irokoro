@@ -1,8 +1,8 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import App from "./App";
 import { createChime } from "./audio/chime";
 import type { Scene } from "./features/session/sequence";
-import App from "./App";
 
 vi.mock("./audio/chime", () => ({
   createChime: vi.fn(),

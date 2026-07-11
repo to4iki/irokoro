@@ -78,9 +78,12 @@
     cursor: pointer;
   }
 
-  button:focus-visible,
-  input:focus-visible + span,
-  input:focus-visible + .switch__track {
+  button:focus-visible {
+    outline: 3px solid #0b6fa4;
+    outline-offset: 3px;
+  }
+
+  :where(input:focus-visible + span, input:focus-visible + .switch__track) {
     outline: 3px solid #0b6fa4;
     outline-offset: 3px;
   }
@@ -912,12 +915,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      scroll-behavior: auto !important;
-    }
-
     .choice-card,
     .time-choice,
     .switch__track,

@@ -55,11 +55,11 @@ export function PlayerScreen({
       style={style}
     >
       <header className="player-header">
-        <div className="player-brand" aria-label="いろころ">
+        <div className="player-brand">
           <span aria-hidden="true">●</span>
           いろころ
         </div>
-        <div className="timer" aria-label="残り時間">
+        <div className="timer" role="timer" aria-label="残り時間">
           <span aria-hidden="true">のこり</span>
           <output aria-live="off">{formatRemaining(state.remainingMs)}</output>
         </div>

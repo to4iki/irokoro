@@ -1,4 +1,4 @@
-import { COLORS, SHAPES, type ColorId, type ShapeId } from "../../content/packs";
+import { COLORS, type ColorId, SHAPES, type ShapeId } from "../../content/packs";
 
 export type Scene = {
   id: string;

@@ -60,7 +60,7 @@ export type ColorId = (typeof COLORS)[number]["id"];
 export type ShapeId = (typeof SHAPES)[number]["id"];
 export type PackId = "colors" | "shapes";
 
-export type SceneContent = {
+type SceneContent = {
   colorId: ColorId;
   shapeId: ShapeId;
 };

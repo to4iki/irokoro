@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useRef } from "react";
-import { createChime, type ChimeController } from "./audio/chime";
+import { type ChimeController, createChime } from "./audio/chime";
 import { FinishScreen } from "./components/FinishScreen";
 import { PlayerScreen } from "./components/PlayerScreen";
 import { SetupScreen } from "./components/SetupScreen";
@@ -49,7 +49,7 @@ export default function App({ sequence = DEFAULT_SEQUENCE }: AppProps) {
   }, [status, deadline]);
 
   useEffect(() => {
-    if (status !== "playing") {
+    if (status !== "playing" || scene.id.length === 0) {
       return;
     }
 

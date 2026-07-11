@@ -1,7 +1,7 @@
 import { CONTENT_PACKS, type PackId } from "../content/packs";
-import {
-  type DurationSeconds,
-  type SessionPreferences,
+import type {
+  DurationSeconds,
+  SessionPreferences,
 } from "../features/session/sessionReducer";
 
 type SetupScreenProps = {
