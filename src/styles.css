@@ -11,6 +11,9 @@
     min-width: 320px;
     min-height: 100%;
     background: #fff8ec;
+    overscroll-behavior: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
@@ -18,6 +21,8 @@
     min-height: 100%;
     margin: 0;
     overflow-x: hidden;
+    overscroll-behavior: none;
+    touch-action: manipulation;
   }
 
   button,
@@ -76,6 +81,7 @@
   button {
     min-height: 48px;
     cursor: pointer;
+    touch-action: manipulation;
   }
 
   button:focus-visible {
@@ -89,7 +95,7 @@
   }
 
   #root {
-    min-height: 100svh;
+    min-height: 100dvh;
   }
 }
 
@@ -98,9 +104,11 @@
   .finish-screen {
     position: relative;
     display: grid;
-    min-height: 100svh;
-    padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
-      max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+    min-height: 100dvh;
+    padding: max(16px, env(safe-area-inset-top, 0px))
+      max(16px, env(safe-area-inset-right, 0px))
+      max(16px, env(safe-area-inset-bottom, 0px))
+      max(16px, env(safe-area-inset-left, 0px));
     overflow: hidden;
     background:
       radial-gradient(circle at 8% 7%, rgb(244 201 75 / 34%) 0 8%, transparent 24%),
@@ -440,15 +448,19 @@
     display: grid;
     grid-template-rows: auto auto 1fr auto;
     width: 100%;
-    min-height: 100svh;
     height: 100dvh;
-    padding: max(15px, env(safe-area-inset-top)) max(15px, env(safe-area-inset-right))
-      max(15px, env(safe-area-inset-bottom)) max(15px, env(safe-area-inset-left));
+    padding: max(16px, env(safe-area-inset-top, 0px))
+      max(16px, env(safe-area-inset-right, 0px))
+      max(18px, env(safe-area-inset-bottom, 0px))
+      max(16px, env(safe-area-inset-left, 0px));
     overflow: hidden;
     color: white;
     background: var(--scene-background);
     isolation: isolate;
-    transition: background-color 1000ms ease;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    transition: background-color 1400ms ease;
   }
 
   .player-screen::before {
@@ -551,7 +563,7 @@
 
   .shape-stage {
     display: grid;
-    width: min(62vw, 340px);
+    width: min(72vw, 56dvh, 360px);
     aspect-ratio: 1;
     place-items: center;
   }
@@ -637,24 +649,24 @@
     z-index: 4;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    gap: 12px;
     width: min(100%, 440px);
     margin-inline: auto;
   }
 
   .control-button {
     display: inline-flex;
-    min-height: 56px;
+    min-height: 60px;
     align-items: center;
     justify-content: center;
     gap: 8px;
     border: 1px solid rgb(255 255 255 / 27%);
-    border-radius: 17px;
+    border-radius: 18px;
     color: white;
     background: rgb(13 29 43 / 78%);
     box-shadow: 0 10px 28px rgb(0 0 0 / 14%);
     backdrop-filter: blur(14px);
-    font-size: 0.82rem;
+    font-size: 0.9rem;
     font-weight: 850;
   }
 
@@ -838,12 +850,12 @@
 @layer motion {
   .visual-shape {
     animation:
-      scene-enter 1000ms cubic-bezier(0.2, 0.8, 0.2, 1) both,
-      shape-breathe 6s ease-in-out 1s var(--shimmer-iterations) alternate both;
+      scene-enter 1400ms cubic-bezier(0.2, 0.8, 0.2, 1) both,
+      shape-breathe 8s ease-in-out 1s var(--shimmer-iterations) alternate both;
   }
 
   .visual-shape::after {
-    animation: shimmer 7s ease-in-out 500ms var(--shimmer-iterations) alternate both;
+    animation: shimmer 8s ease-in-out 500ms var(--shimmer-iterations) alternate both;
   }
 
   .finish-illustration {
@@ -905,7 +917,7 @@
   }
 
   .player-screen[data-motion="reduced"] .visual-shape {
-    animation: scene-fade 950ms ease both;
+    animation: scene-fade 1400ms ease both;
   }
 
   .player-screen[data-motion="reduced"] .visual-shape::after {
@@ -926,12 +938,76 @@
     }
 
     .visual-shape {
-      animation: scene-fade 950ms ease both;
+      animation: scene-fade 1400ms ease both;
     }
 
     .visual-shape::after,
     .finish-illustration {
       animation: none;
+    }
+  }
+
+  /* iPhone 17 Pro (402×874) and similar phones */
+  @media (max-width: 430px) {
+    .setup-screen,
+    .finish-screen {
+      place-items: stretch center;
+      align-content: center;
+    }
+
+    .setup-card,
+    .finish-card {
+      width: 100%;
+      max-width: none;
+      padding: 20px 18px;
+      border-radius: 28px;
+    }
+
+    .brand {
+      gap: 12px;
+    }
+
+    .brand h1,
+    .finish-card h1 {
+      font-size: clamp(2.1rem, 11vw, 2.6rem);
+    }
+
+    .setup-lead {
+      font-size: 0.92rem;
+    }
+
+    .choice-card,
+    .time-choice,
+    .sound-setting,
+    .primary-button,
+    .secondary-button {
+      min-height: 52px;
+    }
+
+    .player-brand,
+    .timer {
+      min-height: 44px;
+    }
+
+    .scene {
+      gap: 18px;
+    }
+
+    .shape-stage {
+      width: min(74vw, 48dvh, 320px);
+    }
+
+    .scene-cue {
+      font-size: 1rem;
+      padding: 12px 18px;
+    }
+
+    .player-controls {
+      width: 100%;
+    }
+
+    .control-button {
+      min-height: 64px;
     }
   }
 
@@ -980,7 +1056,7 @@
     }
   }
 
-  @media (max-height: 650px) {
+  @media (max-height: 700px) {
     .setup-screen {
       place-items: start center;
     }
@@ -990,15 +1066,15 @@
     }
 
     .shape-stage {
-      width: min(48vh, 280px);
+      width: min(52vw, 42dvh, 280px);
     }
 
     .scene-cue {
-      padding-block: 7px;
+      padding-block: 8px;
     }
 
     .control-button {
-      min-height: 50px;
+      min-height: 56px;
     }
   }
 }

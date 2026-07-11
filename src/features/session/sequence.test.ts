@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { createSceneSequence, createSeededRandom } from "./sequence";
 
 describe("createSceneSequence", () => {
-  it("creates calm four-to-six-second scenes without adjacent repetition", () => {
+  it("creates calm six-to-eight-second scenes without adjacent repetition", () => {
     const scenes = createSceneSequence({
       length: 64,
       random: createSeededRandom(42),
@@ -11,8 +11,8 @@ describe("createSceneSequence", () => {
 
     expect(scenes).toHaveLength(64);
     for (const [index, scene] of scenes.entries()) {
-      expect(scene.durationMs).toBeGreaterThanOrEqual(4_000);
-      expect(scene.durationMs).toBeLessThanOrEqual(6_000);
+      expect(scene.durationMs).toBeGreaterThanOrEqual(6_000);
+      expect(scene.durationMs).toBeLessThanOrEqual(8_000);
 
       const previous = scenes[index - 1];
       if (previous) {
@@ -33,8 +33,8 @@ describe("createSceneSequence", () => {
         return scenes.every((scene, index) => {
           const previous = scenes[index - 1];
           return (
-            scene.durationMs >= 4_000 &&
-            scene.durationMs <= 6_000 &&
+            scene.durationMs >= 6_000 &&
+            scene.durationMs <= 8_000 &&
             (!previous ||
               (scene.colorId !== previous.colorId &&
                 scene.shapeId !== previous.shapeId))

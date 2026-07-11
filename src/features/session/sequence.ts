@@ -7,6 +7,12 @@ export type Scene = {
   durationMs: number;
 };
 
+/** Calm scene dwell time for infants: longer holds, slower color changes. */
+export const SCENE_DURATION_MS = {
+  min: 6_000,
+  max: 8_000,
+} as const;
+
 type SequenceOptions = {
   length: number;
   /** Must return values in [0, 1), like Math.random. */
@@ -50,7 +56,9 @@ export function createSceneSequence({
       id: `${index}-${color.id}-${shape.id}`,
       colorId: color.id,
       shapeId: shape.id,
-      durationMs: 4_000 + Math.floor(random() * 2_001),
+      durationMs:
+        SCENE_DURATION_MS.min +
+        Math.floor(random() * (SCENE_DURATION_MS.max - SCENE_DURATION_MS.min + 1)),
     });
   }
 

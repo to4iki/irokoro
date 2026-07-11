@@ -39,7 +39,7 @@ export function PlayerScreen({
   const style: SceneStyle = {
     "--scene-background": color.background,
     "--shape-color": color.foreground,
-    "--shimmer-iterations": Math.ceil(state.preferences.durationSeconds / 7),
+    "--shimmer-iterations": Math.ceil(state.preferences.durationSeconds / 8),
   };
 
   return (
