@@ -75,7 +75,7 @@ export function PlayerScreen({
             className={`visual-shape visual-shape--${shape.id}`}
           />
         </div>
-        <p className="scene-cue" data-testid="scene-cue">
+        <p className="scene-cue" data-testid="scene-cue" key={`cue-${scene.id}`}>
           {pack.cue(scene)}
         </p>
         {reducedMotion && <p className="motion-status">動きを抑えて表示しています</p>}
