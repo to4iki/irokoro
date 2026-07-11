@@ -19,10 +19,15 @@
 
 - React 19
 - Vite 8 + TypeScript 7
+- Tailwind CSS v4（ブランドトークンは `@theme`）
 - Cloudflare公式Viteプラグイン + Workers Static Assets
 - Vitest + React Testing Library + fast-check
 - Biome
 - Bun（`mise.toml` で固定）
+
+shadcn/ui は入れていません。再生画面の独自アニメーション／全画面演出が主体で、
+汎用コンポーネントセットの恩恵が薄いためです。必要になったら Setup のスイッチ等から
+段階的に足せます。
 
 画面遷移は外部状態管理を使わず、純粋なReducerで
 `Setup → Playing → Paused ↔ Playing → Finished → Setup` を表現しています。

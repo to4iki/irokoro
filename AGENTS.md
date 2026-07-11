@@ -12,10 +12,16 @@ JavaScriptランタイムとツールキットには Bun、デプロイ先には
 
 - React 19: UI
 - Vite 8 + TypeScript 7: 開発サーバー、ビルド、型検査
+- Tailwind CSS v4（`@tailwindcss/vite`）: レイアウト・トークン・ユーティリティ
 - Cloudflare 公式 Vite プラグイン: Workers Static Assets
 - Vitest + React Testing Library + fast-check: 単体・コンポーネント・プロパティベーステスト
 - Biome: リンター、フォーマッター、import 整理
 - Web Audio API: 外部音源を使わないチャイム合成
+
+### UIライブラリ方針
+
+- **Tailwind**: 採用。ブランド色は `@theme`、レイアウトはユーティリティ、形の clip-path / keyframes は CSS に残す
+- **shadcn/ui**: 非採用。再生画面は独自の全画面演出が中心で、Radix系のフォーム／ダイアログ前提の shadcn と噛み合いにくい。セットアップ程度では依存とテーマ追従コストが勝つ
 
 ## 命名
 
