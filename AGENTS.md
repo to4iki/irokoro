@@ -10,15 +10,42 @@ JavaScriptランタイムとツールキットには Bun、デプロイ先には
 
 ## 技術スタック
 
-TODO
+- React 19 + React Compiler: UI とコンパイル時最適化
+- Vite 8 + TypeScript 7: 開発サーバー、ビルド、型検査
+- Cloudflare 公式 Vite プラグイン: Workers Static Assets
+- Vitest + React Testing Library + fast-check: 単体、コンポーネント、プロパティベーステスト
+- Playwright + axe-core: モバイル E2E とアクセシビリティ検査
+- Biome: リンター、フォーマッター、import 整理
+- Knip: 未使用コード、export、依存パッケージ検査
+- Web Audio API: 外部音源を使わないチャイム合成
 
 ## ディレクトリ構造
 
-TODO
+- `e2e/` - Playwright のモバイル E2E とアクセシビリティ検査
+- `src/audio/` - Web Audio の境界とチャイム生成
+- `src/components/` - Setup、Player、Finish の画面コンポーネント
+- `src/content/` - 色、形、親子遊びの ContentPack
+- `src/features/session/` - 純粋 Reducer と決定的シーケンス
+- `src/hooks/` - ブラウザー設定を React に接続する hooks
+- `src/test/` - Vitest 共通セットアップ
 
 ## 開発コマンド
 
-TODO
+- `bun run dev` - Cloudflare ランタイムを含む Vite 開発サーバー
+- `bun run check` - 型検査、Biome、単体テスト
+- `bun run test:coverage` - カバレッジ閾値を含む Vitest
+- `bun run test:e2e` - モバイル Chromium E2E と axe
+- `bun run knip` - 未使用コードと依存関係の検査
+- `bun run build` - 型検査と production build
+- `bun run deploy:dry-run` - 実デプロイなしの Cloudflare 検証
+
+## プロダクト制約
+
+- 音は OFF、時間は 1 分を初期値とする
+- 自動リピート、点滅、外部通信、分析 SDK、Cookie を追加しない
+- 一時停止と終了を常時提供する
+- `prefers-reduced-motion` では移動と拡縮を行わない
+- 状態遷移やタイミングの変更は、先に失敗テストを追加する
 
 ## Cursor Cloud specific instructions
 
