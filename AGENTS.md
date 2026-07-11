@@ -18,29 +18,6 @@ JavaScriptランタイムとツールキットには Bun、デプロイ先には
 - Biome: リンター、フォーマッター、import 整理
 - Web Audio API: 外部音源を使わないチャイム合成
 
-### UI / 状態 / スキーマ方針
-
-- **Tailwind**: 採用。ブランド色は `@theme`、レイアウトはユーティリティ、形の clip-path / keyframes は CSS に残す
-- **shadcn/ui**: 非採用。再生画面は独自の全画面演出が中心で、Radix系のフォーム／ダイアログ前提の shadcn と噛み合いにくい
-- **状態管理**: `useReducer` のまま。画面は Setup → Playing ↔ Paused → Finished の単一 FSM だけなので、Jotai / Zustand は不要
-- **TanStack Query**: 非採用。fetch・サーバ状態・キャッシュがない
-- **Zod**: 当面非採用。コンテンツは TypeScript 定数。JSON / CMS / URL パラメータなど信頼境界をまたぐ入力が入ったら検討
-- **clsx / tailwind-merge**: 非採用。条件クラスは `has-[:checked]` など CSS で足りる
-
-## 命名
-
-- `html` / `css` / `ts` / `tsx` ファイル名はケバブケース（例: `player-screen.tsx`）
-- React コンポーネント定義はパスカルケース（例: `export function PlayerScreen`）
-
-## ディレクトリ構造
-
-- `src/audio/` - Web Audio の境界とチャイム生成
-- `src/components/` - Setup、Player、Finish の画面コンポーネント
-- `src/content/` - 色、形、親子遊びの ContentPack
-- `src/features/session/` - 純粋 Reducer と決定的シーケンス
-- `src/hooks/` - ブラウザー設定を React に接続する hooks
-- `src/test/` - Vitest 共通セットアップ
-
 ## 開発コマンド
 
 - `bun run dev` - Cloudflare ランタイムを含む Vite 開発サーバー
@@ -48,29 +25,16 @@ JavaScriptランタイムとツールキットには Bun、デプロイ先には
 - `bun run build` - 型検査と production build
 - `bun run deploy:dry-run` - 実デプロイなしの Cloudflare 検証
 
-## プロダクト制約
+## ルール
 
-- 音は OFF、時間は 1 分を初期値とする
-- 自動リピート、点滅、外部通信、分析 SDK、Cookie を追加しない
-- 一時停止と終了を常時提供する
-- `prefers-reduced-motion` では移動と拡縮を行わない
-- 状態遷移やタイミングの変更は、先に失敗テストを追加する
+実装・レビュー・リファクタリングでは、関連ドキュメントを読んでから進める。
 
-## テスト方針
+- [product-spec.md](./docs/product-spec.md) — 安全制約・セッション要件
+- [architecture.md](./docs/architecture.md) — 画面遷移・ディレクトリ・責務
+- [code-style.md](./docs/code-style.md) — 命名・ファイル構成
+- [testing.md](./docs/testing.md) — テストの選定方針
 
-数より質。カバレッジは目的ではない。価値の低いテストは削除し、内部実装依存で偽陽性を生むテストは避ける。
-
-### 書く
-
-- 主要フローの最終状態（安全な初期値、一時停止で時間／シーンが止まる、自動リピートしない、など）
-- 境界値・ガード（期限ちょうどで終了、不正なシーケンス長、など振る舞いとして意味のある分岐）
-- ドメイン不変条件（隣接シーンで色・形が連続しない、dwell が 6–8 秒、など）
-
-### 書かない
-
-- モック呼び出し回数だけの検証（要件が「呼ばれないこと」なら、呼ばれたら即失敗にする）
-- 同一観点の過剰分割（自然にまとまる入力整形・後続処理は 1 テストへ）
-- 自明な setter / デフォルト→デフォルトのタウトロジー / 型で守れている未知 ID の throw
+状態遷移やタイミングの変更は、[testing.md](./docs/testing.md) に従い先に失敗テストを追加する。
 
 ## Cursor Cloud specific instructions
 
