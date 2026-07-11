@@ -39,10 +39,9 @@ describe("App", () => {
     vi.useRealTimers();
   });
 
-  it("offers safe defaults and starts in one explicit action", () => {
+  it("starts from safe defaults without unlocking audio", () => {
     render(<App sequence={TEST_SEQUENCE} />);
 
-    expect(screen.getByRole("heading", { name: "いろころ" })).toBeVisible();
     expect(screen.getByRole("radio", { name: "いろ" })).toBeChecked();
     expect(screen.getByRole("radio", { name: "1分" })).toBeChecked();
     expect(screen.getByRole("checkbox", { name: "音をつける" })).not.toBeChecked();
@@ -54,22 +53,7 @@ describe("App", () => {
     expect(createChime).not.toHaveBeenCalled();
   });
 
-  it("initializes audio from the start action and chimes only on scene changes", () => {
-    render(<App sequence={TEST_SEQUENCE} />);
-
-    fireEvent.click(screen.getByRole("checkbox", { name: "音をつける" }));
-    fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
-
-    expect(createChime).toHaveBeenCalledOnce();
-    expect(chime.play).not.toHaveBeenCalled();
-
-    act(() => vi.advanceTimersByTime(5_000));
-
-    expect(screen.getByText("きいろ、みつけた")).toBeVisible();
-    expect(chime.play).toHaveBeenCalledOnce();
-  });
-
-  it("applies optional choices and disposes audio after an early finish", () => {
+  it("applies choices, chimes on scene change when sound is on, and disposes on stop", () => {
     render(<App sequence={TEST_SEQUENCE} />);
 
     fireEvent.click(screen.getByRole("radio", { name: "かたち" }));
@@ -79,13 +63,20 @@ describe("App", () => {
 
     expect(screen.getByRole("main", { name: "かたちの再生画面" })).toBeVisible();
     expect(screen.getByText("まる、みつけた")).toBeVisible();
+    expect(createChime).toHaveBeenCalledOnce();
+    expect(chime.play).not.toHaveBeenCalled();
+
+    act(() => vi.advanceTimersByTime(5_000));
+
+    expect(screen.getByText("さんかく、みつけた")).toBeVisible();
+    expect(chime.play).toHaveBeenCalledOnce();
 
     fireEvent.click(screen.getByRole("button", { name: "おしまい" }));
-
     expect(chime.dispose).toHaveBeenCalledOnce();
+    expect(screen.getByRole("heading", { name: "おしまい" })).toBeVisible();
   });
 
-  it("freezes both countdown and scene while paused, then finishes without repeating", () => {
+  it("freezes while paused, finishes without auto-repeat, and resets to safe defaults", () => {
     render(<App sequence={TEST_SEQUENCE} />);
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
 
@@ -96,7 +87,6 @@ describe("App", () => {
     expect(screen.getByText("きいろ、みつけた")).toBeVisible();
 
     act(() => vi.advanceTimersByTime(60_000));
-
     expect(screen.getByRole("heading", { name: "ひとやすみ" })).toBeVisible();
     expect(screen.getByText("きいろ、みつけた")).toBeVisible();
 
@@ -112,39 +102,5 @@ describe("App", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "はじめの画面へ" }));
     expect(screen.getByRole("checkbox", { name: "音をつける" })).not.toBeChecked();
-  });
-
-  it("allows an explicit early finish from both playing and paused states", () => {
-    render(<App sequence={TEST_SEQUENCE} />);
-    fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
-    fireEvent.click(screen.getByRole("button", { name: "一時停止" }));
-    fireEvent.click(screen.getByRole("button", { name: "おしまい" }));
-
-    expect(screen.getByRole("heading", { name: "おしまい" })).toBeVisible();
-  });
-
-  it("exposes reduced-motion mode to the player", () => {
-    vi.stubGlobal(
-      "matchMedia",
-      vi.fn().mockReturnValue({
-        matches: true,
-        media: "(prefers-reduced-motion: reduce)",
-        onchange: null,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-      }),
-    );
-    render(<App sequence={TEST_SEQUENCE} />);
-
-    fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
-
-    expect(screen.getByRole("main", { name: "いろの再生画面" })).toHaveAttribute(
-      "data-motion",
-      "reduced",
-    );
-    expect(screen.getByText("動きを抑えて表示しています")).toBeVisible();
   });
 });

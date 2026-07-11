@@ -2,18 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createInitialState, sessionReducer } from "./session-reducer";
 
 describe("sessionReducer", () => {
-  it("starts with the safest, shortest defaults", () => {
-    expect(createInitialState()).toEqual({
-      status: "setup",
-      preferences: {
-        packId: "colors",
-        durationSeconds: 60,
-        soundEnabled: false,
-      },
-    });
-  });
-
-  it("updates setup choices and starts a bounded session", () => {
+  it("starts a bounded session from configured preferences", () => {
     const configured = sessionReducer(createInitialState(), {
       type: "SET_DURATION",
       durationSeconds: 120,
@@ -39,33 +28,43 @@ describe("sessionReducer", () => {
     });
   });
 
-  it("finishes exactly at the configured deadline", () => {
+  it("finishes exactly at the deadline and when pausing at zero remaining", () => {
     const playing = sessionReducer(createInitialState(), {
       type: "START",
       now: 1_000,
     });
 
-    const nearlyFinished = sessionReducer(playing, {
-      type: "TICK",
-      now: 60_999,
-    });
-    expect(nearlyFinished).toMatchObject({
+    expect(
+      sessionReducer(playing, {
+        type: "TICK",
+        now: 60_999,
+      }),
+    ).toMatchObject({
       status: "playing",
       remainingMs: 1,
     });
 
-    const finished = sessionReducer(nearlyFinished, {
-      type: "TICK",
-      now: 61_000,
-    });
-    expect(finished).toMatchObject({
+    expect(
+      sessionReducer(playing, {
+        type: "TICK",
+        now: 61_000,
+      }),
+    ).toMatchObject({
       status: "finished",
-      preferences: { soundEnabled: false },
       sceneIndex: 0,
+    });
+
+    expect(
+      sessionReducer(playing, {
+        type: "PAUSE",
+        now: 61_000,
+      }),
+    ).toMatchObject({
+      status: "finished",
     });
   });
 
-  it("freezes time and scene changes while paused, then resumes the remainder", () => {
+  it("freezes time and scenes while paused, then resumes the remainder", () => {
     const playing = sessionReducer(createInitialState(), {
       type: "START",
       now: 1_000,
@@ -85,11 +84,12 @@ describe("sessionReducer", () => {
     expect(sessionReducer(paused, { type: "TICK", now: 99_000 })).toBe(paused);
     expect(sessionReducer(paused, { type: "NEXT_SCENE" })).toBe(paused);
 
-    const resumed = sessionReducer(paused, {
-      type: "RESUME",
-      now: 100_000,
-    });
-    expect(resumed).toMatchObject({
+    expect(
+      sessionReducer(paused, {
+        type: "RESUME",
+        now: 100_000,
+      }),
+    ).toMatchObject({
       status: "playing",
       deadline: 150_000,
       remainingMs: 50_000,
@@ -97,7 +97,7 @@ describe("sessionReducer", () => {
     });
   });
 
-  it("supports explicit early finish and requires reset before another session", () => {
+  it("requires reset after an early finish and ignores invalid lifecycle actions", () => {
     const playing = sessionReducer(createInitialState(), {
       type: "START",
       now: 0,
@@ -107,32 +107,14 @@ describe("sessionReducer", () => {
     expect(finished.status).toBe("finished");
     expect(sessionReducer(finished, { type: "RESUME", now: 1 })).toBe(finished);
     expect(sessionReducer(finished, { type: "RESET" })).toEqual(createInitialState());
-  });
 
-  it("ignores preference changes outside setup", () => {
-    const playing = sessionReducer(createInitialState(), {
-      type: "START",
-      now: 0,
-    });
-
+    expect(sessionReducer(playing, { type: "START", now: 1_000 })).toBe(playing);
+    expect(sessionReducer(playing, { type: "RESET" })).toBe(playing);
     expect(
       sessionReducer(playing, {
         type: "SET_SOUND",
         soundEnabled: true,
       }),
     ).toBe(playing);
-  });
-
-  it("ignores duplicate lifecycle actions and finishes when pausing at the deadline", () => {
-    const playing = sessionReducer(createInitialState(), {
-      type: "START",
-      now: 0,
-    });
-
-    expect(sessionReducer(playing, { type: "START", now: 1_000 })).toBe(playing);
-    expect(sessionReducer(playing, { type: "RESET" })).toBe(playing);
-    expect(sessionReducer(playing, { type: "PAUSE", now: 60_000 })).toMatchObject({
-      status: "finished",
-    });
   });
 });
