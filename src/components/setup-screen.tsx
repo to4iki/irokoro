@@ -3,7 +3,6 @@ import type {
   DurationSeconds,
   SessionPreferences,
 } from "../features/session/session-reducer";
-import { cn } from "../lib/cn";
 
 type SetupScreenProps = {
   preferences: SessionPreferences;
@@ -18,6 +17,9 @@ const DURATIONS = [
   { value: 120, label: "2分" },
   { value: 180, label: "3分" },
 ] as const;
+
+const choiceBase =
+  "relative grid min-w-0 cursor-pointer border border-line bg-white/70 text-ink transition-[border-color,box-shadow,background-color,translate] duration-150 has-[:checked]:border-ink has-[:checked]:bg-ink has-[:checked]:text-white has-[:checked]:shadow-[0_7px_16px_rgb(23_52_81_/_17%)]";
 
 export function SetupScreen({
   preferences,
@@ -88,29 +90,20 @@ export function SetupScreen({
             <div className="grid grid-cols-2 gap-2">
               {Object.values(CONTENT_PACKS).map((pack) => (
                 <label
-                  className={cn(
-                    "relative grid min-h-[61px] min-w-0 cursor-pointer content-center rounded-[15px] border border-line bg-white/70 px-3.5 py-2.5 text-ink transition-[border-color,box-shadow,background-color,translate] duration-150 max-[360px]:min-h-[54px] max-[360px]:px-2.5 max-[360px]:py-2",
-                    preferences.packId === pack.id &&
-                      "border-ink bg-ink text-white shadow-[0_7px_16px_rgb(23_52_81_/_17%)]",
-                  )}
+                  className={`${choiceBase} min-h-[61px] content-center rounded-[15px] px-3.5 py-2.5 max-[360px]:min-h-[54px] max-[360px]:px-2.5 max-[360px]:py-2`}
                   key={pack.id}
                 >
                   <input
                     aria-label={pack.shortLabel}
                     checked={preferences.packId === pack.id}
-                    className="absolute size-px opacity-0"
+                    className="peer absolute size-px opacity-0"
                     name="pack"
                     onChange={() => onPackChange(pack.id)}
                     type="radio"
                     value={pack.id}
                   />
                   <span className="text-base font-black">{pack.shortLabel}</span>
-                  <span
-                    className={cn(
-                      "mt-px text-[0.68rem] font-semibold text-[#5a6d7a]",
-                      preferences.packId === pack.id && "text-[#dbe7ed]",
-                    )}
-                  >
+                  <span className="mt-px text-[0.68rem] font-semibold text-[#5a6d7a] peer-checked:text-[#dbe7ed]">
                     {pack.id === "colors" ? "8つの色" : "4つのかたち"}
                   </span>
                 </label>
@@ -125,11 +118,7 @@ export function SetupScreen({
             <div className="grid grid-cols-3 gap-2">
               {DURATIONS.map((duration) => (
                 <label
-                  className={cn(
-                    "relative grid min-h-11 min-w-0 cursor-pointer place-items-center rounded-[13px] border border-line bg-white/70 text-[0.86rem] font-extrabold text-ink transition-[border-color,box-shadow,background-color,translate] duration-150",
-                    preferences.durationSeconds === duration.value &&
-                      "border-ink bg-ink text-white shadow-[0_7px_16px_rgb(23_52_81_/_17%)]",
-                  )}
+                  className={`${choiceBase} min-h-11 place-items-center rounded-[13px] text-[0.86rem] font-extrabold`}
                   key={duration.value}
                 >
                   <input

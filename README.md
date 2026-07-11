@@ -25,13 +25,16 @@
 - Biome
 - Bun（`mise.toml` で固定）
 
-shadcn/ui は入れていません。再生画面の独自アニメーション／全画面演出が主体で、
-汎用コンポーネントセットの恩恵が薄いためです。必要になったら Setup のスイッチ等から
-段階的に足せます。
-
-画面遷移は外部状態管理を使わず、純粋なReducerで
+画面遷移は外部状態管理を使わず、純粋な Reducer で
 `Setup → Playing → Paused ↔ Playing → Finished → Setup` を表現しています。
 色・形のシーケンスとチャイムはすべてローカルで生成します。
+
+入れていないもの（現状の規模では依存コストが勝つ）:
+
+- shadcn/ui … 全画面演出中心で、Radix系フォームキットの恩恵が薄い
+- Zod … 外部入力がなく、TypeScript 定数で十分
+- TanStack Query … サーバ状態・fetch がない
+- Jotai / Zustand … 単一 FSM の `useReducer` で足りる
 
 ## ローカル開発
 

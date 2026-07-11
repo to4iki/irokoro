@@ -2,7 +2,6 @@ import type { CSSProperties } from "react";
 import { CONTENT_PACKS, getColor, getShape } from "../content/packs";
 import type { Scene } from "../features/session/sequence";
 import type { SessionState } from "../features/session/session-reducer";
-import { cn } from "../lib/cn";
 
 type PlayerState = Extract<SessionState, { status: "playing" | "paused" }>;
 
@@ -137,9 +136,7 @@ export function PlayerScreen({
           {state.status === "playing" ? "一時停止" : "つづける"}
         </button>
         <button
-          className={cn(
-            "inline-flex min-h-[60px] items-center justify-center gap-2 rounded-[18px] border border-white/27 bg-[rgb(73_36_32_/_80%)] text-[0.9rem] font-extrabold text-white shadow-[0_10px_28px_rgb(0_0_0_/_14%)] backdrop-blur-[14px] transition-colors hover:bg-[rgb(7_20_31_/_92%)] focus-visible:bg-[rgb(7_20_31_/_92%)] max-[700px]:min-h-14",
-          )}
+          className="inline-flex min-h-[60px] items-center justify-center gap-2 rounded-[18px] border border-white/27 bg-[rgb(73_36_32_/_80%)] text-[0.9rem] font-extrabold text-white shadow-[0_10px_28px_rgb(0_0_0_/_14%)] backdrop-blur-[14px] transition-colors hover:bg-[rgb(7_20_31_/_92%)] focus-visible:bg-[rgb(7_20_31_/_92%)] max-[700px]:min-h-14"
           onClick={onStop}
           type="button"
         >

@@ -18,10 +18,14 @@ JavaScriptランタイムとツールキットには Bun、デプロイ先には
 - Biome: リンター、フォーマッター、import 整理
 - Web Audio API: 外部音源を使わないチャイム合成
 
-### UIライブラリ方針
+### UI / 状態 / スキーマ方針
 
 - **Tailwind**: 採用。ブランド色は `@theme`、レイアウトはユーティリティ、形の clip-path / keyframes は CSS に残す
-- **shadcn/ui**: 非採用。再生画面は独自の全画面演出が中心で、Radix系のフォーム／ダイアログ前提の shadcn と噛み合いにくい。セットアップ程度では依存とテーマ追従コストが勝つ
+- **shadcn/ui**: 非採用。再生画面は独自の全画面演出が中心で、Radix系のフォーム／ダイアログ前提の shadcn と噛み合いにくい
+- **状態管理**: `useReducer` のまま。画面は Setup → Playing ↔ Paused → Finished の単一 FSM だけなので、Jotai / Zustand は不要
+- **TanStack Query**: 非採用。fetch・サーバ状態・キャッシュがない
+- **Zod**: 当面非採用。コンテンツは TypeScript 定数。JSON / CMS / URL パラメータなど信頼境界をまたぐ入力が入ったら検討
+- **clsx / tailwind-merge**: 非採用。条件クラスは `has-[:checked]` など CSS で足りる
 
 ## 命名
 
