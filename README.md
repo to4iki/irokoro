@@ -17,12 +17,11 @@
 
 ## 技術スタック
 
-- React 19 + React Compiler
+- React 19
 - Vite 8 + TypeScript 7
 - Cloudflare公式Viteプラグイン + Workers Static Assets
 - Vitest + React Testing Library + fast-check
-- Playwright + axe-core
-- Biome + Knip
+- Biome
 - Bun（`mise.toml` で固定）
 
 画面遷移は外部状態管理を使わず、純粋なReducerで
@@ -43,19 +42,8 @@ bun run dev
 ## 品質チェック
 
 ```sh
-bun run typecheck
-bun run lint
-bun run test
-bun run test:coverage
+bun run check
 bun run build
-bun run test:e2e
-bun run knip
-```
-
-PlaywrightのChromiumが未導入の場合は、先に次を実行します。
-
-```sh
-bunx playwright install chromium
 ```
 
 ## Cloudflare Workers Static Assets

@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { CONTENT_PACKS, getColor, getShape } from "../content/packs";
 import type { Scene } from "../features/session/sequence";
-import type { SessionState } from "../features/session/sessionReducer";
+import type { SessionState } from "../features/session/session-reducer";
 
 type PlayerState = Extract<SessionState, { status: "playing" | "paused" }>;
 

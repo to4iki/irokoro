@@ -1,11 +1,11 @@
 import { useEffect, useReducer, useRef } from "react";
 import { type ChimeController, createChime } from "./audio/chime";
-import { FinishScreen } from "./components/FinishScreen";
-import { PlayerScreen } from "./components/PlayerScreen";
-import { SetupScreen } from "./components/SetupScreen";
+import { FinishScreen } from "./components/finish-screen";
+import { PlayerScreen } from "./components/player-screen";
+import { SetupScreen } from "./components/setup-screen";
 import { createSceneSequence, type Scene } from "./features/session/sequence";
-import { createInitialState, sessionReducer } from "./features/session/sessionReducer";
-import { useReducedMotion } from "./hooks/useReducedMotion";
+import { createInitialState, sessionReducer } from "./features/session/session-reducer";
+import { useReducedMotion } from "./hooks/use-reduced-motion";
 
 const DEFAULT_SEQUENCE = createSceneSequence({ length: 64 });
 

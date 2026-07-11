@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createInitialState, sessionReducer } from "./sessionReducer";
+import { createInitialState, sessionReducer } from "./session-reducer";
 
 describe("sessionReducer", () => {
   it("starts with the safest, shortest defaults", () => {
