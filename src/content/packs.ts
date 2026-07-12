@@ -1,8 +1,15 @@
+/** High-contrast primary pairs inspired by Sassy baby-book pages. */
 export const COLORS = [
+  {
+    id: "red",
+    label: "あか",
+    background: "#e60012",
+    foreground: "#ffe500",
+  },
   {
     id: "blue",
     label: "あお",
-    background: "#0066ff",
+    background: "#0057ff",
     foreground: "#ffe500",
   },
   {
@@ -14,38 +21,56 @@ export const COLORS = [
   {
     id: "green",
     label: "みどり",
-    background: "#00c43a",
+    background: "#00b82e",
     foreground: "#111111",
-  },
-  {
-    id: "purple",
-    label: "むらさき",
-    background: "#6b2fff",
-    foreground: "#ffe500",
   },
   {
     id: "orange",
     label: "だいだい",
-    background: "#ff5a00",
+    background: "#ff6a00",
     foreground: "#111111",
   },
   {
-    id: "aqua",
+    id: "cyan",
     label: "みずいろ",
-    background: "#00c2e8",
+    background: "#00c4f0",
     foreground: "#111111",
   },
   {
-    id: "pink",
-    label: "ももいろ",
-    background: "#ff2d7a",
+    id: "magenta",
+    label: "ピンク",
+    background: "#ff0090",
     foreground: "#ffffff",
   },
   {
-    id: "navy",
-    label: "こんいろ",
-    background: "#0b1230",
+    id: "purple",
+    label: "むらさき",
+    background: "#6a00ff",
     foreground: "#ffe500",
+  },
+  {
+    id: "black",
+    label: "くろ",
+    background: "#111111",
+    foreground: "#ffe500",
+  },
+  {
+    id: "white",
+    label: "しろ",
+    background: "#ffffff",
+    foreground: "#e60012",
+  },
+  {
+    id: "lime",
+    label: "きみどり",
+    background: "#b4e600",
+    foreground: "#111111",
+  },
+  {
+    id: "sky",
+    label: "そらいろ",
+    background: "#00a8ff",
+    foreground: "#111111",
   },
 ] as const;
 
@@ -99,7 +124,7 @@ export const PACK_CHOICES: readonly PackChoice[] = [
   {
     id: "colors",
     shortLabel: "いろ",
-    detail: "8つの色",
+    detail: `${COLORS.length}つの色`,
     available: true,
   },
   {
