@@ -23,9 +23,8 @@ Setup → Playing ↔ Paused → Finished → Setup
 |------|------|
 | `src/audio/` | Web Audio の境界とチャイム生成 |
 | `src/components/` | Setup / Player / Finish の画面 |
-| `src/content/` | 色・形・親子遊びの ContentPack |
+| `src/content/` | 色・形・パック定義（どうぶつ枠含む） |
 | `src/features/session/` | 純粋 Reducer と決定的シーケンス |
-| `src/hooks/` | ブラウザー設定を React に接続する hooks |
 | `src/test/` | Vitest 共通セットアップ |
 
 ## スタイル

@@ -8,7 +8,6 @@ type PlayerState = Extract<SessionState, { status: "playing" | "paused" }>;
 type PlayerScreenProps = {
   state: PlayerState;
   scene: Scene;
-  reducedMotion: boolean;
   onPause: () => void;
   onResume: () => void;
   onStop: () => void;
@@ -17,7 +16,6 @@ type PlayerScreenProps = {
 type SceneStyle = CSSProperties & {
   "--scene-background": string;
   "--shape-color": string;
-  "--shimmer-iterations": number;
 };
 
 function formatRemaining(remainingMs: number): string {
@@ -28,7 +26,6 @@ function formatRemaining(remainingMs: number): string {
 export function PlayerScreen({
   state,
   scene,
-  reducedMotion,
   onPause,
   onResume,
   onStop,
@@ -39,14 +36,12 @@ export function PlayerScreen({
   const style: SceneStyle = {
     "--scene-background": color.background,
     "--shape-color": color.foreground,
-    "--shimmer-iterations": Math.ceil(state.preferences.durationSeconds / 8),
   };
 
   return (
     <main
       aria-label={`${pack.shortLabel}の再生画面`}
       className="player-screen relative isolate grid h-dvh grid-rows-[auto_auto_1fr_auto] overflow-hidden text-white select-none touch-manipulation p-[max(16px,env(safe-area-inset-top,0px))_max(16px,env(safe-area-inset-right,0px))_max(18px,env(safe-area-inset-bottom,0px))_max(16px,env(safe-area-inset-left,0px))]"
-      data-motion={reducedMotion ? "reduced" : "full"}
       data-paused={state.status === "paused"}
       style={style}
     >
@@ -83,7 +78,7 @@ export function PlayerScreen({
 
       <section
         aria-label={`${color.label}の${shape.label}`}
-        className="scene grid min-h-0 place-content-center place-items-center max-[430px]:gap-[18px]"
+        className="scene grid min-h-0 place-content-center place-items-center"
       >
         <div
           className="grid aspect-square w-[min(72vw,56dvh,360px)] place-items-center max-[430px]:w-[min(74vw,48dvh,320px)] max-[700px]:w-[min(52vw,42dvh,280px)]"
@@ -94,18 +89,6 @@ export function PlayerScreen({
             className={`visual-shape visual-shape--${shape.id}`}
           />
         </div>
-        <p
-          className="scene-cue max-w-[calc(100vw-36px)] rounded-full border border-white/26 bg-[rgb(13_29_43_/_70%)] px-[18px] py-2.5 text-[clamp(0.9rem,4vw,1.05rem)] font-extrabold tracking-[0.06em] text-white shadow-[0_8px_24px_rgb(0_0_0_/_10%)] backdrop-blur-[12px] max-[430px]:px-[18px] max-[430px]:py-3 max-[430px]:text-base max-[700px]:py-2"
-          data-testid="scene-cue"
-          key={`cue-${scene.id}`}
-        >
-          {pack.cue(scene)}
-        </p>
-        {reducedMotion && (
-          <p className="mt-2 rounded-lg bg-[rgb(13_29_43_/_70%)] px-2.5 py-1.5 text-[0.66rem] font-bold text-white">
-            動きを抑えて表示しています
-          </p>
-        )}
       </section>
 
       {state.status === "paused" && (

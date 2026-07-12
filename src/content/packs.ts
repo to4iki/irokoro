@@ -49,6 +49,7 @@ export const COLORS = [
   },
 ] as const;
 
+/** Visual variety within the colors pack. Animals pack will replace this later. */
 export const SHAPES = [
   { id: "circle", label: "まる" },
   { id: "triangle", label: "さんかく" },
@@ -58,20 +59,28 @@ export const SHAPES = [
 
 export type ColorId = (typeof COLORS)[number]["id"];
 export type ShapeId = (typeof SHAPES)[number]["id"];
-export type PackId = "colors" | "shapes";
-
-type SceneContent = {
-  colorId: ColorId;
-  shapeId: ShapeId;
-};
+export type PackId = "colors";
 
 export type ContentPack = {
   id: PackId;
   shortLabel: string;
   title: string;
   description: string;
-  cue: (scene: SceneContent) => string;
 };
+
+export type PackChoice =
+  | {
+      id: PackId;
+      shortLabel: string;
+      detail: string;
+      available: true;
+    }
+  | {
+      id: "animals";
+      shortLabel: string;
+      detail: string;
+      available: false;
+    };
 
 const colorById = new Map(COLORS.map((color) => [color.id, color]));
 const shapeById = new Map(SHAPES.map((shape) => [shape.id, shape]));
@@ -82,23 +91,24 @@ export const CONTENT_PACKS: Record<PackId, ContentPack> = {
     shortLabel: "いろ",
     title: "いろを みつけよう",
     description: "背景の色を、ゆっくり声に出してみましょう。",
-    cue: (scene) => `${getColor(scene.colorId).label}、みつけた`,
-  },
-  shapes: {
-    id: "shapes",
-    shortLabel: "かたち",
-    title: "かたちを みつけよう",
-    description: "まんなかの形を、指さしてみましょう。",
-    cue: (scene) => `${getShape(scene.shapeId).label}、みつけた`,
   },
 };
 
-export const FINISH_SUGGESTIONS = [
-  "同じ色を、お部屋の中で探してみよう。",
-  "見つけた形を、指で空に描いてみよう。",
-  "好きだった色を、ことばで教えてね。",
-  "まるいものを、いっしょに一つ探してみよう。",
-] as const;
+/** Setup choices: only colors is playable; animals is a reserved slot. */
+export const PACK_CHOICES: readonly PackChoice[] = [
+  {
+    id: "colors",
+    shortLabel: "いろ",
+    detail: "8つの色",
+    available: true,
+  },
+  {
+    id: "animals",
+    shortLabel: "どうぶつ",
+    detail: "もうすぐ",
+    available: false,
+  },
+];
 
 export function getColor(id: ColorId) {
   const color = colorById.get(id);

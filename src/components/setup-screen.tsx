@@ -1,4 +1,4 @@
-import { CONTENT_PACKS, type PackId } from "../content/packs";
+import { PACK_CHOICES, type PackId } from "../content/packs";
 import type {
   DurationSeconds,
   SessionPreferences,
@@ -60,21 +60,8 @@ export function SetupScreen({
         </header>
 
         <p className="mt-3 text-[clamp(0.88rem,3.5vw,1rem)] leading-[1.7] font-semibold text-[#40596a] max-[430px]:text-[0.92rem] max-[360px]:text-[0.82rem] max-[360px]:leading-[1.55]">
-          いっしょに話しながら、色とかたちをゆっくり眺めよう。
+          いっしょに話しながら、色をゆっくり眺めよう。
         </p>
-
-        <aside
-          className="mt-3.5 flex items-center gap-2.5 rounded-2xl border border-[#ead8a9] bg-[#fff1c9] px-3.5 py-2.5 text-[#5a4513] max-[360px]:mt-2.5 max-[360px]:px-2.5 max-[360px]:py-2"
-          aria-label="短時間利用のお願い"
-        >
-          <span className="text-[1.25rem]" aria-hidden="true">
-            ⌛
-          </span>
-          <p className="text-[0.73rem] leading-[1.45]">
-            <strong className="block text-[0.78rem]">短い時間で楽しみましょう。</strong>
-            画面から目を離したくなったら、いつでもおしまいにできます。
-          </p>
-        </aside>
 
         <form
           className="mt-4 grid gap-3 max-[360px]:mt-2.5 max-[360px]:gap-2.5"
@@ -88,26 +75,39 @@ export function SetupScreen({
               あそび
             </legend>
             <div className="grid grid-cols-2 gap-2">
-              {Object.values(CONTENT_PACKS).map((pack) => (
-                <label
-                  className={`${choiceBase} min-h-[61px] content-center rounded-[15px] px-3.5 py-2.5 max-[360px]:min-h-[54px] max-[360px]:px-2.5 max-[360px]:py-2`}
-                  key={pack.id}
-                >
-                  <input
-                    aria-label={pack.shortLabel}
-                    checked={preferences.packId === pack.id}
-                    className="peer absolute size-px opacity-0"
-                    name="pack"
-                    onChange={() => onPackChange(pack.id)}
-                    type="radio"
-                    value={pack.id}
-                  />
-                  <span className="text-base font-black">{pack.shortLabel}</span>
-                  <span className="mt-px text-[0.68rem] font-semibold text-[#5a6d7a] peer-checked:text-[#dbe7ed]">
-                    {pack.id === "colors" ? "8つの色" : "4つのかたち"}
-                  </span>
-                </label>
-              ))}
+              {PACK_CHOICES.map((pack) =>
+                pack.available ? (
+                  <label
+                    className={`${choiceBase} min-h-[61px] content-center rounded-[15px] px-3.5 py-2.5 max-[360px]:min-h-[54px] max-[360px]:px-2.5 max-[360px]:py-2`}
+                    key={pack.id}
+                  >
+                    <input
+                      aria-label={pack.shortLabel}
+                      checked={preferences.packId === pack.id}
+                      className="peer absolute size-px opacity-0"
+                      name="pack"
+                      onChange={() => onPackChange(pack.id)}
+                      type="radio"
+                      value={pack.id}
+                    />
+                    <span className="text-base font-black">{pack.shortLabel}</span>
+                    <span className="mt-px text-[0.68rem] font-semibold text-[#5a6d7a] peer-checked:text-[#dbe7ed]">
+                      {pack.detail}
+                    </span>
+                  </label>
+                ) : (
+                  <div
+                    aria-disabled="true"
+                    className="grid min-h-[61px] min-w-0 content-center rounded-[15px] border border-dashed border-line bg-white/40 px-3.5 py-2.5 text-[#8a9aaa] max-[360px]:min-h-[54px] max-[360px]:px-2.5 max-[360px]:py-2"
+                    key={pack.id}
+                  >
+                    <span className="text-base font-black">{pack.shortLabel}</span>
+                    <span className="mt-px text-[0.68rem] font-semibold">
+                      {pack.detail}
+                    </span>
+                  </div>
+                ),
+              )}
             </div>
           </fieldset>
 

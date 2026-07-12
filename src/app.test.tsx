@@ -49,26 +49,21 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
 
     expect(screen.getByRole("main", { name: "いろの再生画面" })).toBeVisible();
-    expect(screen.getByText("あお、みつけた")).toBeVisible();
     expect(createChime).not.toHaveBeenCalled();
   });
 
   it("applies choices, chimes on scene change when sound is on, and disposes on stop", () => {
     render(<App sequence={TEST_SEQUENCE} />);
 
-    fireEvent.click(screen.getByRole("radio", { name: "かたち" }));
     fireEvent.click(screen.getByRole("radio", { name: "3分" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "音をつける" }));
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
 
-    expect(screen.getByRole("main", { name: "かたちの再生画面" })).toBeVisible();
-    expect(screen.getByText("まる、みつけた")).toBeVisible();
+    expect(screen.getByRole("main", { name: "いろの再生画面" })).toBeVisible();
     expect(createChime).toHaveBeenCalledOnce();
     expect(chime.play).not.toHaveBeenCalled();
 
     act(() => vi.advanceTimersByTime(5_000));
-
-    expect(screen.getByText("さんかく、みつけた")).toBeVisible();
     expect(chime.play).toHaveBeenCalledOnce();
 
     fireEvent.click(screen.getByRole("button", { name: "おしまい" }));
@@ -84,11 +79,9 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: "一時停止" }));
 
     expect(screen.getByRole("heading", { name: "ひとやすみ" })).toBeVisible();
-    expect(screen.getByText("きいろ、みつけた")).toBeVisible();
 
     act(() => vi.advanceTimersByTime(60_000));
     expect(screen.getByRole("heading", { name: "ひとやすみ" })).toBeVisible();
-    expect(screen.getByText("きいろ、みつけた")).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: "つづける" }));
     act(() => vi.advanceTimersByTime(54_999));

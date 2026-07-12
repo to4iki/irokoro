@@ -186,11 +186,11 @@
     inset: -40%;
     background: linear-gradient(
       105deg,
-      transparent 30%,
-      rgb(255 255 255 / 12%) 40%,
-      rgb(255 255 255 / 62%) 50%,
-      rgb(255 255 255 / 12%) 60%,
-      transparent 70%
+      transparent 28%,
+      rgb(255 255 255 / 18%) 40%,
+      rgb(255 255 255 / 72%) 50%,
+      rgb(255 255 255 / 18%) 60%,
+      transparent 72%
     );
     content: "";
     translate: -65% 0;
@@ -272,16 +272,12 @@
 @layer motion {
   .visual-shape {
     animation:
-      scene-enter 1000ms cubic-bezier(0.22, 1, 0.36, 1) both,
-      shape-drift 6.5s ease-in-out 900ms var(--shimmer-iterations) alternate both;
+      scene-enter 900ms cubic-bezier(0.22, 1, 0.36, 1) both,
+      shape-drift 3.2s ease-in-out 600ms infinite alternate both;
   }
 
   .visual-shape::after {
-    animation: shimmer 5.5s ease-in-out 400ms var(--shimmer-iterations) alternate both;
-  }
-
-  .scene-cue {
-    animation: cue-enter 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: shimmer 3s ease-in-out 200ms infinite alternate both;
   }
 
   .finish-illustration {
@@ -300,8 +296,8 @@
   @keyframes scene-enter {
     from {
       opacity: 0;
-      scale: 0.78;
-      translate: 0 18px;
+      scale: 0.68;
+      translate: 0 28px;
     }
     to {
       opacity: 1;
@@ -310,42 +306,26 @@
     }
   }
 
-  @keyframes scene-fade {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes cue-enter {
-    from {
-      opacity: 0;
-      translate: 0 10px;
-    }
-    to {
-      opacity: 1;
-      translate: 0 0;
-    }
-  }
-
   @keyframes shape-drift {
     from {
-      transform: translate3d(-5%, 3%, 0) scale(0.94) rotate(-4deg);
+      translate: -12% 7%;
+      scale: 0.88;
+      rotate: -10deg;
     }
     to {
-      transform: translate3d(5%, -4%, 0) scale(1.06) rotate(4deg);
+      translate: 12% -9%;
+      scale: 1.14;
+      rotate: 10deg;
     }
   }
 
   @keyframes shimmer {
     from {
-      translate: -70% 0;
-      opacity: 0.55;
+      translate: -75% 0;
+      opacity: 0.4;
     }
     to {
-      translate: 70% 0;
+      translate: 75% 0;
       opacity: 1;
     }
   }
@@ -358,39 +338,6 @@
     to {
       opacity: 1;
       translate: 0 0;
-    }
-  }
-
-  .player-screen[data-motion="reduced"] .visual-shape {
-    animation: scene-fade 900ms ease both;
-  }
-
-  .player-screen[data-motion="reduced"] .visual-shape::after {
-    animation: none;
-    opacity: 0.1;
-    translate: 0;
-  }
-
-  .player-screen[data-motion="reduced"] .scene-cue {
-    animation: scene-fade 700ms ease both;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .player-screen {
-      transition: none;
-    }
-
-    .visual-shape {
-      animation: scene-fade 900ms ease both;
-    }
-
-    .visual-shape::after,
-    .finish-illustration {
-      animation: none;
-    }
-
-    .scene-cue {
-      animation: scene-fade 700ms ease both;
     }
   }
 }

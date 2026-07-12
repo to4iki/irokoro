@@ -5,7 +5,6 @@ import { PlayerScreen } from "./components/player-screen";
 import { SetupScreen } from "./components/setup-screen";
 import { createSceneSequence, type Scene } from "./features/session/sequence";
 import { createInitialState, sessionReducer } from "./features/session/session-reducer";
-import { useReducedMotion } from "./hooks/use-reduced-motion";
 
 const DEFAULT_SEQUENCE = createSceneSequence({ length: 64 });
 
@@ -16,7 +15,6 @@ type AppProps = {
 export default function App({ sequence = DEFAULT_SEQUENCE }: AppProps) {
   const [state, dispatch] = useReducer(sessionReducer, undefined, createInitialState);
   const audioRef = useRef<ChimeController | null>(null);
-  const reducedMotion = useReducedMotion();
 
   const sceneIndex = state.status === "setup" ? 0 : state.sceneIndex;
   const scene = sequence[sceneIndex % sequence.length];
@@ -87,12 +85,7 @@ export default function App({ sequence = DEFAULT_SEQUENCE }: AppProps) {
   }
 
   if (state.status === "finished") {
-    return (
-      <FinishScreen
-        sceneIndex={state.sceneIndex}
-        onReset={() => dispatch({ type: "RESET" })}
-      />
-    );
+    return <FinishScreen onReset={() => dispatch({ type: "RESET" })} />;
   }
 
   return (
@@ -100,7 +93,6 @@ export default function App({ sequence = DEFAULT_SEQUENCE }: AppProps) {
       onPause={() => dispatch({ type: "PAUSE", now: Date.now() })}
       onResume={() => dispatch({ type: "RESUME", now: Date.now() })}
       onStop={() => dispatch({ type: "STOP" })}
-      reducedMotion={reducedMotion}
       scene={scene}
       state={state}
     />
