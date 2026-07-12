@@ -52,7 +52,7 @@ describe("App", () => {
     expect(createChime).not.toHaveBeenCalled();
   });
 
-  it("applies choices, chimes on scene change when sound is on, and disposes on stop", () => {
+  it("applies choices, plays korokoro on each scene enter when sound is on, and disposes on stop", () => {
     render(<App sequence={TEST_SEQUENCE} />);
 
     fireEvent.click(screen.getByRole("radio", { name: "3分" }));
@@ -61,10 +61,10 @@ describe("App", () => {
 
     expect(screen.getByRole("main", { name: "いろの再生画面" })).toBeVisible();
     expect(createChime).toHaveBeenCalledOnce();
-    expect(chime.play).not.toHaveBeenCalled();
+    expect(chime.play).toHaveBeenCalledOnce();
 
     act(() => vi.advanceTimersByTime(5_000));
-    expect(chime.play).toHaveBeenCalledOnce();
+    expect(chime.play).toHaveBeenCalledTimes(2);
 
     fireEvent.click(screen.getByRole("button", { name: "おしまい" }));
     expect(chime.dispose).toHaveBeenCalledOnce();

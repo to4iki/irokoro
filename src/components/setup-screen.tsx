@@ -139,7 +139,7 @@ export function SetupScreen({
             <div>
               <p className="text-[0.82rem] font-extrabold text-ink">音をつける</p>
               <p className="mt-0.5 text-[0.64rem] leading-[1.4] text-[#576b79]">
-                小さな合成音です。端末音量もご確認ください。
+                ころころ転がるときの合成音です。端末音量もご確認ください。
               </p>
             </div>
             <label className="relative shrink-0 cursor-pointer">

@@ -171,14 +171,102 @@
     background: rgb(255 255 255 / 78%);
   }
 
+  .roll-stage {
+    container-type: size;
+  }
+
+  .roll-actor {
+    --roll-from-x: 0%;
+    --roll-from-y: 0%;
+    --roll-settle-x: 0%;
+    --roll-settle-y: 0%;
+    --roll-spin: 720deg;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    width: calc(72% * var(--roll-scale, 1));
+    aspect-ratio: 1;
+    place-items: center;
+    translate: -50% -50%;
+    will-change: transform;
+  }
+
+  .roll-actor--primary {
+    z-index: 2;
+  }
+
+  .roll-actor--companion {
+    z-index: 1;
+    opacity: 0.92;
+  }
+
+  .roll-actor--companion:nth-child(2) {
+    --roll-settle-x: -34%;
+    --roll-settle-y: 28%;
+  }
+
+  .roll-actor--companion:nth-child(3) {
+    --roll-settle-x: 36%;
+    --roll-settle-y: -30%;
+  }
+
+  .roll-from--left {
+    --roll-from-x: -130%;
+    --roll-from-y: 8%;
+    --roll-spin: 760deg;
+  }
+
+  .roll-from--right {
+    --roll-from-x: 130%;
+    --roll-from-y: -6%;
+    --roll-spin: -760deg;
+  }
+
+  .roll-from--top {
+    --roll-from-x: -4%;
+    --roll-from-y: -125%;
+    --roll-spin: 700deg;
+  }
+
+  .roll-from--bottom {
+    --roll-from-x: 6%;
+    --roll-from-y: 125%;
+    --roll-spin: -700deg;
+  }
+
+  .roll-from--top-left {
+    --roll-from-x: -118%;
+    --roll-from-y: -110%;
+    --roll-spin: 820deg;
+  }
+
+  .roll-from--top-right {
+    --roll-from-x: 118%;
+    --roll-from-y: -110%;
+    --roll-spin: -820deg;
+  }
+
+  .roll-from--bottom-left {
+    --roll-from-x: -118%;
+    --roll-from-y: 110%;
+    --roll-spin: -780deg;
+  }
+
+  .roll-from--bottom-right {
+    --roll-from-x: 118%;
+    --roll-from-y: 110%;
+    --roll-spin: 780deg;
+  }
+
   .visual-shape {
     position: relative;
-    width: 78%;
+    width: 100%;
     aspect-ratio: 1;
     overflow: hidden;
     background: var(--shape-color);
-    filter: drop-shadow(0 22px 22px rgb(0 0 0 / 20%));
-    will-change: opacity, transform;
+    filter: drop-shadow(0 18px 18px rgb(0 0 0 / 22%));
+    will-change: transform, filter;
   }
 
   .visual-shape::after {
@@ -206,7 +294,6 @@
 
   .visual-shape--square {
     border-radius: 18%;
-    rotate: -4deg;
   }
 
   .visual-shape--star {
@@ -270,21 +357,22 @@
 }
 
 @layer motion {
-  .visual-shape {
+  .roll-actor {
+    /* tumble must not use `both` fill: its delay backwards fill would kill roll-in */
     animation:
-      scene-enter 900ms cubic-bezier(0.22, 1, 0.36, 1) both,
-      shape-drift 3.2s ease-in-out 600ms infinite alternate both;
+      shape-roll-in 1.35s cubic-bezier(0.18, 0.84, 0.28, 1) var(--roll-delay, 0ms) both,
+      shape-tumble 2.8s ease-in-out calc(var(--roll-delay, 0ms) + 1.2s) infinite;
   }
 
   .visual-shape::after {
-    animation: shimmer 3s ease-in-out 200ms infinite alternate both;
+    animation: shimmer 2.4s ease-in-out 200ms infinite alternate both;
   }
 
   .finish-illustration {
     animation: finish-rise 800ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
-  .player-screen[data-paused="true"] .visual-shape,
+  .player-screen[data-paused="true"] .roll-actor,
   .player-screen[data-paused="true"] .visual-shape::after {
     animation-play-state: paused;
   }
@@ -293,29 +381,53 @@
     opacity: 0;
   }
 
-  @keyframes scene-enter {
-    from {
-      opacity: 0;
-      scale: 0.68;
-      translate: 0 28px;
+  @keyframes shape-roll-in {
+    0% {
+      opacity: 0.75;
+      translate: calc(-50% + var(--roll-from-x)) calc(-50% + var(--roll-from-y));
+      rotate: 0deg;
+      scale: 0.72;
     }
-    to {
+    62% {
       opacity: 1;
+      scale: 1.08;
+    }
+    100% {
+      opacity: 1;
+      translate: calc(-50% + var(--roll-settle-x)) calc(-50% + var(--roll-settle-y));
+      rotate: var(--roll-spin);
       scale: 1;
-      translate: 0 0;
     }
   }
 
-  @keyframes shape-drift {
-    from {
-      translate: -12% 7%;
-      scale: 0.88;
-      rotate: -10deg;
+  @keyframes shape-tumble {
+    0% {
+      translate: calc(-50% + var(--roll-settle-x)) calc(-50% + var(--roll-settle-y));
+      rotate: var(--roll-spin);
+      scale: 1;
     }
-    to {
-      translate: 12% -9%;
-      scale: 1.14;
-      rotate: 10deg;
+    25% {
+      translate: calc(-50% + var(--roll-settle-x) + 10%)
+        calc(-50% + var(--roll-settle-y) - 8%);
+      rotate: calc(var(--roll-spin) + 90deg);
+      scale: 1.06;
+    }
+    50% {
+      translate: calc(-50% + var(--roll-settle-x) - 8%)
+        calc(-50% + var(--roll-settle-y) + 10%);
+      rotate: calc(var(--roll-spin) + 180deg);
+      scale: 0.94;
+    }
+    75% {
+      translate: calc(-50% + var(--roll-settle-x) + 9%)
+        calc(-50% + var(--roll-settle-y) + 5%);
+      rotate: calc(var(--roll-spin) + 270deg);
+      scale: 1.05;
+    }
+    100% {
+      translate: calc(-50% + var(--roll-settle-x)) calc(-50% + var(--roll-settle-y));
+      rotate: calc(var(--roll-spin) + 360deg);
+      scale: 1;
     }
   }
 

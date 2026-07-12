@@ -43,8 +43,10 @@ export default function App({ sequence = DEFAULT_SEQUENCE }: AppProps) {
       return;
     }
 
+    // Play the rolling “ころころ” phrase as shapes tumble in.
+    audioRef.current?.play();
+
     const timer = window.setTimeout(() => {
-      audioRef.current?.play();
       dispatch({ type: "NEXT_SCENE" });
     }, scene.durationMs);
     return () => window.clearTimeout(timer);

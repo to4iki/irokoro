@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createChime } from "./chime";
+import { createChime, ROLL_SYLLABLES } from "./chime";
 
 class FakeAudioParam {
   value = 0;
@@ -49,22 +49,26 @@ class FakeAudioContext {
 }
 
 describe("createChime", () => {
-  it("uses a quiet master gain, plays a short two-note chime, and stops after dispose", async () => {
+  it("uses a quiet master gain, plays a rolling korokoro phrase, and stops after dispose", async () => {
     const context = new FakeAudioContext();
     const chime = createChime(() => context as unknown as AudioContext);
 
     expect(chime).not.toBeNull();
-    expect(context.gains[0]?.gain.value).toBe(0.04);
+    expect(context.gains[0]?.gain.value).toBe(0.055);
+    expect(ROLL_SYLLABLES.length).toBeGreaterThanOrEqual(6);
 
     chime?.play();
-    expect(context.oscillators).toHaveLength(2);
+    expect(context.oscillators).toHaveLength(ROLL_SYLLABLES.length);
+    expect(
+      context.oscillators.every((oscillator) => oscillator.type === "triangle"),
+    ).toBe(true);
 
     await chime?.dispose();
     expect(context.close).toHaveBeenCalledOnce();
 
     chime?.play();
     await chime?.dispose();
-    expect(context.oscillators).toHaveLength(2);
+    expect(context.oscillators).toHaveLength(ROLL_SYLLABLES.length);
     expect(context.close).toHaveBeenCalledOnce();
   });
 
