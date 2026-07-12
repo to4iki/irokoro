@@ -5,7 +5,17 @@ export type ChimeController = {
 
 type AudioContextFactory = () => AudioContext;
 
-const MASTER_GAIN = 0.04;
+/** Soft “ころころ〜” phrase while shapes tumble in. */
+export const ROLL_SYLLABLES = [
+  { frequency: 392.0, delay: 0, duration: 0.16 },
+  { frequency: 329.63, delay: 0.17, duration: 0.16 },
+  { frequency: 440.0, delay: 0.34, duration: 0.16 },
+  { frequency: 349.23, delay: 0.51, duration: 0.18 },
+  { frequency: 415.3, delay: 0.78, duration: 0.2 },
+  { frequency: 293.66, delay: 1.02, duration: 0.28 },
+] as const;
+
+const MASTER_GAIN = 0.055;
 
 export function createChime(
   createContext: AudioContextFactory = () => new AudioContext(),
@@ -28,21 +38,16 @@ export function createChime(
           return;
         }
 
-        const notes = [
-          { frequency: 523.25, delay: 0, duration: 0.3 },
-          { frequency: 659.25, delay: 0.09, duration: 0.3 },
-        ] as const;
-
-        for (const note of notes) {
-          const startAt = context.currentTime + note.delay;
-          const stopAt = startAt + note.duration;
+        for (const syllable of ROLL_SYLLABLES) {
+          const startAt = context.currentTime + syllable.delay;
+          const stopAt = startAt + syllable.duration;
           const oscillator = context.createOscillator();
           const envelope = context.createGain();
 
-          oscillator.type = "sine";
-          oscillator.frequency.setValueAtTime(note.frequency, startAt);
+          oscillator.type = "triangle";
+          oscillator.frequency.setValueAtTime(syllable.frequency, startAt);
           envelope.gain.setValueAtTime(0.0001, startAt);
-          envelope.gain.exponentialRampToValueAtTime(0.7, startAt + 0.025);
+          envelope.gain.exponentialRampToValueAtTime(0.85, startAt + 0.02);
           envelope.gain.exponentialRampToValueAtTime(0.0001, stopAt);
 
           oscillator.connect(envelope);

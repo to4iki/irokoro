@@ -15,6 +15,7 @@ type AppProps = {
 export default function App({ sequence = DEFAULT_SEQUENCE }: AppProps) {
   const [state, dispatch] = useReducer(sessionReducer, undefined, createInitialState);
   const audioRef = useRef<ChimeController | null>(null);
+  const sceneRemainRef = useRef<{ id: string; remainingMs: number } | null>(null);
 
   const sceneIndex = state.status === "setup" ? 0 : state.sceneIndex;
   const scene = sequence[sceneIndex % sequence.length];
@@ -37,23 +38,46 @@ export default function App({ sequence = DEFAULT_SEQUENCE }: AppProps) {
     return () => window.clearInterval(timer);
   }, [status, deadline]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: scene.id re-arms the timer for every new scene, even when consecutive durations are equal
   useEffect(() => {
     if (status !== "playing") {
       return;
     }
 
-    const timer = window.setTimeout(() => {
+    const isNewScene =
+      sceneRemainRef.current === null || sceneRemainRef.current.id !== scene.id;
+    if (isNewScene) {
+      sceneRemainRef.current = { id: scene.id, remainingMs: scene.durationMs };
       audioRef.current?.play();
+    }
+
+    const active = sceneRemainRef.current;
+    if (!active) {
+      return;
+    }
+
+    const budget = active.remainingMs;
+    const startedAt = Date.now();
+    const timer = window.setTimeout(() => {
       dispatch({ type: "NEXT_SCENE" });
-    }, scene.durationMs);
-    return () => window.clearTimeout(timer);
+    }, budget);
+
+    return () => {
+      window.clearTimeout(timer);
+      const elapsed = Date.now() - startedAt;
+      if (sceneRemainRef.current?.id === scene.id) {
+        sceneRemainRef.current = {
+          id: scene.id,
+          remainingMs: Math.max(0, budget - elapsed),
+        };
+      }
+    };
   }, [status, scene.id, scene.durationMs]);
 
   useEffect(() => {
     if (status === "finished") {
       const audio = audioRef.current;
       audioRef.current = null;
+      sceneRemainRef.current = null;
       void audio?.dispose();
     }
   }, [status]);
@@ -74,6 +98,7 @@ export default function App({ sequence = DEFAULT_SEQUENCE }: AppProps) {
         onPackChange={(packId) => dispatch({ type: "SET_PACK", packId })}
         onSoundChange={(soundEnabled) => dispatch({ type: "SET_SOUND", soundEnabled })}
         onStart={() => {
+          sceneRemainRef.current = null;
           if (state.preferences.soundEnabled) {
             audioRef.current = createChime();
           }

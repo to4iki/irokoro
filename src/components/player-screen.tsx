@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { CONTENT_PACKS, getColor, getShape } from "../content/packs";
 import type { Scene } from "../features/session/sequence";
 import type { SessionState } from "../features/session/session-reducer";
+import { RollCanvas } from "./roll-canvas";
 
 type PlayerState = Extract<SessionState, { status: "playing" | "paused" }>;
 
@@ -15,7 +16,6 @@ type PlayerScreenProps = {
 
 type SceneStyle = CSSProperties & {
   "--scene-background": string;
-  "--shape-color": string;
 };
 
 function formatRemaining(remainingMs: number): string {
@@ -35,7 +35,6 @@ export function PlayerScreen({
   const pack = CONTENT_PACKS[state.preferences.packId];
   const style: SceneStyle = {
     "--scene-background": color.background,
-    "--shape-color": color.foreground,
   };
 
   return (
@@ -78,15 +77,15 @@ export function PlayerScreen({
 
       <section
         aria-label={`${color.label}の${shape.label}`}
-        className="scene grid min-h-0 place-content-center place-items-center"
+        className="scene relative grid min-h-0 place-content-center place-items-center overflow-hidden"
       >
-        <div
-          className="grid aspect-square w-[min(72vw,56dvh,360px)] place-items-center max-[430px]:w-[min(74vw,48dvh,320px)] max-[700px]:w-[min(52vw,42dvh,280px)]"
-          key={scene.id}
-        >
-          <div
-            aria-hidden="true"
-            className={`visual-shape visual-shape--${shape.id}`}
+        <div className="roll-stage relative aspect-square w-[min(88vw,68dvh,440px)] max-[430px]:w-[min(90vw,58dvh,360px)] max-[700px]:w-[min(70vw,52dvh,340px)]">
+          <RollCanvas
+            key={scene.id}
+            paused={state.status === "paused"}
+            sceneId={scene.id}
+            shapeColor={color.foreground}
+            shapeId={shape.id}
           />
         </div>
       </section>

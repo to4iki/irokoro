@@ -138,8 +138,8 @@
     z-index: -1;
     inset: 0;
     background:
-      radial-gradient(circle at 16% 20%, rgb(255 255 255 / 13%), transparent 27%),
-      radial-gradient(circle at 85% 77%, rgb(0 0 0 / 10%), transparent 31%);
+      radial-gradient(circle at 14% 18%, rgb(255 255 255 / 10%), transparent 24%),
+      radial-gradient(circle at 86% 78%, rgb(0 0 0 / 8%), transparent 28%);
     content: "";
     pointer-events: none;
   }
@@ -171,57 +171,14 @@
     background: rgb(255 255 255 / 78%);
   }
 
-  .visual-shape {
-    position: relative;
-    width: 78%;
-    aspect-ratio: 1;
+  .roll-stage {
     overflow: hidden;
-    background: var(--shape-color);
-    filter: drop-shadow(0 22px 22px rgb(0 0 0 / 20%));
-    will-change: opacity, transform;
   }
 
-  .visual-shape::after {
-    position: absolute;
-    inset: -40%;
-    background: linear-gradient(
-      105deg,
-      transparent 28%,
-      rgb(255 255 255 / 18%) 40%,
-      rgb(255 255 255 / 72%) 50%,
-      rgb(255 255 255 / 18%) 60%,
-      transparent 72%
-    );
-    content: "";
-    translate: -65% 0;
-  }
-
-  .visual-shape--circle {
-    border-radius: 50%;
-  }
-
-  .visual-shape--triangle {
-    clip-path: polygon(50% 4%, 97% 92%, 3% 92%);
-  }
-
-  .visual-shape--square {
-    border-radius: 18%;
-    rotate: -4deg;
-  }
-
-  .visual-shape--star {
-    clip-path: polygon(
-      50% 2%,
-      61% 35%,
-      96% 35%,
-      68% 56%,
-      79% 90%,
-      50% 70%,
-      21% 90%,
-      32% 56%,
-      4% 35%,
-      39% 35%
-    );
+  .roll-canvas {
+    display: block;
+    touch-action: none;
+    animation: roll-canvas-fade 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
   .finish-illustration {
@@ -270,62 +227,19 @@
 }
 
 @layer motion {
-  .visual-shape {
-    animation:
-      scene-enter 900ms cubic-bezier(0.22, 1, 0.36, 1) both,
-      shape-drift 3.2s ease-in-out 600ms infinite alternate both;
-  }
-
-  .visual-shape::after {
-    animation: shimmer 3s ease-in-out 200ms infinite alternate both;
-  }
-
   .finish-illustration {
     animation: finish-rise 800ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  }
-
-  .player-screen[data-paused="true"] .visual-shape,
-  .player-screen[data-paused="true"] .visual-shape::after {
-    animation-play-state: paused;
   }
 
   .player-screen[data-paused="true"] .scene {
     opacity: 0;
   }
 
-  @keyframes scene-enter {
+  @keyframes roll-canvas-fade {
     from {
       opacity: 0;
-      scale: 0.68;
-      translate: 0 28px;
     }
     to {
-      opacity: 1;
-      scale: 1;
-      translate: 0 0;
-    }
-  }
-
-  @keyframes shape-drift {
-    from {
-      translate: -12% 7%;
-      scale: 0.88;
-      rotate: -10deg;
-    }
-    to {
-      translate: 12% -9%;
-      scale: 1.14;
-      rotate: 10deg;
-    }
-  }
-
-  @keyframes shimmer {
-    from {
-      translate: -75% 0;
-      opacity: 0.4;
-    }
-    to {
-      translate: 75% 0;
       opacity: 1;
     }
   }
