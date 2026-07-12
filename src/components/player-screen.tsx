@@ -1,8 +1,8 @@
 import type { CSSProperties } from "react";
 import { CONTENT_PACKS, getColor, getShape } from "../content/packs";
-import { createRollCast } from "../features/session/roll";
 import type { Scene } from "../features/session/sequence";
 import type { SessionState } from "../features/session/session-reducer";
+import { RollCanvas } from "./roll-canvas";
 
 type PlayerState = Extract<SessionState, { status: "playing" | "paused" }>;
 
@@ -16,12 +16,6 @@ type PlayerScreenProps = {
 
 type SceneStyle = CSSProperties & {
   "--scene-background": string;
-  "--shape-color": string;
-};
-
-type ActorStyle = CSSProperties & {
-  "--roll-delay": string;
-  "--roll-scale": string;
 };
 
 function formatRemaining(remainingMs: number): string {
@@ -39,10 +33,8 @@ export function PlayerScreen({
   const color = getColor(scene.colorId);
   const shape = getShape(scene.shapeId);
   const pack = CONTENT_PACKS[state.preferences.packId];
-  const cast = createRollCast(scene.id);
   const style: SceneStyle = {
     "--scene-background": color.background,
-    "--shape-color": color.foreground,
   };
 
   return (
@@ -87,29 +79,14 @@ export function PlayerScreen({
         aria-label={`${color.label}の${shape.label}`}
         className="scene relative grid min-h-0 place-content-center place-items-center overflow-hidden"
       >
-        <div
-          className="roll-stage relative aspect-square w-[min(88vw,68dvh,440px)] max-[430px]:w-[min(90vw,58dvh,360px)] max-[700px]:w-[min(70vw,52dvh,340px)]"
-          key={scene.id}
-        >
-          {cast.map((actor) => {
-            const actorStyle: ActorStyle = {
-              "--roll-delay": `${actor.delayMs}ms`,
-              "--roll-scale": String(actor.scale),
-            };
-
-            return (
-              <div
-                aria-hidden="true"
-                className={`roll-actor roll-actor--${actor.role} roll-from--${actor.direction}`}
-                key={actor.key}
-                style={actorStyle}
-              >
-                <div className="roll-spinner">
-                  <div className={`visual-shape visual-shape--${shape.id}`} />
-                </div>
-              </div>
-            );
-          })}
+        <div className="roll-stage relative aspect-square w-[min(88vw,68dvh,440px)] max-[430px]:w-[min(90vw,58dvh,360px)] max-[700px]:w-[min(70vw,52dvh,340px)]">
+          <RollCanvas
+            key={scene.id}
+            paused={state.status === "paused"}
+            sceneId={scene.id}
+            shapeColor={color.foreground}
+            shapeId={shape.id}
+          />
         </div>
       </section>
 
