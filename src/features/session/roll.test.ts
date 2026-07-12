@@ -1,26 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { createRollCast, pickRollDirection, ROLL_DIRECTIONS } from "./roll";
+import { createRollCast, ENTRY_DURATION_MS, sampleActorPose } from "./roll";
 
-describe("roll cast", () => {
-  it("picks a known direction from the scene id", () => {
-    expect(ROLL_DIRECTIONS).toContain(pickRollDirection("0-blue-circle"));
-    expect(pickRollDirection("0-blue-circle")).toBe(pickRollDirection("0-blue-circle"));
-    expect(pickRollDirection("0-blue-circle", 1)).not.toBe(
-      pickRollDirection("0-blue-circle", 7),
-    );
-  });
+describe("roll motion", () => {
+  it("rolls in from off-stage with spin, then keeps moving after settle", () => {
+    const [primary] = createRollCast("0-blue-circle");
+    if (!primary) {
+      throw new Error("expected a primary actor");
+    }
 
-  it("builds one primary and two companion actors with varied directions", () => {
-    const cast = createRollCast("3-yellow-star");
+    const start = sampleActorPose(primary, 0);
+    const mid = sampleActorPose(primary, ENTRY_DURATION_MS * 0.5);
+    const settled = sampleActorPose(primary, ENTRY_DURATION_MS);
+    const later = sampleActorPose(primary, ENTRY_DURATION_MS + 1_400);
 
-    expect(cast).toHaveLength(3);
-    expect(cast[0]).toMatchObject({
-      role: "primary",
-      delayMs: 0,
-      scale: 1,
-    });
-    expect(cast.slice(1).every((actor) => actor.role === "companion")).toBe(true);
-    expect(new Set(cast.map((actor) => actor.direction)).size).toBeGreaterThan(1);
-    expect(cast.every((actor) => ROLL_DIRECTIONS.includes(actor.direction))).toBe(true);
+    expect(Math.hypot(start.x, start.y)).toBeGreaterThan(0.8);
+    expect(Math.hypot(mid.x, mid.y)).toBeLessThan(Math.hypot(start.x, start.y));
+    expect(settled.x).toBeCloseTo(primary.settleX, 2);
+    expect(Math.abs(settled.rotationRad)).toBeGreaterThan(Math.PI);
+    expect(Math.abs(later.rotationRad)).toBeGreaterThan(Math.abs(settled.rotationRad));
   });
 });

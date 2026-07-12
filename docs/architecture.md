@@ -24,15 +24,15 @@ Setup → Playing ↔ Paused → Finished → Setup
 | `src/audio/` | Web Audio の境界とチャイム生成 |
 | `src/components/` | Setup / Player / Finish の画面。再生中の図形は `RollCanvas`（Canvas 2D） |
 | `src/content/` | 色・形・パック定義（どうぶつ枠含む） |
-| `src/features/session/` | 純粋 Reducer・シーケンス・転がりモーション／描画ヘルパ |
+| `src/features/session/` | 純粋 Reducer・シーケンス・転がりモーション／Canvas 描画ヘルパ |
 | `src/test/` | Vitest 共通セットアップ |
 
 ## スタイル
 
 - ブランド色・余白などのトークンは `src/styles.css` の `@theme`
 - レイアウトは Tailwind ユーティリティ
-- 再生中の図形モーションは Canvas 2D（`requestAnimationFrame`）。CSS は背景クロスフェードや終了画面など UI 演出に限定
-- シーン入場の canvas フェードは Web Animations API（未対応時は CSS transition）
+- 再生中の図形モーションは Canvas 2D（`requestAnimationFrame`）。一時停止中はループを止める
+- シーン入場フェードと背景クロスフェードは CSS
 ## デプロイ
 
 `wrangler.jsonc` の `assets.not_found_handling: single-page-application` のみ。

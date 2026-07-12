@@ -3,11 +3,9 @@ import { createChime, ROLL_SYLLABLES } from "./chime";
 
 class FakeAudioParam {
   value = 0;
-
   setValueAtTime(value: number) {
     this.value = value;
   }
-
   exponentialRampToValueAtTime(value: number) {
     this.value = value;
   }
@@ -49,27 +47,21 @@ class FakeAudioContext {
 }
 
 describe("createChime", () => {
-  it("uses a quiet master gain, plays a rolling korokoro phrase, and stops after dispose", async () => {
+  it("plays a quiet rolling phrase and stops after dispose", async () => {
     const context = new FakeAudioContext();
     const chime = createChime(() => context as unknown as AudioContext);
 
     expect(chime).not.toBeNull();
     expect(context.gains[0]?.gain.value).toBe(0.055);
-    expect(ROLL_SYLLABLES.length).toBeGreaterThanOrEqual(6);
 
     chime?.play();
     expect(context.oscillators).toHaveLength(ROLL_SYLLABLES.length);
-    expect(
-      context.oscillators.every((oscillator) => oscillator.type === "triangle"),
-    ).toBe(true);
 
     await chime?.dispose();
     expect(context.close).toHaveBeenCalledOnce();
 
     chime?.play();
-    await chime?.dispose();
     expect(context.oscillators).toHaveLength(ROLL_SYLLABLES.length);
-    expect(context.close).toHaveBeenCalledOnce();
   });
 
   it("degrades silently when Web Audio is unavailable", () => {

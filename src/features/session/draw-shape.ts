@@ -1,9 +1,5 @@
 import type { ShapeId } from "../../content/packs";
-import type { ActorPose } from "../../features/session/roll-motion";
-
-export type DrawableActor = {
-  pose: ActorPose;
-};
+import type { ActorPose } from "./roll";
 
 function drawRoundedRect(
   ctx: CanvasRenderingContext2D,
@@ -31,13 +27,12 @@ function drawTriangle(ctx: CanvasRenderingContext2D, size: number) {
 }
 
 function drawStar(ctx: CanvasRenderingContext2D, size: number) {
-  const spikes = 5;
   const outer = size * 0.48;
   const inner = size * 0.2;
   ctx.beginPath();
-  for (let i = 0; i < spikes * 2; i += 1) {
+  for (let i = 0; i < 10; i += 1) {
     const radius = i % 2 === 0 ? outer : inner;
-    const angle = (i * Math.PI) / spikes - Math.PI / 2;
+    const angle = (i * Math.PI) / 5 - Math.PI / 2;
     const x = Math.cos(angle) * radius;
     const y = Math.sin(angle) * radius;
     if (i === 0) {
@@ -49,11 +44,7 @@ function drawStar(ctx: CanvasRenderingContext2D, size: number) {
   ctx.closePath();
 }
 
-export function drawShapePath(
-  ctx: CanvasRenderingContext2D,
-  shapeId: ShapeId,
-  size: number,
-) {
+function drawShapePath(ctx: CanvasRenderingContext2D, shapeId: ShapeId, size: number) {
   switch (shapeId) {
     case "circle":
       ctx.beginPath();
@@ -83,17 +74,16 @@ export function paintRollFrame(
     height: number;
     shapeId: ShapeId;
     shapeColor: string;
-    actors: readonly DrawableActor[];
+    poses: readonly ActorPose[];
   },
 ) {
-  const { width, height, shapeId, shapeColor, actors } = options;
+  const { width, height, shapeId, shapeColor, poses } = options;
   ctx.clearRect(0, 0, width, height);
 
   const minSide = Math.min(width, height);
   const baseSize = minSide * 0.58;
 
-  for (const actor of actors) {
-    const { pose } = actor;
+  for (const pose of poses) {
     const cx = width * 0.5 + pose.x * minSide * 0.5;
     const cy = height * 0.5 + pose.y * minSide * 0.5;
     const size = baseSize * pose.scale;

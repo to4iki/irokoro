@@ -63,7 +63,12 @@ describe("App", () => {
     expect(createChime).toHaveBeenCalledOnce();
     expect(chime.play).toHaveBeenCalledOnce();
 
-    act(() => vi.advanceTimersByTime(5_000));
+    act(() => vi.advanceTimersByTime(2_000));
+    fireEvent.click(screen.getByRole("button", { name: "一時停止" }));
+    fireEvent.click(screen.getByRole("button", { name: "つづける" }));
+    expect(chime.play).toHaveBeenCalledOnce();
+
+    act(() => vi.advanceTimersByTime(3_000));
     expect(chime.play).toHaveBeenCalledTimes(2);
 
     fireEvent.click(screen.getByRole("button", { name: "おしまい" }));
