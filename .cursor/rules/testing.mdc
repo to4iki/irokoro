@@ -1,0 +1,7 @@
+---
+description: テスト方針（書くべき／書かないべき）。正本は docs/testing.md。
+globs: src/**/*.{test,spec}.{ts,tsx}
+alwaysApply: false
+---
+
+@docs/testing.md

@@ -1,0 +1,7 @@
+---
+description: 命名・実装指針。正本は docs/code-style.md。
+globs: src/**/*.{ts,tsx,css}
+alwaysApply: false
+---
+
+@docs/code-style.md

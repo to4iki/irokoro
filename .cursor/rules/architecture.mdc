@@ -1,0 +1,7 @@
+---
+description: 画面遷移・ディレクトリ責務・スタイル／デプロイ。正本は docs/architecture.md。
+globs: src/**
+alwaysApply: false
+---
+
+@docs/architecture.md
