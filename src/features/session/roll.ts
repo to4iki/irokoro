@@ -55,15 +55,15 @@ export function createRollCast(sceneId: string): readonly RollActor[] {
       direction:
         companionA === primaryDirection ? pickRollDirection(sceneId, 11) : companionA,
       delayMs: 180,
-      scale: 0.42,
+      scale: 0.55,
     },
     {
       key: `${sceneId}-b`,
       role: "companion",
       direction:
         companionB === primaryDirection ? pickRollDirection(sceneId, 19) : companionB,
-      delayMs: 360,
-      scale: 0.28,
+      delayMs: 320,
+      scale: 0.38,
     },
   ];
 }

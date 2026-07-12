@@ -104,7 +104,9 @@ export function PlayerScreen({
                 key={actor.key}
                 style={actorStyle}
               >
-                <div className={`visual-shape visual-shape--${shape.id}`} />
+                <div className="roll-spinner">
+                  <div className={`visual-shape visual-shape--${shape.id}`} />
+                </div>
               </div>
             );
           })}

@@ -1,5 +1,23 @@
 @import "tailwindcss";
 
+@property --roll-spin {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+
+@property --roll-delay {
+  syntax: "<time>";
+  inherits: true;
+  initial-value: 0s;
+}
+
+@property --roll-scale {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
 @theme {
   --color-cream: #fff8ec;
   --color-paper: rgb(255 255 255 / 88%);
@@ -138,8 +156,8 @@
     z-index: -1;
     inset: 0;
     background:
-      radial-gradient(circle at 16% 20%, rgb(255 255 255 / 13%), transparent 27%),
-      radial-gradient(circle at 85% 77%, rgb(0 0 0 / 10%), transparent 31%);
+      radial-gradient(circle at 14% 18%, rgb(255 255 255 / 10%), transparent 24%),
+      radial-gradient(circle at 86% 78%, rgb(0 0 0 / 8%), transparent 28%);
     content: "";
     pointer-events: none;
   }
@@ -176,19 +194,26 @@
   }
 
   .roll-actor {
-    --roll-from-x: 0%;
-    --roll-from-y: 0%;
-    --roll-settle-x: 0%;
-    --roll-settle-y: 0%;
+    --roll-from-x: 0cqw;
+    --roll-from-y: 0cqh;
+    --roll-settle-x: 0cqw;
+    --roll-settle-y: 0cqh;
     --roll-spin: 720deg;
     position: absolute;
     top: 50%;
     left: 50%;
     display: grid;
-    width: calc(72% * var(--roll-scale, 1));
+    width: calc(58cqw * var(--roll-scale, 1));
     aspect-ratio: 1;
     place-items: center;
     translate: -50% -50%;
+    will-change: transform;
+  }
+
+  .roll-spinner {
+    width: 100%;
+    aspect-ratio: 1;
+    transform-origin: center;
     will-change: transform;
   }
 
@@ -198,64 +223,64 @@
 
   .roll-actor--companion {
     z-index: 1;
-    opacity: 0.92;
+    opacity: 0.95;
   }
 
   .roll-actor--companion:nth-child(2) {
-    --roll-settle-x: -34%;
-    --roll-settle-y: 28%;
+    --roll-settle-x: -32cqw;
+    --roll-settle-y: 26cqh;
   }
 
   .roll-actor--companion:nth-child(3) {
-    --roll-settle-x: 36%;
-    --roll-settle-y: -30%;
+    --roll-settle-x: 34cqw;
+    --roll-settle-y: -28cqh;
   }
 
   .roll-from--left {
-    --roll-from-x: -130%;
-    --roll-from-y: 8%;
+    --roll-from-x: -110cqw;
+    --roll-from-y: 8cqh;
     --roll-spin: 760deg;
   }
 
   .roll-from--right {
-    --roll-from-x: 130%;
-    --roll-from-y: -6%;
+    --roll-from-x: 110cqw;
+    --roll-from-y: -6cqh;
     --roll-spin: -760deg;
   }
 
   .roll-from--top {
-    --roll-from-x: -4%;
-    --roll-from-y: -125%;
+    --roll-from-x: -4cqw;
+    --roll-from-y: -110cqh;
     --roll-spin: 700deg;
   }
 
   .roll-from--bottom {
-    --roll-from-x: 6%;
-    --roll-from-y: 125%;
+    --roll-from-x: 6cqw;
+    --roll-from-y: 110cqh;
     --roll-spin: -700deg;
   }
 
   .roll-from--top-left {
-    --roll-from-x: -118%;
-    --roll-from-y: -110%;
+    --roll-from-x: -100cqw;
+    --roll-from-y: -100cqh;
     --roll-spin: 820deg;
   }
 
   .roll-from--top-right {
-    --roll-from-x: 118%;
-    --roll-from-y: -110%;
+    --roll-from-x: 100cqw;
+    --roll-from-y: -100cqh;
     --roll-spin: -820deg;
   }
 
   .roll-from--bottom-left {
-    --roll-from-x: -118%;
-    --roll-from-y: 110%;
+    --roll-from-x: -100cqw;
+    --roll-from-y: 100cqh;
     --roll-spin: -780deg;
   }
 
   .roll-from--bottom-right {
-    --roll-from-x: 118%;
-    --roll-from-y: 110%;
+    --roll-from-x: 100cqw;
+    --roll-from-y: 100cqh;
     --roll-spin: 780deg;
   }
 
@@ -265,7 +290,8 @@
     aspect-ratio: 1;
     overflow: hidden;
     background: var(--shape-color);
-    filter: drop-shadow(0 18px 18px rgb(0 0 0 / 22%));
+    filter: drop-shadow(0 14px 0 rgb(0 0 0 / 28%))
+      drop-shadow(0 22px 28px rgb(0 0 0 / 18%));
     will-change: transform, filter;
   }
 
@@ -358,10 +384,16 @@
 
 @layer motion {
   .roll-actor {
-    /* tumble must not use `both` fill: its delay backwards fill would kill roll-in */
+    /* tumble-move must not use `both` fill: delay backwards fill would kill roll-in */
     animation:
       shape-roll-in 1.35s cubic-bezier(0.18, 0.84, 0.28, 1) var(--roll-delay, 0ms) both,
-      shape-tumble 2.8s ease-in-out calc(var(--roll-delay, 0ms) + 1.2s) infinite;
+      shape-tumble-move 2.8s ease-in-out calc(var(--roll-delay, 0ms) + 1.2s) infinite;
+  }
+
+  .roll-spinner {
+    animation:
+      shape-spin-in 1.35s cubic-bezier(0.18, 0.84, 0.28, 1) var(--roll-delay, 0ms) both,
+      shape-tumble-spin 2.8s linear calc(var(--roll-delay, 0ms) + 1.2s) infinite;
   }
 
   .visual-shape::after {
@@ -373,6 +405,7 @@
   }
 
   .player-screen[data-paused="true"] .roll-actor,
+  .player-screen[data-paused="true"] .roll-spinner,
   .player-screen[data-paused="true"] .visual-shape::after {
     animation-play-state: paused;
   }
@@ -385,7 +418,6 @@
     0% {
       opacity: 0.75;
       translate: calc(-50% + var(--roll-from-x)) calc(-50% + var(--roll-from-y));
-      rotate: 0deg;
       scale: 0.72;
     }
     62% {
@@ -395,39 +427,51 @@
     100% {
       opacity: 1;
       translate: calc(-50% + var(--roll-settle-x)) calc(-50% + var(--roll-settle-y));
-      rotate: var(--roll-spin);
       scale: 1;
     }
   }
 
-  @keyframes shape-tumble {
+  @keyframes shape-spin-in {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(var(--roll-spin));
+    }
+  }
+
+  @keyframes shape-tumble-move {
     0% {
       translate: calc(-50% + var(--roll-settle-x)) calc(-50% + var(--roll-settle-y));
-      rotate: var(--roll-spin);
       scale: 1;
     }
     25% {
-      translate: calc(-50% + var(--roll-settle-x) + 10%)
-        calc(-50% + var(--roll-settle-y) - 8%);
-      rotate: calc(var(--roll-spin) + 90deg);
-      scale: 1.06;
+      translate: calc(-50% + var(--roll-settle-x) + 12cqw)
+        calc(-50% + var(--roll-settle-y) - 10cqh);
+      scale: 1.08;
     }
     50% {
-      translate: calc(-50% + var(--roll-settle-x) - 8%)
-        calc(-50% + var(--roll-settle-y) + 10%);
-      rotate: calc(var(--roll-spin) + 180deg);
-      scale: 0.94;
+      translate: calc(-50% + var(--roll-settle-x) - 10cqw)
+        calc(-50% + var(--roll-settle-y) + 12cqh);
+      scale: 0.92;
     }
     75% {
-      translate: calc(-50% + var(--roll-settle-x) + 9%)
-        calc(-50% + var(--roll-settle-y) + 5%);
-      rotate: calc(var(--roll-spin) + 270deg);
-      scale: 1.05;
+      translate: calc(-50% + var(--roll-settle-x) + 11cqw)
+        calc(-50% + var(--roll-settle-y) + 6cqh);
+      scale: 1.06;
     }
     100% {
       translate: calc(-50% + var(--roll-settle-x)) calc(-50% + var(--roll-settle-y));
-      rotate: calc(var(--roll-spin) + 360deg);
       scale: 1;
+    }
+  }
+
+  @keyframes shape-tumble-spin {
+    from {
+      transform: rotate(var(--roll-spin));
+    }
+    to {
+      transform: rotate(calc(var(--roll-spin) + 360deg));
     }
   }
 
