@@ -10,5 +10,12 @@
 mise trust
 mise install
 bun install --frozen-lockfile
+apm install
 bun run dev
+```
+
+## Agent Skills（APM）
+
+```sh
+apm update --yes
 ```
