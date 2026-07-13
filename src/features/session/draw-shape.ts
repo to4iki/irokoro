@@ -93,9 +93,6 @@ export function paintRollFrame(
     ctx.globalAlpha = pose.opacity;
     ctx.translate(cx, cy);
     ctx.rotate(pose.rotationRad);
-    ctx.shadowColor = "rgb(0 0 0 / 28%)";
-    ctx.shadowBlur = size * 0.08;
-    ctx.shadowOffsetY = size * 0.06;
     drawShapePath(ctx, shapeId, size);
     ctx.fillStyle = shapeColor;
     ctx.fill();

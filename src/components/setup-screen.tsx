@@ -1,9 +1,11 @@
 import { MOMIJIBA_SITE_URL } from "../content/music-credits";
 import { PACK_CHOICES, type PackId } from "../content/packs";
+import { SCREEN_HEADING_ID } from "../features/session/screen-a11y";
 import type {
   DurationSeconds,
   SessionPreferences,
 } from "../features/session/session-reducer";
+import { useFocusScreenHeadingOnMount } from "../features/session/use-focus-screen-heading-on-mount";
 
 type SetupScreenProps = {
   preferences: SessionPreferences;
@@ -11,6 +13,9 @@ type SetupScreenProps = {
   onDurationChange: (duration: DurationSeconds) => void;
   onSoundChange: (enabled: boolean) => void;
   onStart: () => void;
+  moveFocus?: boolean;
+  /** Prefetch player/finish chunks (vercel bundle-preload). */
+  onStartIntent?: () => void;
 };
 
 const DURATIONS = [
@@ -28,7 +33,11 @@ export function SetupScreen({
   onDurationChange,
   onSoundChange,
   onStart,
+  moveFocus = false,
+  onStartIntent,
 }: SetupScreenProps) {
+  useFocusScreenHeadingOnMount(moveFocus);
+
   return (
     <main className="relative isolate grid min-h-dvh place-items-center overflow-hidden bg-[radial-gradient(circle_at_8%_7%,rgb(244_201_75_/_34%)_0_8%,transparent_24%),radial-gradient(circle_at_94%_82%,rgb(90_191_157_/_24%)_0_10%,transparent_27%),linear-gradient(145deg,#fff9ed_0%,#f8f4e8_100%)] p-[max(16px,env(safe-area-inset-top,0px))_max(16px,env(safe-area-inset-right,0px))_max(16px,env(safe-area-inset-bottom,0px))_max(16px,env(safe-area-inset-left,0px))] max-[430px]:place-items-stretch max-[430px]:content-center max-[700px]:place-items-start max-[700px]:justify-center">
       <span className="setup-orb setup-orb--circle" aria-hidden="true" />
@@ -36,7 +45,7 @@ export function SetupScreen({
 
       <section
         className="w-full max-w-[500px] rounded-[clamp(24px,6vw,36px)] border border-white/75 bg-paper p-[clamp(18px,4vw,30px)] shadow-soft backdrop-blur-[20px] max-[430px]:max-w-none max-[430px]:rounded-[28px] max-[430px]:px-[18px] max-[430px]:py-5 max-[360px]:rounded-[25px] max-[360px]:p-[17px]"
-        aria-labelledby="app-title"
+        aria-labelledby={SCREEN_HEADING_ID}
       >
         <header className="flex items-center gap-3.5 max-[430px]:gap-3">
           <div
@@ -52,8 +61,9 @@ export function SetupScreen({
               親子で 1〜3分
             </p>
             <h1
-              id="app-title"
+              id={SCREEN_HEADING_ID}
               className="text-[clamp(2.25rem,9vw,3.35rem)] leading-none font-black tracking-[0.06em] text-ink max-[430px]:text-[clamp(2.1rem,11vw,2.6rem)] max-[360px]:text-[2.1rem]"
+              tabIndex={-1}
             >
               いろころ
             </h1>
@@ -162,6 +172,8 @@ export function SetupScreen({
 
           <button
             className="flex min-h-[54px] w-full items-center justify-center gap-3 rounded-2xl bg-coral font-black tracking-[0.04em] text-white shadow-[0_9px_20px_rgb(182_73_44_/_24%)] transition-[translate,box-shadow,background-color] duration-150 hover:translate-y-[-1px] hover:bg-[#db5f40] focus-visible:translate-y-[-1px] focus-visible:bg-[#db5f40] max-[430px]:min-h-[52px]"
+            onFocus={onStartIntent}
+            onPointerEnter={onStartIntent}
             type="submit"
           >
             <span>はじめる</span>

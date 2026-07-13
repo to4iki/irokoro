@@ -38,12 +38,22 @@ describe("App", () => {
     document.dispatchEvent(new Event("visibilitychange"));
   }
 
-  beforeEach(() => {
+  async function flushLazyScreens() {
+    await act(async () => {
+      await Promise.resolve();
+    });
+  }
+
+  beforeEach(async () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-11T08:00:00Z"));
     vi.mocked(createBackgroundMusic).mockReturnValue(music);
     setDocumentVisibility("visible");
+    document.title = "いろころ｜親子で色あそび";
+    // Resolve lazy screen chunks before interactions (fake timers + Suspense).
+    await import("./components/player-screen");
+    await import("./components/finish-screen");
   });
 
   afterEach(() => {
@@ -51,7 +61,7 @@ describe("App", () => {
     vi.useRealTimers();
   });
 
-  it("starts from safe defaults without unlocking audio", () => {
+  it("starts from safe defaults without unlocking audio", async () => {
     render(<App sequence={TEST_SEQUENCE} />);
 
     expect(screen.getByRole("radio", { name: "いろ" })).toBeChecked();
@@ -59,29 +69,32 @@ describe("App", () => {
     expect(screen.getByRole("checkbox", { name: "音をつける" })).not.toBeChecked();
 
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
+    await flushLazyScreens();
 
     expect(screen.getByRole("main", { name: "いろの再生画面" })).toBeVisible();
     expect(createBackgroundMusic).not.toHaveBeenCalled();
   });
 
-  it("keeps the session usable when BGM cannot be created", () => {
+  it("keeps the session usable when BGM cannot be created", async () => {
     vi.mocked(createBackgroundMusic).mockReturnValue(null);
     render(<App sequence={TEST_SEQUENCE} />);
 
     fireEvent.click(screen.getByRole("checkbox", { name: "音をつける" }));
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
+    await flushLazyScreens();
 
     expect(screen.getByRole("main", { name: "いろの再生画面" })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "一時停止" }));
     expect(screen.getByRole("heading", { name: "ひとやすみ" })).toBeVisible();
   });
 
-  it("runs one BGM session across pause, tab hide, scene change, and stop", () => {
+  it("runs one BGM session across pause, tab hide, scene change, and stop", async () => {
     render(<App sequence={TEST_SEQUENCE} />);
 
     fireEvent.click(screen.getByRole("radio", { name: "3分" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "音をつける" }));
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
+    await flushLazyScreens();
 
     expect(screen.getByRole("main", { name: "いろの再生画面" })).toBeVisible();
     expect(createBackgroundMusic).toHaveBeenCalledOnce();
@@ -100,14 +113,16 @@ describe("App", () => {
     expect(createBackgroundMusic).toHaveBeenCalledOnce();
 
     fireEvent.click(screen.getByRole("button", { name: "おしまい" }));
+    await flushLazyScreens();
     expect(music.dispose).toHaveBeenCalled();
     expect(screen.getByRole("heading", { name: "おしまい" })).toBeVisible();
   });
 
-  it("does not restart BGM when a paused session is foregrounded", () => {
+  it("does not restart BGM when a paused session is foregrounded", async () => {
     render(<App sequence={TEST_SEQUENCE} />);
     fireEvent.click(screen.getByRole("checkbox", { name: "音をつける" }));
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
+    await flushLazyScreens();
     fireEvent.click(screen.getByRole("button", { name: "一時停止" }));
     music.play.mockClear();
 
@@ -120,10 +135,11 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "ひとやすみ" })).toBeVisible();
   });
 
-  it("freezes while paused, finishes without auto-repeat, and resets to safe defaults", () => {
+  it("freezes while paused, finishes without auto-repeat, and resets to safe defaults", async () => {
     render(<App sequence={TEST_SEQUENCE} />);
     fireEvent.click(screen.getByRole("checkbox", { name: "音をつける" }));
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
+    await flushLazyScreens();
 
     act(() => vi.advanceTimersByTime(5_000));
     fireEvent.click(screen.getByRole("button", { name: "一時停止" }));
@@ -138,6 +154,7 @@ describe("App", () => {
     expect(screen.queryByRole("heading", { name: "おしまい" })).not.toBeInTheDocument();
 
     act(() => vi.advanceTimersByTime(1));
+    await flushLazyScreens();
     expect(screen.getByRole("heading", { name: "おしまい" })).toBeVisible();
     expect(music.dispose).toHaveBeenCalled();
 
@@ -146,5 +163,37 @@ describe("App", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "はじめの画面へ" }));
     expect(screen.getByRole("checkbox", { name: "音をつける" })).not.toBeChecked();
+  });
+
+  it("updates the document title and moves focus across major screen hops only", async () => {
+    render(<App sequence={TEST_SEQUENCE} />);
+
+    expect(document.title).toBe("いろころ｜親子で色あそび");
+    expect(screen.getByRole("heading", { name: "いろころ" })).not.toHaveFocus();
+
+    fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
+    await flushLazyScreens();
+    const playerHeading = screen.getByRole("heading", {
+      name: "いろを みつけよう",
+    });
+    expect(document.title).toBe("再生中｜いろころ");
+    expect(playerHeading).toHaveFocus();
+
+    fireEvent.click(screen.getByRole("button", { name: "一時停止" }));
+    expect(document.title).toBe("一時停止｜いろころ");
+    expect(screen.getByRole("heading", { name: "ひとやすみ" })).toBeVisible();
+    // Pause stays on the same PlayerScreen mount, so focus is not re-routed.
+    expect(playerHeading).toHaveFocus();
+
+    fireEvent.click(screen.getByRole("button", { name: "おしまい" }));
+    await flushLazyScreens();
+    const finishHeading = screen.getByRole("heading", { name: "おしまい" });
+    expect(document.title).toBe("おしまい｜いろころ");
+    expect(finishHeading).toHaveFocus();
+
+    fireEvent.click(screen.getByRole("button", { name: "はじめの画面へ" }));
+    const setupHeading = screen.getByRole("heading", { name: "いろころ" });
+    expect(document.title).toBe("いろころ｜親子で色あそび");
+    expect(setupHeading).toHaveFocus();
   });
 });

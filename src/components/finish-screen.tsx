@@ -1,13 +1,18 @@
+import { SCREEN_HEADING_ID } from "../features/session/screen-a11y";
+import { useFocusScreenHeadingOnMount } from "../features/session/use-focus-screen-heading-on-mount";
+
 type FinishScreenProps = {
   onReset: () => void;
 };
 
 export function FinishScreen({ onReset }: FinishScreenProps) {
+  useFocusScreenHeadingOnMount();
+
   return (
     <main className="relative isolate grid min-h-dvh place-items-center overflow-hidden bg-[radial-gradient(circle_at_50%_25%,rgb(255_222_121_/_64%),transparent_28%),linear-gradient(160deg,#dff2eb_0%,#fff7e5_64%,#f8ddca_100%)] p-[max(16px,env(safe-area-inset-top,0px))_max(16px,env(safe-area-inset-right,0px))_max(16px,env(safe-area-inset-bottom,0px))_max(16px,env(safe-area-inset-left,0px))] max-[430px]:place-items-stretch max-[430px]:content-center">
       <section
         className="w-full max-w-[500px] rounded-[clamp(24px,6vw,36px)] border border-white/75 bg-paper p-[clamp(18px,4vw,30px)] text-center shadow-soft backdrop-blur-[20px] max-[430px]:max-w-none max-[430px]:rounded-[28px] max-[430px]:px-[18px] max-[430px]:py-5"
-        aria-labelledby="finish-title"
+        aria-labelledby={SCREEN_HEADING_ID}
       >
         <div className="finish-illustration" aria-hidden="true">
           <span className="finish-sun" />
@@ -18,8 +23,9 @@ export function FinishScreen({ onReset }: FinishScreenProps) {
           たのしかったね
         </p>
         <h1
-          id="finish-title"
+          id={SCREEN_HEADING_ID}
           className="text-[clamp(2.25rem,9vw,3.35rem)] leading-none font-black tracking-[0.06em] text-ink max-[430px]:text-[clamp(2.1rem,11vw,2.6rem)]"
+          tabIndex={-1}
         >
           おしまい
         </h1>
