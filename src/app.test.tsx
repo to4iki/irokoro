@@ -1,11 +1,11 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./app";
-import { createChime } from "./audio/chime";
+import { createBackgroundMusic } from "./audio/background-music";
 import type { Scene } from "./features/session/sequence";
 
-vi.mock("./audio/chime", () => ({
-  createChime: vi.fn(),
+vi.mock("./audio/background-music", () => ({
+  createBackgroundMusic: vi.fn(),
 }));
 
 const TEST_SEQUENCE: Scene[] = [
@@ -24,18 +24,30 @@ const TEST_SEQUENCE: Scene[] = [
 ];
 
 describe("App", () => {
-  const chime = {
+  const music = {
     play: vi.fn(),
+    pause: vi.fn(),
     dispose: vi.fn(),
   };
 
+  function setDocumentVisibility(state: DocumentVisibilityState) {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      get: () => state,
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  }
+
   beforeEach(() => {
+    vi.clearAllMocks();
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-11T08:00:00Z"));
-    vi.mocked(createChime).mockReturnValue(chime);
+    vi.mocked(createBackgroundMusic).mockReturnValue(music);
+    setDocumentVisibility("visible");
   });
 
   afterEach(() => {
+    setDocumentVisibility("visible");
     vi.useRealTimers();
   });
 
@@ -49,10 +61,22 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
 
     expect(screen.getByRole("main", { name: "いろの再生画面" })).toBeVisible();
-    expect(createChime).not.toHaveBeenCalled();
+    expect(createBackgroundMusic).not.toHaveBeenCalled();
   });
 
-  it("applies choices, plays korokoro on each scene enter when sound is on, and disposes on stop", () => {
+  it("keeps the session usable when BGM cannot be created", () => {
+    vi.mocked(createBackgroundMusic).mockReturnValue(null);
+    render(<App sequence={TEST_SEQUENCE} />);
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "音をつける" }));
+    fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
+
+    expect(screen.getByRole("main", { name: "いろの再生画面" })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "一時停止" }));
+    expect(screen.getByRole("heading", { name: "ひとやすみ" })).toBeVisible();
+  });
+
+  it("runs one BGM session across pause, tab hide, scene change, and stop", () => {
     render(<App sequence={TEST_SEQUENCE} />);
 
     fireEvent.click(screen.getByRole("radio", { name: "3分" }));
@@ -60,24 +84,45 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
 
     expect(screen.getByRole("main", { name: "いろの再生画面" })).toBeVisible();
-    expect(createChime).toHaveBeenCalledOnce();
-    expect(chime.play).toHaveBeenCalledOnce();
+    expect(createBackgroundMusic).toHaveBeenCalledOnce();
 
     act(() => vi.advanceTimersByTime(2_000));
     fireEvent.click(screen.getByRole("button", { name: "一時停止" }));
     fireEvent.click(screen.getByRole("button", { name: "つづける" }));
-    expect(chime.play).toHaveBeenCalledOnce();
+
+    act(() => {
+      setDocumentVisibility("hidden");
+      setDocumentVisibility("visible");
+    });
 
     act(() => vi.advanceTimersByTime(3_000));
-    expect(chime.play).toHaveBeenCalledTimes(2);
+    // Scene advanced, but the same controller must keep running.
+    expect(createBackgroundMusic).toHaveBeenCalledOnce();
 
     fireEvent.click(screen.getByRole("button", { name: "おしまい" }));
-    expect(chime.dispose).toHaveBeenCalledOnce();
+    expect(music.dispose).toHaveBeenCalled();
     expect(screen.getByRole("heading", { name: "おしまい" })).toBeVisible();
+  });
+
+  it("does not restart BGM when a paused session is foregrounded", () => {
+    render(<App sequence={TEST_SEQUENCE} />);
+    fireEvent.click(screen.getByRole("checkbox", { name: "音をつける" }));
+    fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
+    fireEvent.click(screen.getByRole("button", { name: "一時停止" }));
+    music.play.mockClear();
+
+    act(() => {
+      setDocumentVisibility("hidden");
+      setDocumentVisibility("visible");
+    });
+
+    expect(music.play).not.toHaveBeenCalled();
+    expect(screen.getByRole("heading", { name: "ひとやすみ" })).toBeVisible();
   });
 
   it("freezes while paused, finishes without auto-repeat, and resets to safe defaults", () => {
     render(<App sequence={TEST_SEQUENCE} />);
+    fireEvent.click(screen.getByRole("checkbox", { name: "音をつける" }));
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
 
     act(() => vi.advanceTimersByTime(5_000));
@@ -94,6 +139,7 @@ describe("App", () => {
 
     act(() => vi.advanceTimersByTime(1));
     expect(screen.getByRole("heading", { name: "おしまい" })).toBeVisible();
+    expect(music.dispose).toHaveBeenCalled();
 
     act(() => vi.advanceTimersByTime(60_000));
     expect(screen.getByRole("heading", { name: "おしまい" })).toBeVisible();

@@ -77,9 +77,9 @@ export function PlayerScreen({
 
       <section
         aria-label={`${color.label}の${shape.label}`}
-        className="scene relative grid min-h-0 place-content-center place-items-center overflow-hidden"
+        className="scene relative min-h-0 overflow-hidden"
       >
-        <div className="roll-stage relative aspect-square w-[min(88vw,68dvh,440px)] max-[430px]:w-[min(90vw,58dvh,360px)] max-[700px]:w-[min(70vw,52dvh,340px)]">
+        <div className="roll-stage absolute inset-0">
           <RollCanvas
             key={scene.id}
             paused={state.status === "paused"}

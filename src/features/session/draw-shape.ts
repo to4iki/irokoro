@@ -81,11 +81,12 @@ export function paintRollFrame(
   ctx.clearRect(0, 0, width, height);
 
   const minSide = Math.min(width, height);
-  const baseSize = minSide * 0.58;
+  const baseSize = minSide * 0.48;
 
   for (const pose of poses) {
-    const cx = width * 0.5 + pose.x * minSide * 0.5;
-    const cy = height * 0.5 + pose.y * minSide * 0.5;
+    // Pose x/y are normalized to the full scene stage (±1 ≈ edge).
+    const cx = width * 0.5 + pose.x * (width * 0.5);
+    const cy = height * 0.5 + pose.y * (height * 0.5);
     const size = baseSize * pose.scale;
 
     ctx.save();

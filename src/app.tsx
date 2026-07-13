@@ -1,5 +1,8 @@
 import { useEffect, useReducer, useRef } from "react";
-import { type ChimeController, createChime } from "./audio/chime";
+import {
+  type BackgroundMusicController,
+  createBackgroundMusic,
+} from "./audio/background-music";
 import { FinishScreen } from "./components/finish-screen";
 import { PlayerScreen } from "./components/player-screen";
 import { SetupScreen } from "./components/setup-screen";
@@ -14,7 +17,7 @@ type AppProps = {
 
 export default function App({ sequence = DEFAULT_SEQUENCE }: AppProps) {
   const [state, dispatch] = useReducer(sessionReducer, undefined, createInitialState);
-  const audioRef = useRef<ChimeController | null>(null);
+  const audioRef = useRef<BackgroundMusicController | null>(null);
   const sceneRemainRef = useRef<{ id: string; remainingMs: number } | null>(null);
 
   const sceneIndex = state.status === "setup" ? 0 : state.sceneIndex;
@@ -47,7 +50,6 @@ export default function App({ sequence = DEFAULT_SEQUENCE }: AppProps) {
       sceneRemainRef.current === null || sceneRemainRef.current.id !== scene.id;
     if (isNewScene) {
       sceneRemainRef.current = { id: scene.id, remainingMs: scene.durationMs };
-      audioRef.current?.play();
     }
 
     const active = sceneRemainRef.current;
@@ -78,13 +80,32 @@ export default function App({ sequence = DEFAULT_SEQUENCE }: AppProps) {
       const audio = audioRef.current;
       audioRef.current = null;
       sceneRemainRef.current = null;
-      void audio?.dispose();
+      audio?.dispose();
     }
+  }, [status]);
+
+  useEffect(() => {
+    if (status !== "playing" && status !== "paused") {
+      return;
+    }
+
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        audioRef.current?.pause();
+        return;
+      }
+      if (status === "playing") {
+        audioRef.current?.play();
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
   }, [status]);
 
   useEffect(
     () => () => {
-      void audioRef.current?.dispose();
+      audioRef.current?.dispose();
     },
     [],
   );
@@ -100,7 +121,9 @@ export default function App({ sequence = DEFAULT_SEQUENCE }: AppProps) {
         onStart={() => {
           sceneRemainRef.current = null;
           if (state.preferences.soundEnabled) {
-            audioRef.current = createChime();
+            const music = createBackgroundMusic();
+            audioRef.current = music;
+            music?.play();
           }
           dispatch({ type: "START", now: Date.now() });
         }}
@@ -115,8 +138,14 @@ export default function App({ sequence = DEFAULT_SEQUENCE }: AppProps) {
 
   return (
     <PlayerScreen
-      onPause={() => dispatch({ type: "PAUSE", now: Date.now() })}
-      onResume={() => dispatch({ type: "RESUME", now: Date.now() })}
+      onPause={() => {
+        audioRef.current?.pause();
+        dispatch({ type: "PAUSE", now: Date.now() });
+      }}
+      onResume={() => {
+        audioRef.current?.play();
+        dispatch({ type: "RESUME", now: Date.now() });
+      }}
       onStop={() => dispatch({ type: "STOP" })}
       scene={scene}
       state={state}
