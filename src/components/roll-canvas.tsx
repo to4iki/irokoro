@@ -8,6 +8,12 @@ import {
   type RotationStyle,
   sampleActorPose,
 } from "../features/session/roll";
+import {
+  canStartPon,
+  cssPointToPose,
+  pickPonActorIndex,
+  ponScaleFactor,
+} from "../features/session/touch-pon";
 
 type ShapeCanvasProps = {
   kind: "shape";
@@ -26,6 +32,11 @@ type AnimalCanvasProps = {
 
 type RollCanvasProps = ShapeCanvasProps | AnimalCanvasProps;
 
+type ActivePon = {
+  actorIndex: number;
+  startElapsedMs: number;
+};
+
 function readDocumentVisible(): boolean {
   return typeof document === "undefined" || document.visibilityState !== "hidden";
 }
@@ -34,6 +45,9 @@ export function RollCanvas(props: RollCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const elapsedRef = useRef(0);
   const sceneIdRef = useRef(props.sceneId);
+  const pausedRef = useRef(props.paused);
+  const ponRef = useRef<ActivePon | null>(null);
+  const lastPonStartMsRef = useRef<number | null>(null);
   const [documentVisible, setDocumentVisible] = useState(readDocumentVisible);
 
   const sceneId = props.sceneId;
@@ -45,9 +59,12 @@ export function RollCanvas(props: RollCanvasProps) {
   const rotationStyle: RotationStyle = kind === "animal" ? "tilt" : "spin";
   const animalImage = animalSrc ? getAnimalImage(animalSrc) : null;
 
+  pausedRef.current = paused;
+
   if (sceneIdRef.current !== sceneId) {
     sceneIdRef.current = sceneId;
     elapsedRef.current = 0;
+    ponRef.current = null;
   }
 
   useEffect(() => {
@@ -88,6 +105,19 @@ export function RollCanvas(props: RollCanvasProps) {
       }
     };
 
+    const posesAt = (elapsedMs: number) =>
+      cast.map((actor, index) => {
+        const pose = sampleActorPose(actor, elapsedMs, rotationStyle);
+        const pon = ponRef.current;
+        if (!pon || pon.actorIndex !== index) {
+          return pose;
+        }
+        return {
+          ...pose,
+          scale: pose.scale * ponScaleFactor(elapsedMs - pon.startElapsedMs),
+        };
+      });
+
     const paintAt = (elapsedMs: number) => {
       syncBuffer();
       paintRollFrame(context, {
@@ -97,9 +127,44 @@ export function RollCanvas(props: RollCanvasProps) {
           kind === "shape" && shapeId && shapeColor
             ? { kind: "shape", shapeId, shapeColor }
             : { kind: "animal", image: animalImage },
-        poses: cast.map((actor) => sampleActorPose(actor, elapsedMs, rotationStyle)),
+        poses: posesAt(elapsedMs),
       });
     };
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (pausedRef.current || !event.isPrimary) {
+        return;
+      }
+
+      const nowMs = performance.now();
+      const active = ponRef.current;
+      if (
+        !canStartPon({
+          nowMs,
+          lastStartMs: lastPonStartMsRef.current,
+          reactionElapsedMs:
+            active === null ? null : elapsedRef.current - active.startElapsedMs,
+        })
+      ) {
+        return;
+      }
+
+      const rect = canvas.getBoundingClientRect();
+      const tap = cssPointToPose(
+        event.clientX - rect.left,
+        event.clientY - rect.top,
+        rect.width,
+        rect.height,
+      );
+
+      lastPonStartMsRef.current = nowMs;
+      ponRef.current = {
+        actorIndex: pickPonActorIndex(posesAt(elapsedRef.current), tap.x, tap.y),
+        startElapsedMs: elapsedRef.current,
+      };
+    };
+
+    canvas.addEventListener("pointerdown", onPointerDown);
 
     const onAnimalLoad = () => paintAt(elapsedRef.current);
     animalImage?.addEventListener("load", onAnimalLoad);
@@ -126,6 +191,7 @@ export function RollCanvas(props: RollCanvasProps) {
     if (paused || !documentVisible) {
       paintAt(elapsedRef.current);
       return () => {
+        canvas.removeEventListener("pointerdown", onPointerDown);
         animalImage?.removeEventListener("load", onAnimalLoad);
         resizeObserver.disconnect();
       };
@@ -143,6 +209,7 @@ export function RollCanvas(props: RollCanvasProps) {
     frameId = window.requestAnimationFrame(tick);
     return () => {
       window.cancelAnimationFrame(frameId);
+      canvas.removeEventListener("pointerdown", onPointerDown);
       animalImage?.removeEventListener("load", onAnimalLoad);
       resizeObserver.disconnect();
     };
