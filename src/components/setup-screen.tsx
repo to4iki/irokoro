@@ -1,3 +1,4 @@
+import { MOMIJIBA_SITE_URL } from "../content/music-credits";
 import { PACK_CHOICES, type PackId } from "../content/packs";
 import type {
   DurationSeconds,
@@ -139,7 +140,7 @@ export function SetupScreen({
             <div>
               <p className="text-[0.82rem] font-extrabold text-ink">音をつける</p>
               <p className="mt-0.5 text-[0.64rem] leading-[1.4] text-[#576b79]">
-                ころころ転がるときの合成音です。端末音量もご確認ください。
+                再生中にやさしいBGMを流します。端末音量もご確認ください。
               </p>
             </div>
             <label className="relative shrink-0 cursor-pointer">
@@ -168,7 +169,19 @@ export function SetupScreen({
           </button>
         </form>
 
-        <p className="mt-2.5 text-center text-[0.62rem] leading-[1.5] text-[#5c6f7b] max-[360px]:mt-1.5">
+        <p className="mt-3 text-center text-[0.72rem] leading-[1.55] text-[#40596a]">
+          BGM:{" "}
+          <a
+            className="font-extrabold text-ink underline decoration-[#8aa0ae] underline-offset-2 transition-colors hover:text-coral focus-visible:text-coral"
+            href={MOMIJIBA_SITE_URL}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            もみじばミュージック
+          </a>
+        </p>
+
+        <p className="mt-2 text-center text-[0.62rem] leading-[1.5] text-[#5c6f7b] max-[360px]:mt-1.5">
           広告・Cookie・アクセス解析・個人情報の収集はありません。
         </p>
       </section>

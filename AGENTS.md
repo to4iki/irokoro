@@ -16,7 +16,7 @@ JavaScriptランタイムとツールキットには Bun、デプロイ先には
 - Cloudflare 公式 Vite プラグイン: Workers Static Assets
 - Vitest + React Testing Library + fast-check: 単体・コンポーネント・プロパティベーステスト
 - Biome: リンター、フォーマッター、import 整理
-- Web Audio API: 外部音源を使わないチャイム合成
+- HTMLMediaElement: セッション再生中のループ BGM（`src/assets/sound` の ESM import）
 
 ## 開発コマンド
 
