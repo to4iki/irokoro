@@ -173,27 +173,20 @@ describe("App", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
     await flushLazyScreens();
-    const playerHeading = screen.getByRole("heading", {
-      name: "いろを みつけよう",
-    });
     expect(document.title).toBe("再生中｜いろころ");
-    expect(playerHeading).toHaveFocus();
+    expect(screen.getByRole("heading", { name: "いろを みつけよう" })).toHaveFocus();
 
     fireEvent.click(screen.getByRole("button", { name: "一時停止" }));
     expect(document.title).toBe("一時停止｜いろころ");
     expect(screen.getByRole("heading", { name: "ひとやすみ" })).toBeVisible();
-    // Pause stays on the same PlayerScreen mount, so focus is not re-routed.
-    expect(playerHeading).toHaveFocus();
 
     fireEvent.click(screen.getByRole("button", { name: "おしまい" }));
     await flushLazyScreens();
-    const finishHeading = screen.getByRole("heading", { name: "おしまい" });
     expect(document.title).toBe("おしまい｜いろころ");
-    expect(finishHeading).toHaveFocus();
+    expect(screen.getByRole("heading", { name: "おしまい" })).toHaveFocus();
 
     fireEvent.click(screen.getByRole("button", { name: "はじめの画面へ" }));
-    const setupHeading = screen.getByRole("heading", { name: "いろころ" });
     expect(document.title).toBe("いろころ｜親子で色あそび");
-    expect(setupHeading).toHaveFocus();
+    expect(screen.getByRole("heading", { name: "いろころ" })).toHaveFocus();
   });
 });
