@@ -29,7 +29,7 @@ JavaScriptランタイムとツールキットには Bun、デプロイ先には
 
 実装・レビュー・リファクタリングでは、関連ドキュメントを読んでから進める。
 
-- [product-spec.md](./docs/product-spec.md) — 安全制約・セッション要件
+- [product-spec](./docs/product-spec/) — 安全制約・セッション要件・機能仕様
 - [architecture.md](./docs/architecture.md) — 画面遷移・ディレクトリ・責務
 - [code-style.md](./docs/code-style.md) — 命名・ファイル構成
 - [testing.md](./docs/testing.md) — テストの選定方針

@@ -31,4 +31,12 @@
 ## 非スコープ（MVP）
 
 アカウント、同期、コンテンツ CMS、自動リピート、広告・課金。
-音源の二次配布・販売や、音楽聴取を主目的とした配信は行わない（利用条件は [music-credits.md](./music-credits.md)）。
+音源の二次配布・販売や、音楽聴取を主目的とした配信は行わない（利用条件は [music-credits.md](../music-credits.md)）。
+
+## 機能仕様（未実装含む）
+
+| 機能 | 仕様 |
+|------|------|
+| どうぶつパック | [feature-animals-pack.md](./feature-animals-pack.md) |
+| タッチ反応「ぽん」 | [feature-touch-pon.md](./feature-touch-pon.md) |
+| かおのゆるい変形 | [feature-face-expressions.md](./feature-face-expressions.md) |
