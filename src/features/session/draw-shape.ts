@@ -1,4 +1,5 @@
 import type { ShapeId } from "../../content/packs";
+import { type FaceExpression, faceInkColor } from "./face";
 import type { ActorPose } from "./roll";
 
 function drawRoundedRect(
@@ -83,8 +84,60 @@ function drawAnimalImage(
   ctx.drawImage(image, -width / 2, -height / 2, width, height);
 }
 
+/** Triangle apex is “head”; nudge the face slightly upward. */
+function faceOriginY(shapeId: ShapeId, size: number): number {
+  return shapeId === "triangle" ? -size * 0.06 : 0;
+}
+
+function drawFace(
+  ctx: CanvasRenderingContext2D,
+  shapeId: ShapeId,
+  size: number,
+  face: FaceExpression,
+  ink: string,
+) {
+  const originY = faceOriginY(shapeId, size);
+  const eyeR = size * face.eyeRadius;
+  const eyeX = size * face.eyeSpread;
+  const eyeY = originY + size * face.eyeY;
+  const mouthY = originY + size * face.mouthY;
+  const mouthW = size * face.mouthWidth;
+
+  ctx.fillStyle = ink;
+  ctx.beginPath();
+  ctx.ellipse(-eyeX, eyeY, eyeR, eyeR * 1.05, 0, 0, Math.PI * 2);
+  ctx.ellipse(eyeX, eyeY, eyeR, eyeR * 1.05, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  const smileAlpha = 1 - face.mouthOpen;
+  if (smileAlpha > 0.02) {
+    const radius = size * face.mouthCurve * 0.85 + mouthW * 0.35;
+    ctx.save();
+    ctx.globalAlpha *= smileAlpha;
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = Math.max(2, size * 0.028);
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.arc(0, mouthY - radius * 0.15, radius, Math.PI * 0.15, Math.PI * 0.85, false);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  if (face.mouthOpen > 0.02) {
+    const rx = mouthW * (0.45 + 0.25 * face.mouthOpen);
+    const ry = size * (0.035 + 0.055 * face.mouthOpen);
+    ctx.save();
+    ctx.globalAlpha *= face.mouthOpen;
+    ctx.fillStyle = ink;
+    ctx.beginPath();
+    ctx.ellipse(0, mouthY, rx, ry, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
 export type PaintSubject =
-  | { kind: "shape"; shapeId: ShapeId; shapeColor: string }
+  | { kind: "shape"; shapeId: ShapeId; shapeColor: string; face: FaceExpression }
   | { kind: "animal"; image: HTMLImageElement | null };
 
 export function paintRollFrame(
@@ -117,6 +170,13 @@ export function paintRollFrame(
       drawShapePath(ctx, subject.shapeId, size);
       ctx.fillStyle = subject.shapeColor;
       ctx.fill();
+      drawFace(
+        ctx,
+        subject.shapeId,
+        size,
+        subject.face,
+        faceInkColor(subject.shapeColor),
+      );
     } else if (subject.image) {
       drawAnimalImage(ctx, subject.image, size);
     }

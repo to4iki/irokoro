@@ -3,6 +3,7 @@ import { getAnimalImage } from "../content/animals";
 import type { ShapeId } from "../content/packs";
 import { resolveCanvasBufferSize } from "../features/session/canvas-buffer";
 import { paintRollFrame } from "../features/session/draw-shape";
+import { sampleFaceExpression } from "../features/session/face";
 import {
   createRollCast,
   type RotationStyle,
@@ -18,6 +19,7 @@ import {
 type ShapeCanvasProps = {
   kind: "shape";
   sceneId: string;
+  sceneDurationMs: number;
   shapeId: ShapeId;
   shapeColor: string;
   paused: boolean;
@@ -55,6 +57,7 @@ export function RollCanvas(props: RollCanvasProps) {
   const kind = props.kind;
   const shapeId = props.kind === "shape" ? props.shapeId : null;
   const shapeColor = props.kind === "shape" ? props.shapeColor : null;
+  const sceneDurationMs = props.kind === "shape" ? props.sceneDurationMs : null;
   const animalSrc = props.kind === "animal" ? props.imageSrc : null;
   const rotationStyle: RotationStyle = kind === "animal" ? "tilt" : "spin";
   const animalImage = animalSrc ? getAnimalImage(animalSrc) : null;
@@ -124,8 +127,13 @@ export function RollCanvas(props: RollCanvasProps) {
         width: canvas.width,
         height: canvas.height,
         subject:
-          kind === "shape" && shapeId && shapeColor
-            ? { kind: "shape", shapeId, shapeColor }
+          kind === "shape" && shapeId && shapeColor && sceneDurationMs !== null
+            ? {
+                kind: "shape",
+                shapeId,
+                shapeColor,
+                face: sampleFaceExpression(sceneId, elapsedMs, sceneDurationMs),
+              }
             : { kind: "animal", image: animalImage },
         poses: posesAt(elapsedMs),
       });
@@ -215,6 +223,7 @@ export function RollCanvas(props: RollCanvasProps) {
     };
   }, [
     sceneId,
+    sceneDurationMs,
     kind,
     shapeId,
     shapeColor,
