@@ -43,6 +43,10 @@ type Orbit = {
 
 export const ENTRY_DURATION_MS = 1_350;
 const SPIN_PER_DISTANCE = 2.85;
+/** Animals pack: gentle sway only (spec ±12°). */
+export const TILT_MAX_RAD = (12 * Math.PI) / 180;
+
+export type RotationStyle = "spin" | "tilt";
 
 /** Start just outside each edge of the full scene stage (pose units ±1 = edge). */
 const ENTRY_OFFSET: Record<RollDirection, Vec2> = {
@@ -191,7 +195,20 @@ function orbitPose(actor: RollActor, tumbleMs: number) {
   return { x, y, travel: tumbleMs * speed };
 }
 
-export function sampleActorPose(actor: RollActor, elapsedMs: number): ActorPose {
+function spinRotation(distance: number, sign: number): number {
+  return distance * SPIN_PER_DISTANCE * sign;
+}
+
+/** Slow sine tilt capped at ±TILT_MAX_RAD — no upside-down spins. */
+function tiltRotation(localMs: number, sign: number): number {
+  return Math.sin(localMs / 1_900) * TILT_MAX_RAD * sign;
+}
+
+export function sampleActorPose(
+  actor: RollActor,
+  elapsedMs: number,
+  rotationStyle: RotationStyle = "spin",
+): ActorPose {
   const local = Math.max(0, elapsedMs - actor.delayMs);
   const sign = spinSign(actor.direction);
 
@@ -207,7 +224,10 @@ export function sampleActorPose(actor: RollActor, elapsedMs: number): ActorPose 
     return {
       x,
       y,
-      rotationRad: distance * SPIN_PER_DISTANCE * sign,
+      rotationRad:
+        rotationStyle === "tilt"
+          ? tiltRotation(local, sign)
+          : spinRotation(distance, sign),
       scale: scalePulse * overshoot,
       opacity: lerp(0.75, 1, easeOutCubic(progress)),
     };
@@ -220,7 +240,10 @@ export function sampleActorPose(actor: RollActor, elapsedMs: number): ActorPose 
   return {
     x,
     y,
-    rotationRad: (entryDistance + travel) * SPIN_PER_DISTANCE * sign,
+    rotationRad:
+      rotationStyle === "tilt"
+        ? tiltRotation(local, sign)
+        : spinRotation(entryDistance + travel, sign),
     scale: actor.scale * (1 + Math.sin(tumbleMs / 1_800) * 0.03),
     opacity: 1,
   };

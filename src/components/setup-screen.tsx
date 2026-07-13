@@ -1,3 +1,4 @@
+import { IRASUTOYA_SITE_URL } from "../content/animal-credits";
 import { MOMIJIBA_SITE_URL } from "../content/music-credits";
 import { PACK_CHOICES, type PackId } from "../content/packs";
 import { SCREEN_HEADING_ID } from "../features/session/screen-a11y";
@@ -86,39 +87,26 @@ export function SetupScreen({
               あそび
             </legend>
             <div className="grid grid-cols-2 gap-2">
-              {PACK_CHOICES.map((pack) =>
-                pack.available ? (
-                  <label
-                    className={`${choiceBase} min-h-[61px] content-center rounded-[15px] px-3.5 py-2.5 max-[360px]:min-h-[54px] max-[360px]:px-2.5 max-[360px]:py-2`}
-                    key={pack.id}
-                  >
-                    <input
-                      aria-label={pack.shortLabel}
-                      checked={preferences.packId === pack.id}
-                      className="peer absolute size-px opacity-0"
-                      name="pack"
-                      onChange={() => onPackChange(pack.id)}
-                      type="radio"
-                      value={pack.id}
-                    />
-                    <span className="text-base font-black">{pack.shortLabel}</span>
-                    <span className="mt-px text-[0.68rem] font-semibold text-[#5a6d7a] peer-checked:text-[#dbe7ed]">
-                      {pack.detail}
-                    </span>
-                  </label>
-                ) : (
-                  <div
-                    aria-disabled="true"
-                    className="grid min-h-[61px] min-w-0 content-center rounded-[15px] border border-dashed border-line bg-white/40 px-3.5 py-2.5 text-[#8a9aaa] max-[360px]:min-h-[54px] max-[360px]:px-2.5 max-[360px]:py-2"
-                    key={pack.id}
-                  >
-                    <span className="text-base font-black">{pack.shortLabel}</span>
-                    <span className="mt-px text-[0.68rem] font-semibold">
-                      {pack.detail}
-                    </span>
-                  </div>
-                ),
-              )}
+              {PACK_CHOICES.map((pack) => (
+                <label
+                  className={`${choiceBase} min-h-[61px] content-center rounded-[15px] px-3.5 py-2.5 max-[360px]:min-h-[54px] max-[360px]:px-2.5 max-[360px]:py-2`}
+                  key={pack.id}
+                >
+                  <input
+                    aria-label={pack.shortLabel}
+                    checked={preferences.packId === pack.id}
+                    className="peer absolute size-px opacity-0"
+                    name="pack"
+                    onChange={() => onPackChange(pack.id)}
+                    type="radio"
+                    value={pack.id}
+                  />
+                  <span className="text-base font-black">{pack.shortLabel}</span>
+                  <span className="mt-px text-[0.68rem] font-semibold text-[#5a6d7a] peer-checked:text-[#dbe7ed]">
+                    {pack.detail}
+                  </span>
+                </label>
+              ))}
             </div>
           </fieldset>
 
@@ -190,6 +178,16 @@ export function SetupScreen({
             target="_blank"
           >
             もみじばミュージック
+          </a>
+          <br />
+          どうぶつイラスト:{" "}
+          <a
+            className="font-extrabold text-ink underline decoration-[#8aa0ae] underline-offset-2 transition-colors hover:text-coral focus-visible:text-coral"
+            href={IRASUTOYA_SITE_URL}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            いらすとや
           </a>
         </p>
 

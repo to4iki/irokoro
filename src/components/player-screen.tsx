@@ -1,4 +1,5 @@
 import { type CSSProperties, memo } from "react";
+import { getAnimal } from "../content/animals";
 import { CONTENT_PACKS, getColor, getShape } from "../content/packs";
 import { SCREEN_HEADING_ID } from "../features/session/screen-a11y";
 import type { Scene } from "../features/session/sequence";
@@ -24,7 +25,7 @@ type SceneStageProps = {
   scene: Scene;
   paused: boolean;
   colorLabel: string;
-  shapeLabel: string;
+  subjectLabel: string;
   shapeColor: string;
 };
 
@@ -38,22 +39,33 @@ const SceneStage = memo(function SceneStage({
   scene,
   paused,
   colorLabel,
-  shapeLabel,
+  subjectLabel,
   shapeColor,
 }: SceneStageProps) {
   return (
     <section
-      aria-label={`${colorLabel}の${shapeLabel}`}
+      aria-label={`${colorLabel}の${subjectLabel}`}
       className="scene relative min-h-0 overflow-hidden"
     >
       <div className="roll-stage absolute inset-0">
-        <RollCanvas
-          key={scene.id}
-          paused={paused}
-          sceneId={scene.id}
-          shapeColor={shapeColor}
-          shapeId={scene.shapeId}
-        />
+        {scene.packId === "animals" ? (
+          <RollCanvas
+            key={scene.id}
+            imageSrc={getAnimal(scene.animalId).src}
+            kind="animal"
+            paused={paused}
+            sceneId={scene.id}
+          />
+        ) : (
+          <RollCanvas
+            key={scene.id}
+            kind="shape"
+            paused={paused}
+            sceneId={scene.id}
+            shapeColor={shapeColor}
+            shapeId={scene.shapeId}
+          />
+        )}
       </div>
     </section>
   );
@@ -69,7 +81,10 @@ export function PlayerScreen({
   useFocusScreenHeadingOnMount();
 
   const color = getColor(scene.colorId);
-  const shape = getShape(scene.shapeId);
+  const subjectLabel =
+    scene.packId === "animals"
+      ? getAnimal(scene.animalId).label
+      : getShape(scene.shapeId).label;
   const pack = CONTENT_PACKS[state.preferences.packId];
   const style: SceneStyle = {
     "--scene-background": color.background,
@@ -121,7 +136,7 @@ export function PlayerScreen({
         paused={paused}
         scene={scene}
         shapeColor={color.foreground}
-        shapeLabel={shape.label}
+        subjectLabel={subjectLabel}
       />
 
       {paused ? (

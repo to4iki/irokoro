@@ -19,7 +19,7 @@
 |------|------|
 | 初期値 | pack=`colors`、duration=`60`、sound=`false` |
 | 時間選択肢 | 60 / 120 / 180 秒 |
-| あそび | いまは `colors` のみ。`animals` は枠のみ（未実装） |
+| あそび | `colors` と `animals`。初期 pack は `colors` |
 | シーン dwell | 6–8 秒。隣接シーンで色・形を連続させない |
 | 色 | Sassy 絵本のように原色多めの高コントラスト配色。組み合わせは複数。点滅や赤フラッシュは使わない |
 | 背景クロスフェード | 約 900ms |
@@ -35,8 +35,8 @@
 
 ## 機能仕様（未実装含む）
 
-| 機能 | 仕様 |
-|------|------|
-| どうぶつパック | [feature-animals-pack.md](./feature-animals-pack.md) |
-| タッチ反応「ぽん」 | [feature-touch-pon.md](./feature-touch-pon.md) |
-| かおのゆるい変形 | [feature-face-expressions.md](./feature-face-expressions.md) |
+| 機能 | 仕様 | 状態 |
+|------|------|------|
+| どうぶつパック | [feature-animals-pack.md](./feature-animals-pack.md) | 実装済み（16 点） |
+| タッチ反応「ぽん」 | [feature-touch-pon.md](./feature-touch-pon.md) | 未実装 |
+| かおのゆるい変形 | [feature-face-expressions.md](./feature-face-expressions.md) | 未実装 |

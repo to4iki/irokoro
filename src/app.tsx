@@ -23,13 +23,17 @@ function prefetchSessionScreens(): void {
   void import("./components/finish-screen");
 }
 
-const DEFAULT_SEQUENCE = createSceneSequence({ length: 64 });
+const DEFAULT_SEQUENCES = {
+  colors: createSceneSequence({ packId: "colors", length: 64 }),
+  animals: createSceneSequence({ packId: "animals", length: 64 }),
+} as const;
 
 type AppProps = {
+  /** Overrides the pack-selected sequence (tests). */
   sequence?: readonly Scene[];
 };
 
-export default function App({ sequence = DEFAULT_SEQUENCE }: AppProps) {
+export default function App({ sequence }: AppProps) {
   const [state, dispatch] = useReducer(sessionReducer, undefined, createInitialState);
   const audioRef = useRef<BackgroundMusicController | null>(null);
   const sceneRemainRef = useRef<{ id: string; remainingMs: number } | null>(null);
@@ -38,8 +42,9 @@ export default function App({ sequence = DEFAULT_SEQUENCE }: AppProps) {
 
   useSessionDocumentTitle(state.status);
 
+  const activeSequence = sequence ?? DEFAULT_SEQUENCES[state.preferences.packId];
   const sceneIndex = state.status === "setup" ? 0 : state.sceneIndex;
-  const scene = sequence[sceneIndex % sequence.length];
+  const scene = activeSequence[sceneIndex % activeSequence.length];
 
   if (!scene) {
     throw new RangeError("Unable to resolve the current scene.");
