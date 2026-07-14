@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { getAnimalImage } from "../content/animals";
 import type { ShapeId } from "../content/packs";
 import { resolveCanvasBufferSize } from "../features/session/canvas-buffer";
 import { paintRollFrame } from "../features/session/draw-shape";
@@ -29,50 +30,20 @@ function readDocumentVisible(): boolean {
   return typeof document === "undefined" || document.visibilityState !== "hidden";
 }
 
-function useAnimalImage(src: string | null): HTMLImageElement | null {
-  const [image, setImage] = useState<HTMLImageElement | null>(null);
-
-  useEffect(() => {
-    if (!src) {
-      setImage(null);
-      return;
-    }
-
-    const next = new Image();
-    let cancelled = false;
-    next.decoding = "async";
-    next.onload = () => {
-      if (!cancelled) {
-        setImage(next);
-      }
-    };
-    next.onerror = () => {
-      if (!cancelled) {
-        setImage(null);
-      }
-    };
-    next.src = src;
-    return () => {
-      cancelled = true;
-    };
-  }, [src]);
-
-  return image;
-}
-
 export function RollCanvas(props: RollCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const elapsedRef = useRef(0);
   const sceneIdRef = useRef(props.sceneId);
   const [documentVisible, setDocumentVisible] = useState(readDocumentVisible);
-  const animalImage = useAnimalImage(props.kind === "animal" ? props.imageSrc : null);
 
   const sceneId = props.sceneId;
   const paused = props.paused;
   const kind = props.kind;
   const shapeId = props.kind === "shape" ? props.shapeId : null;
   const shapeColor = props.kind === "shape" ? props.shapeColor : null;
+  const animalSrc = props.kind === "animal" ? props.imageSrc : null;
   const rotationStyle: RotationStyle = kind === "animal" ? "tilt" : "spin";
+  const animalImage = animalSrc ? getAnimalImage(animalSrc) : null;
 
   if (sceneIdRef.current !== sceneId) {
     sceneIdRef.current = sceneId;
@@ -130,6 +101,9 @@ export function RollCanvas(props: RollCanvasProps) {
       });
     };
 
+    const onAnimalLoad = () => paintAt(elapsedRef.current);
+    animalImage?.addEventListener("load", onAnimalLoad);
+
     const resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (!entry) {
@@ -152,6 +126,7 @@ export function RollCanvas(props: RollCanvasProps) {
     if (paused || !documentVisible) {
       paintAt(elapsedRef.current);
       return () => {
+        animalImage?.removeEventListener("load", onAnimalLoad);
         resizeObserver.disconnect();
       };
     }
@@ -168,6 +143,7 @@ export function RollCanvas(props: RollCanvasProps) {
     frameId = window.requestAnimationFrame(tick);
     return () => {
       window.cancelAnimationFrame(frameId);
+      animalImage?.removeEventListener("load", onAnimalLoad);
       resizeObserver.disconnect();
     };
   }, [

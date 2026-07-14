@@ -69,26 +69,14 @@ function drawShapePath(ctx: CanvasRenderingContext2D, shapeId: ShapeId, size: nu
 
 function drawAnimalImage(
   ctx: CanvasRenderingContext2D,
-  image: CanvasImageSource,
+  image: HTMLImageElement,
   size: number,
 ) {
-  const sourceWidth =
-    "naturalWidth" in image && typeof image.naturalWidth === "number"
-      ? image.naturalWidth
-      : "width" in image && typeof image.width === "number"
-        ? image.width
-        : size;
-  const sourceHeight =
-    "naturalHeight" in image && typeof image.naturalHeight === "number"
-      ? image.naturalHeight
-      : "height" in image && typeof image.height === "number"
-        ? image.height
-        : size;
-  if (sourceWidth <= 0 || sourceHeight <= 0) {
+  if (image.naturalWidth <= 0 || image.naturalHeight <= 0) {
     return;
   }
 
-  const aspect = sourceWidth / sourceHeight;
+  const aspect = image.naturalWidth / image.naturalHeight;
   const box = size * 0.9;
   const width = aspect >= 1 ? box : box * aspect;
   const height = aspect >= 1 ? box / aspect : box;
@@ -97,7 +85,7 @@ function drawAnimalImage(
 
 export type PaintSubject =
   | { kind: "shape"; shapeId: ShapeId; shapeColor: string }
-  | { kind: "animal"; image: CanvasImageSource | null };
+  | { kind: "animal"; image: HTMLImageElement | null };
 
 export function paintRollFrame(
   ctx: CanvasRenderingContext2D,

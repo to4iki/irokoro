@@ -99,7 +99,6 @@ export type PackChoice = {
   id: PackId;
   shortLabel: string;
   detail: string;
-  available: true;
 };
 
 const colorById = new Map(COLORS.map((color) => [color.id, color]));
@@ -126,13 +125,11 @@ export const PACK_CHOICES: readonly PackChoice[] = [
     id: "colors",
     shortLabel: "いろ",
     detail: `${COLORS.length}つの色`,
-    available: true,
   },
   {
     id: "animals",
     shortLabel: "どうぶつ",
     detail: `${ANIMALS.length}つのどうぶつ`,
-    available: true,
   },
 ];
 

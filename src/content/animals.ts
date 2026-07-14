@@ -38,6 +38,7 @@ export const ANIMALS = [
 export type AnimalId = (typeof ANIMALS)[number]["id"];
 
 const animalById = new Map(ANIMALS.map((animal) => [animal.id, animal]));
+const imageBySrc = new Map<string, HTMLImageElement>();
 
 export function getAnimal(id: AnimalId) {
   const animal = animalById.get(id);
@@ -45,4 +46,17 @@ export function getAnimal(id: AnimalId) {
     throw new RangeError(`Unknown animal: ${id}`);
   }
   return animal;
+}
+
+/** Shared decode cache so RollCanvas does not recreate Image per mount. */
+export function getAnimalImage(src: string): HTMLImageElement {
+  const cached = imageBySrc.get(src);
+  if (cached) {
+    return cached;
+  }
+  const image = new Image();
+  image.decoding = "async";
+  image.src = src;
+  imageBySrc.set(src, image);
+  return image;
 }

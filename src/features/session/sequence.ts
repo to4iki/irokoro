@@ -47,13 +47,6 @@ function differentIndex(previous: number, size: number, random: () => number): n
   return (previous + offset) % size;
 }
 
-function sceneDurationMs(random: () => number): number {
-  return (
-    SCENE_DURATION_MS.min +
-    Math.floor(random() * (SCENE_DURATION_MS.max - SCENE_DURATION_MS.min + 1))
-  );
-}
-
 export function createSceneSequence({
   packId = "colors",
   length,
@@ -63,54 +56,44 @@ export function createSceneSequence({
     throw new RangeError("Sequence length must be a positive integer.");
   }
 
+  const subjects = packId === "animals" ? ANIMALS : SHAPES;
   const scenes: Scene[] = [];
   let colorIndex = randomIndex(COLORS.length, random);
+  let subjectIndex = randomIndex(subjects.length, random);
 
-  if (packId === "animals") {
-    let animalIndex = randomIndex(ANIMALS.length, random);
-    for (let index = 0; index < length; index += 1) {
-      if (index > 0) {
-        colorIndex = differentIndex(colorIndex, COLORS.length, random);
-        animalIndex = differentIndex(animalIndex, ANIMALS.length, random);
-      }
-
-      const color = COLORS[colorIndex];
-      const animal = ANIMALS[animalIndex];
-      if (!color || !animal) {
-        throw new RangeError("Unable to create a scene from the content pack.");
-      }
-
-      scenes.push({
-        id: `${index}-${color.id}-${animal.id}`,
-        packId: "animals",
-        colorId: color.id,
-        animalId: animal.id,
-        durationMs: sceneDurationMs(random),
-      });
-    }
-    return scenes;
-  }
-
-  let shapeIndex = randomIndex(SHAPES.length, random);
   for (let index = 0; index < length; index += 1) {
     if (index > 0) {
       colorIndex = differentIndex(colorIndex, COLORS.length, random);
-      shapeIndex = differentIndex(shapeIndex, SHAPES.length, random);
+      subjectIndex = differentIndex(subjectIndex, subjects.length, random);
     }
 
     const color = COLORS[colorIndex];
-    const shape = SHAPES[shapeIndex];
-    if (!color || !shape) {
+    const subject = subjects[subjectIndex];
+    if (!color || !subject) {
       throw new RangeError("Unable to create a scene from the content pack.");
     }
 
-    scenes.push({
-      id: `${index}-${color.id}-${shape.id}`,
-      packId: "colors",
-      colorId: color.id,
-      shapeId: shape.id,
-      durationMs: sceneDurationMs(random),
-    });
+    const durationMs =
+      SCENE_DURATION_MS.min +
+      Math.floor(random() * (SCENE_DURATION_MS.max - SCENE_DURATION_MS.min + 1));
+
+    scenes.push(
+      packId === "animals"
+        ? {
+            id: `${index}-${color.id}-${subject.id}`,
+            packId: "animals",
+            colorId: color.id,
+            animalId: subject.id as AnimalId,
+            durationMs,
+          }
+        : {
+            id: `${index}-${color.id}-${subject.id}`,
+            packId: "colors",
+            colorId: color.id,
+            shapeId: subject.id as ShapeId,
+            durationMs,
+          },
+    );
   }
 
   return scenes;
