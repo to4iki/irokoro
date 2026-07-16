@@ -278,6 +278,20 @@
           border-bottom: 1px solid var(--line);
         }
       }
+
+      .callout {
+        margin: 1rem 0;
+        padding: 0.85rem 1rem;
+        border-left: 4px solid var(--accent);
+        background: var(--accent-soft);
+        border-radius: 0 8px 8px 0;
+      }
+
+      .callout ul {
+        margin: 0.4rem 0 0;
+        padding-left: 1.2rem;
+      }
+
     </style>
   </head>
   <body>
@@ -297,6 +311,7 @@
               <li><a href="#components">画面コンポーネント</a></li>
               <li><a href="#canvas">転がり / Canvas</a></li>
               <li><a href="#content">コンテンツ</a></li>
+              <li><a href="#animals-pack">どうぶつパック</a></li>
               <li><a href="#audio">BGM</a></li>
               <li><a href="#a11y">a11y / フック</a></li>
               <li><a href="#tests">テスト</a></li>
@@ -363,7 +378,7 @@
               </tr>
               <tr>
                 <td><span class="path">src/content/</span></td>
-                <td>色・形・パック・BGM メタデータ（データ定義）</td>
+                <td>色・形・どうぶつ・パック・BGM / いらすとやクレジット（データ定義）</td>
               </tr>
               <tr>
                 <td><span class="path">src/audio/</span></td>
@@ -641,15 +656,18 @@
               <dl class="exports">
                 <dt>Scene</dt>
                 <dd>
-                  <code>id</code> / <code>colorId</code> / <code>shapeId</code> /
-                  <code>durationMs</code>
+                  判別共用体。<code>packId: "colors"</code> なら
+                  <code>shapeId</code>、<code>packId: "animals"</code> なら
+                  <code>animalId</code>。共通で <code>id</code> /
+                  <code>colorId</code> / <code>durationMs</code>
                 </dd>
                 <dt>SCENE_DURATION_MS</dt>
                 <dd>min 6000 / max 8000（赤ちゃん向けの落ち着いた dwell）</dd>
-                <dt>createSceneSequence({ length, random? })</dt>
+                <dt>createSceneSequence({ packId?, length, random? })</dt>
                 <dd>
-                  隣接シーンで色・形が連続しない並びを生成。
-                  App は length 64 を起動時に一度作る
+                  隣接シーンで色と subject（形 or どうぶつ）が連続しない並びを生成。
+                  App は pack ごとに length 64 を起動時に一度作る
+                  （<code>DEFAULT_SEQUENCES.colors / .animals</code>）
                 </dd>
                 <dt>createSeededRandom(seed)</dt>
                 <dd>テスト用の決定的乱数</dd>
@@ -681,8 +699,9 @@
                 </dd>
               </dl>
               <p>
-                animals パックは <code>PACK_CHOICES</code> 上で
-                <code>available: false</code> のプレースホルダ表示のみ。
+                <code>PACK_CHOICES</code> の colors / animals をラジオで選択できる。
+                Setup 下部にいらすとやクレジット
+                （<span class="path">animal-credits.ts</span>）も表示する。
               </p>
             </article>
 
@@ -735,14 +754,16 @@
               <dl class="exports">
                 <dt>props</dt>
                 <dd>
-                  <code>sceneId</code> / <code>shapeId</code> / <code>shapeColor</code> /
-                  <code>paused</code>
+                  判別 props。<code>kind: "shape"</code>（shapeId / shapeColor）または
+                  <code>kind: "animal"</code>（imageSrc）。共通で
+                  <code>sceneId</code> / <code>paused</code>
                 </dd>
                 <dt>内部の流れ</dt>
                 <dd>
                   <code>createRollCast(sceneId)</code> →
-                  毎フレーム <code>sampleActorPose</code> →
-                  <code>paintRollFrame</code>
+                  毎フレーム <code>sampleActorPose(..., rotationStyle)</code>
+                  （animals は <code>tilt</code>、colors は <code>spin</code>） →
+                  <code>paintRollFrame</code>（<code>PaintSubject</code>）
                 </dd>
               </dl>
             </article>
@@ -765,9 +786,15 @@
                 <dd>
                   primary 1 + companion 2。sceneId ハッシュで方向が決定的
                 </dd>
-                <dt>sampleActorPose(actor, elapsedMs)</dt>
+                <dt>RotationStyle</dt>
                 <dd>
-                  入場（ENTRY_DURATION_MS=1350）→ その後 Lissajous 風の大振幅軌道
+                  <code>"spin"</code>（colors） /
+                  <code>"tilt"</code>（animals: ±12° 程度のゆるい傾き。上下逆なし）
+                </dd>
+                <dt>sampleActorPose(actor, elapsedMs, rotationStyle?)</dt>
+                <dd>
+                  入場（ENTRY_DURATION_MS=1350）→ その後 Lissajous 風の大振幅軌道。
+                  回転は style で切替
                 </dd>
                 <dt>ENTRY_DURATION_MS / ROLL_DIRECTIONS</dt>
                 <dd>定数</dd>
@@ -780,10 +807,15 @@
               </h4>
               <div class="meta"><span class="tag">Canvas 描画</span></div>
               <dl class="exports">
+                <dt>PaintSubject</dt>
+                <dd>
+                  <code>{ kind: "shape", shapeId, shapeColor }</code> または
+                  <code>{ kind: "animal", image }</code>
+                </dd>
                 <dt>paintRollFrame(ctx, options)</dt>
                 <dd>
-                  clear → 各 pose を translate/rotate → circle/triangle/square/star を fill。
-                  shapeId の網羅は <code>never</code> で保証
+                  clear → 各 pose を translate/rotate → subject に応じて path fill または
+                  <code>drawImage</code>。shapeId の網羅は <code>never</code> で保証
                 </dd>
               </dl>
             </article>
@@ -814,13 +846,11 @@
                   高コントラスト色（label / background / foreground）と形ラベル
                 </dd>
                 <dt>ColorId / ShapeId / PackId</dt>
-                <dd>型。現 PackId は <code>"colors"</code> のみ</dd>
+                <dd>型。PackId は <code>"colors" | "animals"</code></dd>
                 <dt>CONTENT_PACKS</dt>
-                <dd>プレイ可能なパックのタイトル・説明</dd>
+                <dd>両パックのタイトル・説明（Player 見出し用）</dd>
                 <dt>PACK_CHOICES</dt>
-                <dd>
-                  Setup 用。colors は available、animals は枠のみ（未実装）
-                </dd>
+                <dd>Setup 用。colors / animals とも選択可</dd>
                 <dt>getColor / getShape</dt>
                 <dd>ID → 定義。未知 ID は RangeError</dd>
               </dl>
@@ -849,6 +879,56 @@
                 UI バンドルと音を分離しやすい。
               </p>
             </article>
+          </section>
+
+          <section id="animals-pack">
+            <h3>どうぶつパック</h3>
+            <p>
+              colors と同列の選択可能なあそび。背景色は colors のパレットを流用し、
+              図形の代わりにいらすとや PNG（16 点）を描く。
+              仕様の「なぜ」は
+              <a href="./product-spec/feature-animals-pack.md">feature-animals-pack.md</a>。
+            </p>
+
+            <article class="module">
+              <h4><span class="path">src/content/animals.ts</span></h4>
+              <div class="meta"><span class="tag">定数 + アセット import</span></div>
+              <dl class="exports">
+                <dt>ANIMALS / AnimalId</dt>
+                <dd>
+                  16 点。label（語りかけ用）と Vite 経由の PNG URL
+                </dd>
+                <dt>getAnimal(id)</dt>
+                <dd>ID → 定義。未知 ID は RangeError</dd>
+                <dt>getAnimalImage(src)</dt>
+                <dd>
+                  モジュール共有の <code>Image</code> キャッシュ。
+                  Canvas の <code>drawImage</code> 用
+                </dd>
+              </dl>
+            </article>
+
+            <article class="module">
+              <h4>
+                <span class="path">src/content/animal-credits.ts</span>
+              </h4>
+              <div class="meta"><span class="tag">定数（画像 import 非依存）</span></div>
+              <p>
+                Setup のクレジットリンク用。
+                素材一覧・確認日は
+                <a href="./animal-credits.md">animal-credits.md</a>。
+              </p>
+            </article>
+
+            <div class="callout">
+              <strong>レビュー時の要点</strong>
+              <ul>
+                <li>シーケンスが pack 判別共用体になっているか（shapeId と animalId の混在なし）</li>
+                <li>回転が <code>tilt</code>（±12°）に抑えられているか</li>
+                <li>鳴き声 SE を足していないか（初回スコープ外）</li>
+                <li>外部 CDN ではなく同梱 PNG か</li>
+              </ul>
+            </div>
           </section>
 
           <section id="audio">
@@ -968,15 +1048,16 @@
        ├─ sessionReducer  ←── dispatch(アクション)
        │     └─ SessionState (setup|playing|paused|finished)
        │
-       ├─ sequence[sceneIndex] → Scene
+       ├─ DEFAULT_SEQUENCES[packId][sceneIndex] → Scene
+       │     (colors: shapeId / animals: animalId)
        │
        ├─ SetupScreen ← preferences / onChange* / onStart
        ├─ PlayerScreen ← state + scene
        │     └─ SceneStage (memo)
-       │           └─ RollCanvas
-       │                 ├─ createRollCast / sampleActorPose  (roll.ts)
-       │                 └─ paintRollFrame                   (draw-shape.ts)
-       │                       └─ getColor/getShape 由来の色・形
+       │           └─ RollCanvas (kind: shape | animal)
+       │                 ├─ createRollCast / sampleActorPose(…, spin|tilt)
+       │                 └─ paintRollFrame(PaintSubject)
+       │                       └─ 色+形 or getAnimalImage
        └─ FinishScreen ← onReset
 
 副作用（App の useEffect / ハンドラ）:
@@ -1008,6 +1089,10 @@
             <li>
               <strong>テスト先行</strong> — 遷移変更なら失敗テストが先か
             </li>
+            <li>
+              <strong>パック分岐</strong> — Scene / RollCanvas / paint の判別が
+              colors と animals で一貫しているか（どうぶつ PR）
+            </li>
           </ol>
         </section>
 
@@ -1027,7 +1112,19 @@
               </tr>
               <tr>
                 <td>シーン</td>
-                <td>色+形+dwell 時間の 1 コマ。6–8 秒で次へ</td>
+                <td>
+                  色 + subject（形 or どうぶつ）+ dwell の 1 コマ。6–8 秒で次へ
+                </td>
+              </tr>
+              <tr>
+                <td>パック</td>
+                <td>
+                  あそびの種類。<code>colors</code> と <code>animals</code>
+                </td>
+              </tr>
+              <tr>
+                <td>tilt</td>
+                <td>どうぶつ用の弱い回転（±12°）。spin の上下逆を避ける</td>
               </tr>
               <tr>
                 <td>deadline</td>
