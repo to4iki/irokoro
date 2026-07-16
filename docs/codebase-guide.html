@@ -311,6 +311,7 @@
               <li><a href="#components">画面コンポーネント</a></li>
               <li><a href="#canvas">転がり / Canvas</a></li>
               <li><a href="#touch-pon">タッチ反応「ぽん」</a></li>
+              <li><a href="#face-expressions">かおのゆるい変形</a></li>
               <li><a href="#content">コンテンツ</a></li>
               <li><a href="#animals-pack">どうぶつパック</a></li>
               <li><a href="#audio">BGM</a></li>
@@ -767,6 +768,7 @@
                   毎フレーム <code>sampleActorPose(..., rotationStyle)</code>
                   （animals は <code>tilt</code>、colors は <code>spin</code>） →
                   pose.scale に <code>ponScaleFactor</code> を乗算 →
+                  colors なら <code>sampleFaceExpression</code> も →
                   <code>paintRollFrame</code>（<code>PaintSubject</code>）
                 </dd>
               </dl>
@@ -818,7 +820,8 @@
                 </dd>
                 <dt>paintRollFrame(ctx, options)</dt>
                 <dd>
-                  clear → 各 pose を translate/rotate → subject に応じて path fill または
+                  clear → 各 pose を translate/rotate → subject に応じて path fill
+                  （colors は path 直後にかお。ink は <code>faceInkColor</code>）または
                   <code>drawImage</code>。shapeId の網羅は <code>never</code> で保証
                 </dd>
               </dl>
@@ -836,6 +839,48 @@
                 <dd>canvas.width/height 用の整数サイズと実際の ratio</dd>
               </dl>
             </article>
+          </section>
+
+          <section id="face-expressions">
+            <h3>かおのゆるい変形</h3>
+            <p>
+              <code>colors</code> パックの図形に目と口を載せ、シーン中盤で
+              smile → surprise へゆるくモーフする。どうぶつ画像には載せない。
+              仕様の「なぜ」は
+              <a href="./product-spec/feature-face-expressions.md">feature-face-expressions.md</a>。
+            </p>
+
+            <article class="module">
+              <h4>
+                <span class="path">src/features/session/face.ts</span>
+              </h4>
+              <div class="meta"><span class="tag">純粋</span></div>
+              <dl class="exports">
+                <dt>FaceExpression</dt>
+                <dd>目半径・間隔・口の開きなど、描画パラメータ一式</dd>
+                <dt>resolveFaceTimeline(sceneId, sceneDurationMs)</dt>
+                <dd>
+                  シーン ID から決定的に morph 開始（dwell の 40–60%）と
+                  遷移時間（700–1100ms）を決める
+                </dd>
+                <dt>sampleFaceExpression(sceneId, elapsedMs, sceneDurationMs)</dt>
+                <dd>
+                  経過時間 → 補間済み FaceExpression。入場時は必ず smile
+                </dd>
+                <dt>interpolateFace / easeInOutCubic</dt>
+                <dd>パラメータ補間ヘルパ</dd>
+              </dl>
+            </article>
+
+            <div class="callout">
+              <strong>レビュー時の要点</strong>
+              <ul>
+                <li>遷移が 700ms 未満のパッ切りになっていないか</li>
+                <li>まばたき・怖い顔・赤フラッシュがないか</li>
+                <li>一時停止中に表情タイムラインも止まっているか（rAF 停止に乗る）</li>
+                <li>描画が colors の図形 path に限定されているか</li>
+              </ul>
+            </div>
           </section>
 
           <section id="touch-pon">
@@ -1104,8 +1149,9 @@
        │           └─ RollCanvas (kind: shape | animal)
        │                 ├─ pointerdown → touch-pon.ts（対象選定・scale）
        │                 ├─ createRollCast / sampleActorPose(…, spin|tilt)
+       │                 ├─ sampleFaceExpression（colors のみ）
        │                 └─ paintRollFrame(PaintSubject)
-       │                       └─ 色+形 or getAnimalImage
+       │                       └─ 色+形+かお or getAnimalImage
        └─ FinishScreen ← onReset
 
 副作用（App の useEffect / ハンドラ）:
@@ -1144,6 +1190,10 @@
             <li>
               <strong>ぽん</strong> — 触覚反応がセッション時間やシーン進行を
               変えていないか
+            </li>
+            <li>
+              <strong>かお</strong> — ゆるいモーフと安全制約（点滅なし）が
+              守られているか。animals に載せていないか
             </li>
           </ol>
         </section>
@@ -1198,6 +1248,12 @@
                 <td>ぽん</td>
                 <td>
                   playing 中の短いスケール反応。Reducer 外の Canvas エフェクト
+                </td>
+              </tr>
+              <tr>
+                <td>かおモーフ</td>
+                <td>
+                  smile → surprise のパラメータ補間。colors 図形専用
                 </td>
               </tr>
             </tbody>

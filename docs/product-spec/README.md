@@ -29,8 +29,9 @@
 |------|------|
 | 初期値 | pack=`colors`、duration=`60`、sound=`false` |
 | 時間選択肢 | 60 / 120 / 180 秒 |
-| あそび | `colors` と `animals`。初期 pack は `colors` |
-| シーン dwell | 6–8 秒。隣接シーンで色・形（どうぶつ）を連続させない |
+| どうぶつパック | [feature-animals-pack.md](./feature-animals-pack.md) | 実装済み（16 点） |
+| タッチ反応「ぽん」 | [feature-touch-pon.md](./feature-touch-pon.md) | 実装済み |
+| かおのゆるい変形 | [feature-face-expressions.md](./feature-face-expressions.md) | 実装済み（colors） |
 | 色 | 原色多めの高コントラスト。点滅や赤フラッシュは使わない |
 | 動き | 再生中は動かす。一時停止・タブ非表示では止める |
 | 音 | 任意のループ BGM。初期 OFF。セッション単位で 1 曲 |
@@ -47,4 +48,4 @@
 |------|------|------|
 | どうぶつパック | [feature-animals-pack.md](./feature-animals-pack.md) | 実装済み（16 点） |
 | タッチ反応「ぽん」 | [feature-touch-pon.md](./feature-touch-pon.md) | 実装済み |
-| かおのゆるい変形 | [feature-face-expressions.md](./feature-face-expressions.md) | 未実装 |
+| かおのゆるい変形 | [feature-face-expressions.md](./feature-face-expressions.md) | 実装済み（colors） |

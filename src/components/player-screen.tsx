@@ -61,6 +61,7 @@ const SceneStage = memo(function SceneStage({
             key={scene.id}
             kind="shape"
             paused={paused}
+            sceneDurationMs={scene.durationMs}
             sceneId={scene.id}
             shapeColor={shapeColor}
             shapeId={scene.shapeId}
