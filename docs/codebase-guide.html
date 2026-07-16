@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>いろころ コードベース解説</title>
+    <style>
+      :root {
+        --ink: #1a2b38;
+        --muted: #4d6270;
+        --line: #d5dde3;
+        --paper: #fbfaf7;
+        --panel: #ffffff;
+        --accent: #1f6f5b;
+        --accent-soft: #e6f3ef;
+        --code-bg: #f0f3f5;
+        --path: #0b3d52;
+        --sidebar-w: 17rem;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--paper);
+        font-family:
+          "Hiragino Sans",
+          "Hiragino Kaku Gothic ProN",
+          "Noto Sans JP",
+          system-ui,
+          sans-serif;
+        line-height: 1.65;
+        text-wrap: pretty;
+      }
+
+      a {
+        color: var(--accent);
+      }
+
+      a:hover,
+      a:focus-visible {
+        color: #0f4f40;
+      }
+
+      code,
+      .path,
+      pre {
+        font-family:
+          ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+        font-size: 0.9em;
+      }
+
+      code {
+        background: var(--code-bg);
+        padding: 0.1em 0.35em;
+        border-radius: 4px;
+      }
+
+      .path {
+        color: var(--path);
+        font-weight: 600;
+      }
+
+      pre {
+        margin: 0.75rem 0;
+        padding: 0.9rem 1rem;
+        overflow-x: auto;
+        background: #132029;
+        color: #e8eef2;
+        border-radius: 10px;
+        line-height: 1.45;
+        font-size: 0.82rem;
+      }
+
+      pre code {
+        background: none;
+        padding: 0;
+        color: inherit;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+        min-height: 100dvh;
+      }
+
+      .toc {
+        position: sticky;
+        top: 0;
+        align-self: start;
+        height: 100dvh;
+        overflow: auto;
+        padding: 1.25rem 1rem 2rem;
+        border-right: 1px solid var(--line);
+        background: #f4f6f7;
+      }
+
+      .toc h2 {
+        margin: 0 0 0.75rem;
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .toc ol {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .toc > ol > li {
+        margin-bottom: 0.35rem;
+      }
+
+      .toc a {
+        display: block;
+        text-decoration: none;
+        color: var(--ink);
+        font-size: 0.88rem;
+        padding: 0.2rem 0.4rem;
+        border-radius: 6px;
+      }
+
+      .toc a:hover,
+      .toc a:focus-visible {
+        background: var(--accent-soft);
+      }
+
+      .toc ol ol {
+        margin: 0.2rem 0 0.5rem 0.7rem;
+      }
+
+      .toc ol ol a {
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      main {
+        padding: 1.75rem clamp(1rem, 3vw, 2.5rem) 4rem;
+        max-width: 54rem;
+      }
+
+      header.doc-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid var(--line);
+      }
+
+      header.doc-header h1 {
+        margin: 0 0 0.4rem;
+        font-size: clamp(1.6rem, 3vw, 2.1rem);
+        line-height: 1.25;
+        text-wrap: balance;
+      }
+
+      header.doc-header p {
+        margin: 0.35rem 0;
+        color: var(--muted);
+      }
+
+      section {
+        margin: 2.5rem 0;
+        scroll-margin-top: 1rem;
+      }
+
+      h2 {
+        margin: 0 0 0.85rem;
+        padding-bottom: 0.35rem;
+        border-bottom: 2px solid var(--accent-soft);
+        font-size: 1.35rem;
+      }
+
+      h3 {
+        margin: 1.75rem 0 0.6rem;
+        font-size: 1.08rem;
+      }
+
+      h4 {
+        margin: 1.1rem 0 0.4rem;
+        font-size: 0.98rem;
+      }
+
+      p,
+      li {
+        max-width: 46rem;
+      }
+
+      .note {
+        margin: 1rem 0;
+        padding: 0.85rem 1rem;
+        background: var(--accent-soft);
+        border-left: 4px solid var(--accent);
+        border-radius: 0 8px 8px 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0.85rem 0 1.25rem;
+        font-size: 0.92rem;
+        background: var(--panel);
+      }
+
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 0.55rem 0.7rem;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: #eef2f4;
+        font-weight: 700;
+      }
+
+      .module {
+        margin: 1.25rem 0;
+        padding: 1rem 1.1rem;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+      }
+
+      .module h3 {
+        margin-top: 0;
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem 0.75rem;
+        margin: 0.4rem 0 0.75rem;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      .tag {
+        display: inline-block;
+        padding: 0.12rem 0.45rem;
+        border-radius: 999px;
+        background: var(--code-bg);
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      .exports dt {
+        margin-top: 0.55rem;
+        font-weight: 700;
+      }
+
+      .exports dd {
+        margin: 0.15rem 0 0;
+        color: var(--muted);
+      }
+
+      .flow {
+        overflow-x: auto;
+      }
+
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .toc {
+          position: static;
+          height: auto;
+          border-right: none;
+          border-bottom: 1px solid var(--line);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <nav class="toc" aria-label="目次">
+        <h2>目次</h2>
+        <ol>
+          <li><a href="#overview">1. 全体像</a></li>
+          <li><a href="#flow">2. 処理の流れ</a></li>
+          <li>
+            <a href="#modules">3. モジュール詳細</a>
+            <ol>
+              <li><a href="#entry">入口</a></li>
+              <li><a href="#app">App（司令塔）</a></li>
+              <li><a href="#reducer">セッション Reducer</a></li>
+              <li><a href="#sequence">シーケンス</a></li>
+              <li><a href="#components">画面コンポーネント</a></li>
+              <li><a href="#canvas">転がり / Canvas</a></li>
+              <li><a href="#content">コンテンツ</a></li>
+              <li><a href="#audio">BGM</a></li>
+              <li><a href="#a11y">a11y / フック</a></li>
+              <li><a href="#tests">テスト</a></li>
+            </ol>
+          </li>
+          <li><a href="#data-flow">4. データの流れ図</a></li>
+          <li><a href="#review-tips">5. レビューの観点</a></li>
+          <li><a href="#glossary">6. 用語メモ</a></li>
+        </ol>
+      </nav>
+
+      <main>
+        <header class="doc-header">
+          <h1>いろころ コードベース解説</h1>
+          <p>
+            ソースと並べて読むための内部向けガイドです。
+            このリポジトリはクラス中心ではなく、<strong>関数と React コンポーネントのモジュール</strong>で構成されています。
+          </p>
+          <p>
+            公式設計メモ:
+            <a href="./architecture.md">architecture.md</a> /
+            <a href="./product-spec/README.md">product-spec</a> /
+            <a href="./code-style.md">code-style.md</a>
+          </p>
+        </header>
+
+        <section id="overview">
+          <h2>1. 全体像</h2>
+          <p>
+            赤ちゃん向けの短時間お遊び Web アプリ。API はなく、Cloudflare Workers Static Assets で
+            HTML/JS/CSS だけを配信する静的アプリです。
+          </p>
+
+          <div class="note">
+            <strong>設計の核:</strong>
+            画面状態は <code>sessionReducer</code>（純粋）に寄せる。
+            タイマー・BGM などの副作用は <span class="path">src/app.tsx</span> に置く。
+          </div>
+
+          <h3>ディレクトリ責務</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>パス</th>
+                <th>責務</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="path">src/main.tsx</span></td>
+                <td>React の起動入口</td>
+              </tr>
+              <tr>
+                <td><span class="path">src/app.tsx</span></td>
+                <td>状態・画面切替・タイマー・BGM の司令塔</td>
+              </tr>
+              <tr>
+                <td><span class="path">src/components/</span></td>
+                <td>Setup / Player / Finish / RollCanvas の UI</td>
+              </tr>
+              <tr>
+                <td><span class="path">src/features/session/</span></td>
+                <td>Reducer・シーン列・転がり数学・Canvas 描画・a11y</td>
+              </tr>
+              <tr>
+                <td><span class="path">src/content/</span></td>
+                <td>色・形・パック・BGM メタデータ（データ定義）</td>
+              </tr>
+              <tr>
+                <td><span class="path">src/audio/</span></td>
+                <td>HTMLMediaElement の BGM 境界</td>
+              </tr>
+              <tr>
+                <td><span class="path">src/styles.css</span></td>
+                <td>トークン（@theme）と CSS アニメ</td>
+              </tr>
+              <tr>
+                <td><span class="path">src/test/</span></td>
+                <td>Vitest 共通セットアップ</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>画面遷移（状態機械）</h3>
+          <pre><code>Setup → Playing ↔ Paused → Finished → Setup</code></pre>
+          <ul>
+            <li>設定変更（pack / duration / sound）は <code>setup</code> でのみ有効</li>
+            <li><code>playing</code> は <code>deadline</code> と <code>remainingMs</code> で残り時間管理</li>
+            <li><code>paused</code> は <code>deadline</code> を捨て、<code>remainingMs</code> だけ保持</li>
+            <li><code>finished</code> からの再開は <code>RESET</code> のみ（自動リピートなし）</li>
+          </ul>
+        </section>
+
+        <section id="flow">
+          <h2>2. 処理の流れ</h2>
+
+          <h3>ユーザー操作 → アクション</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>画面</th>
+                <th>操作</th>
+                <th>dispatch</th>
+                <th>副作用（app.tsx）</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Setup</td>
+                <td>あそび / じかん / 音</td>
+                <td><code>SET_PACK</code> / <code>SET_DURATION</code> / <code>SET_SOUND</code></td>
+                <td>なし</td>
+              </tr>
+              <tr>
+                <td>Setup</td>
+                <td>はじめる</td>
+                <td><code>START</code></td>
+                <td>音ONなら BGM 作成・再生。シーン残り時間 ref をリセット</td>
+              </tr>
+              <tr>
+                <td>Player</td>
+                <td>一時停止</td>
+                <td><code>PAUSE</code></td>
+                <td>BGM pause。タイマー effect が止まる</td>
+              </tr>
+              <tr>
+                <td>Player</td>
+                <td>つづける</td>
+                <td><code>RESUME</code></td>
+                <td>BGM play。タイマー再開</td>
+              </tr>
+              <tr>
+                <td>Player</td>
+                <td>おしまい</td>
+                <td><code>STOP</code></td>
+                <td>（finished 遷移後に BGM dispose）</td>
+              </tr>
+              <tr>
+                <td>（自動）</td>
+                <td>残り時間 0</td>
+                <td><code>TICK</code> → finished</td>
+                <td>同上</td>
+              </tr>
+              <tr>
+                <td>（自動）</td>
+                <td>シーン dwell 経過</td>
+                <td><code>NEXT_SCENE</code></td>
+                <td>なし（sceneIndex が進むだけ）</td>
+              </tr>
+              <tr>
+                <td>Finish</td>
+                <td>はじめの画面へ</td>
+                <td><code>RESET</code></td>
+                <td>Setup フォーカス用 epoch を加算</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>タイマーは 2 系統</h3>
+          <ol>
+            <li>
+              <strong>セッション全体</strong> — 250ms ごとに <code>TICK</code>。
+              <code>deadline - now</code> で <code>remainingMs</code> 更新。0 で finished。
+            </li>
+            <li>
+              <strong>シーン dwell</strong> — 現シーンの <code>durationMs</code>（6–8 秒）後に
+              <code>NEXT_SCENE</code>。pause 中は effect がアンマウントされ、残り時間を
+              <code>sceneRemainRef</code> に退避。
+            </li>
+          </ol>
+        </section>
+
+        <section id="modules">
+          <h2>3. モジュール詳細</h2>
+
+          <section id="entry">
+            <h3>入口</h3>
+            <article class="module">
+              <h4><span class="path">src/main.tsx</span></h4>
+              <div class="meta">
+                <span class="tag">起動</span>
+                <span>依存: React DOM / App / styles.css</span>
+              </div>
+              <p>
+                <code>#root</code> を取得し、<code>createRoot(...).render(&lt;StrictMode&gt;&lt;App /&gt;)</code>。
+                ルート要素が無いと throw。ロジックはここには置かない。
+              </p>
+            </article>
+          </section>
+
+          <section id="app">
+            <h3>App（司令塔）</h3>
+            <article class="module">
+              <h4><span class="path">src/app.tsx</span> — <code>App</code></h4>
+              <div class="meta">
+                <span class="tag">コンポーネント</span>
+                <span class="tag">副作用の集約</span>
+              </div>
+              <dl class="exports">
+                <dt>export default function App</dt>
+                <dd>
+                  props: 省略可能な <code>sequence</code>（テスト用）。
+                  省略時は長さ 64 の <code>createSceneSequence</code>
+                </dd>
+                <dt>内部 ref</dt>
+                <dd>
+                  <code>audioRef</code>（BGM）、
+                  <code>sceneRemainRef</code>（シーン残り ms）、
+                  <code>setupFocusEpochRef</code>（Finish→Setup で見出しフォーカスするか）
+                </dd>
+              </dl>
+              <p><strong>やっていること</strong></p>
+              <ol>
+                <li><code>useReducer(sessionReducer, createInitialState)</code> で状態を持つ</li>
+                <li>
+                  <code>scene = sequence[sceneIndex % length]</code> で現シーンを解決
+                </li>
+                <li>
+                  status に応じて Setup / Player / Finish を描画
+                  （Player・Finish は lazy）
+                </li>
+                <li>
+                  effects:
+                  <ul>
+                    <li>playing + deadline → 250ms <code>TICK</code></li>
+                    <li>playing → シーン setTimeout → <code>NEXT_SCENE</code></li>
+                    <li>finished → BGM dispose・sceneRemain クリア</li>
+                    <li>playing/paused → visibilitychange で BGM pause/play</li>
+                    <li>unmount → BGM dispose</li>
+                  </ul>
+                </li>
+              </ol>
+              <p>
+                レビュー時の要点: 副作用がここに集中しているか、Reducer に時計が漏れていないか。
+              </p>
+            </article>
+          </section>
+
+          <section id="reducer">
+            <h3>セッション Reducer</h3>
+            <article class="module">
+              <h4>
+                <span class="path">src/features/session/session-reducer.ts</span>
+              </h4>
+              <div class="meta">
+                <span class="tag">純粋</span>
+                <span class="tag">状態の唯一の真実</span>
+              </div>
+              <dl class="exports">
+                <dt>SessionPreferences</dt>
+                <dd>
+                  <code>packId</code> / <code>durationSeconds</code>(60|120|180) /
+                  <code>soundEnabled</code>
+                </dd>
+                <dt>SessionState（ユニオン）</dt>
+                <dd>
+                  <code>setup</code> | <code>playing</code> | <code>paused</code> |
+                  <code>finished</code>。
+                  playing だけ <code>deadline</code> を持つ
+                </dd>
+                <dt>SessionAction</dt>
+                <dd>
+                  SET_* / START / TICK / NEXT_SCENE / PAUSE / RESUME / STOP / RESET
+                </dd>
+                <dt>createInitialState()</dt>
+                <dd>
+                  setup、初期値 pack=<code>colors</code>・60秒・音OFF
+                </dd>
+                <dt>sessionReducer(state, action)</dt>
+                <dd>
+                  不正遷移は現状維持を返す（例: playing 中の SET_PACK）
+                </dd>
+              </dl>
+              <h4>アクション早見</h4>
+              <table>
+                <thead>
+                  <tr>
+                    <th>type</th>
+                    <th>有効な status</th>
+                    <th>結果</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>SET_PACK / SET_DURATION / SET_SOUND</td>
+                    <td>setup</td>
+                    <td>preferences 更新</td>
+                  </tr>
+                  <tr>
+                    <td>START</td>
+                    <td>setup</td>
+                    <td>
+                      playing。deadline = now + duration、sceneIndex = 0
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>TICK</td>
+                    <td>playing</td>
+                    <td>remainingMs 更新。0 なら finished</td>
+                  </tr>
+                  <tr>
+                    <td>NEXT_SCENE</td>
+                    <td>playing</td>
+                    <td>sceneIndex++</td>
+                  </tr>
+                  <tr>
+                    <td>PAUSE</td>
+                    <td>playing</td>
+                    <td>
+                      paused（deadline null）。残り 0 なら finished
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>RESUME</td>
+                    <td>paused</td>
+                    <td>
+                      playing。deadline = now + remainingMs
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>STOP</td>
+                    <td>playing / paused</td>
+                    <td>finished</td>
+                  </tr>
+                  <tr>
+                    <td>RESET</td>
+                    <td>finished</td>
+                    <td>初期 setup へ</td>
+                  </tr>
+                </tbody>
+              </table>
+            </article>
+          </section>
+
+          <section id="sequence">
+            <h3>シーケンス</h3>
+            <article class="module">
+              <h4>
+                <span class="path">src/features/session/sequence.ts</span>
+              </h4>
+              <div class="meta"><span class="tag">純粋（乱数注入可）</span></div>
+              <dl class="exports">
+                <dt>Scene</dt>
+                <dd>
+                  <code>id</code> / <code>colorId</code> / <code>shapeId</code> /
+                  <code>durationMs</code>
+                </dd>
+                <dt>SCENE_DURATION_MS</dt>
+                <dd>min 6000 / max 8000（赤ちゃん向けの落ち着いた dwell）</dd>
+                <dt>createSceneSequence({ length, random? })</dt>
+                <dd>
+                  隣接シーンで色・形が連続しない並びを生成。
+                  App は length 64 を起動時に一度作る
+                </dd>
+                <dt>createSeededRandom(seed)</dt>
+                <dd>テスト用の決定的乱数</dd>
+              </dl>
+            </article>
+          </section>
+
+          <section id="components">
+            <h3>画面コンポーネント</h3>
+
+            <article class="module">
+              <h4>
+                <span class="path">src/components/setup-screen.tsx</span> —
+                <code>SetupScreen</code>
+              </h4>
+              <div class="meta"><span class="tag">UI</span></div>
+              <p>
+                パック選択・時間・音トグル・開始ボタン。設定変更は props のコールバックで
+                App に上げる（制御コンポーネント）。
+              </p>
+              <dl class="exports">
+                <dt>主要 props</dt>
+                <dd>
+                  <code>preferences</code>、
+                  <code>onPackChange</code> / <code>onDurationChange</code> /
+                  <code>onSoundChange</code> / <code>onStart</code>、
+                  <code>onStartIntent</code>（Player/Finish の prefetch）、
+                  <code>moveFocus</code>（Finish から戻ったとき見出しへフォーカス）
+                </dd>
+              </dl>
+              <p>
+                animals パックは <code>PACK_CHOICES</code> 上で
+                <code>available: false</code> のプレースホルダ表示のみ。
+              </p>
+            </article>
+
+            <article class="module">
+              <h4>
+                <span class="path">src/components/player-screen.tsx</span> —
+                <code>PlayerScreen</code> / <code>SceneStage</code>
+              </h4>
+              <div class="meta"><span class="tag">UI</span></div>
+              <p>
+                残り時間表示・progress・一時停止オーバーレイ・停止ボタン。
+                背景色は CSS 変数 <code>--scene-background</code>。
+              </p>
+              <dl class="exports">
+                <dt>PlayerScreen</dt>
+                <dd>
+                  props: <code>state</code>(playing|paused)、
+                  <code>scene</code>、onPause / onResume / onStop
+                </dd>
+                <dt>SceneStage（memo）</dt>
+                <dd>
+                  250ms の TICK 再描画から Canvas を隔離するためのメモ化。
+                  中で <code>RollCanvas</code> を <code>key={scene.id}</code> でマウント
+                </dd>
+              </dl>
+            </article>
+
+            <article class="module">
+              <h4>
+                <span class="path">src/components/finish-screen.tsx</span> —
+                <code>FinishScreen</code>
+              </h4>
+              <div class="meta"><span class="tag">UI</span></div>
+              <p>
+                「おしまい」とリセットボタンのみ。自動再開しない旨の文言あり。
+                <code>onReset</code> → App が <code>RESET</code>。
+              </p>
+            </article>
+
+            <article class="module">
+              <h4>
+                <span class="path">src/components/roll-canvas.tsx</span> —
+                <code>RollCanvas</code>
+              </h4>
+              <div class="meta"><span class="tag">UI + rAF ループ</span></div>
+              <p>
+                Canvas 2D の描画ループ。paused またはタブ非表示では rAF を止め、
+                現フレームだけ描く。リサイズは ResizeObserver。
+              </p>
+              <dl class="exports">
+                <dt>props</dt>
+                <dd>
+                  <code>sceneId</code> / <code>shapeId</code> / <code>shapeColor</code> /
+                  <code>paused</code>
+                </dd>
+                <dt>内部の流れ</dt>
+                <dd>
+                  <code>createRollCast(sceneId)</code> →
+                  毎フレーム <code>sampleActorPose</code> →
+                  <code>paintRollFrame</code>
+                </dd>
+              </dl>
+            </article>
+          </section>
+
+          <section id="canvas">
+            <h3>転がり / Canvas ヘルパ</h3>
+
+            <article class="module">
+              <h4><span class="path">src/features/session/roll.ts</span></h4>
+              <div class="meta"><span class="tag">純粋（数学）</span></div>
+              <dl class="exports">
+                <dt>RollActor</dt>
+                <dd>
+                  1 体の図形。role primary|companion、入場方向、delay、scale、settle 位置
+                </dd>
+                <dt>ActorPose</dt>
+                <dd>x/y（±1≈端）、rotationRad、scale、opacity</dd>
+                <dt>createRollCast(sceneId)</dt>
+                <dd>
+                  primary 1 + companion 2。sceneId ハッシュで方向が決定的
+                </dd>
+                <dt>sampleActorPose(actor, elapsedMs)</dt>
+                <dd>
+                  入場（ENTRY_DURATION_MS=1350）→ その後 Lissajous 風の大振幅軌道
+                </dd>
+                <dt>ENTRY_DURATION_MS / ROLL_DIRECTIONS</dt>
+                <dd>定数</dd>
+              </dl>
+            </article>
+
+            <article class="module">
+              <h4>
+                <span class="path">src/features/session/draw-shape.ts</span>
+              </h4>
+              <div class="meta"><span class="tag">Canvas 描画</span></div>
+              <dl class="exports">
+                <dt>paintRollFrame(ctx, options)</dt>
+                <dd>
+                  clear → 各 pose を translate/rotate → circle/triangle/square/star を fill。
+                  shapeId の網羅は <code>never</code> で保証
+                </dd>
+              </dl>
+            </article>
+
+            <article class="module">
+              <h4>
+                <span class="path">src/features/session/canvas-buffer.ts</span>
+              </h4>
+              <div class="meta"><span class="tag">純粋</span></div>
+              <dl class="exports">
+                <dt>MAX_CANVAS_DEVICE_PIXEL_RATIO = 2</dt>
+                <dd>Retina でも backing store を抑えめに</dd>
+                <dt>resolveCanvasBufferSize(cssW, cssH, dpr)</dt>
+                <dd>canvas.width/height 用の整数サイズと実際の ratio</dd>
+              </dl>
+            </article>
+          </section>
+
+          <section id="content">
+            <h3>コンテンツ（データ）</h3>
+
+            <article class="module">
+              <h4><span class="path">src/content/packs.ts</span></h4>
+              <div class="meta"><span class="tag">定数データ</span></div>
+              <dl class="exports">
+                <dt>COLORS / SHAPES</dt>
+                <dd>
+                  高コントラスト色（label / background / foreground）と形ラベル
+                </dd>
+                <dt>ColorId / ShapeId / PackId</dt>
+                <dd>型。現 PackId は <code>"colors"</code> のみ</dd>
+                <dt>CONTENT_PACKS</dt>
+                <dd>プレイ可能なパックのタイトル・説明</dd>
+                <dt>PACK_CHOICES</dt>
+                <dd>
+                  Setup 用。colors は available、animals は枠のみ（未実装）
+                </dd>
+                <dt>getColor / getShape</dt>
+                <dd>ID → 定義。未知 ID は RangeError</dd>
+              </dl>
+            </article>
+
+            <article class="module">
+              <h4><span class="path">src/content/music.ts</span></h4>
+              <div class="meta"><span class="tag">定数 + アセット import</span></div>
+              <dl class="exports">
+                <dt>BACKGROUND_TRACKS</dt>
+                <dd>
+                  もみじば 3 曲。Vite 経由の mp3 URL。セッション開始時に 1 曲選択
+                </dd>
+                <dt>BackgroundTrack</dt>
+                <dd>id / title / artist / src / pageUrl</dd>
+              </dl>
+            </article>
+
+            <article class="module">
+              <h4>
+                <span class="path">src/content/music-credits.ts</span>
+              </h4>
+              <div class="meta"><span class="tag">定数（音ファイル非依存）</span></div>
+              <p>
+                Setup のクレジットリンク用 URL のみ。音アセットを import しないので、
+                UI バンドルと音を分離しやすい。
+              </p>
+            </article>
+          </section>
+
+          <section id="audio">
+            <h3>BGM</h3>
+            <article class="module">
+              <h4>
+                <span class="path">src/audio/background-music.ts</span>
+              </h4>
+              <div class="meta"><span class="tag">副作用境界</span></div>
+              <dl class="exports">
+                <dt>BackgroundMusicController</dt>
+                <dd><code>{ play, pause, dispose }</code></dd>
+                <dt>BACKGROUND_MUSIC_VOLUME = 0.25</dt>
+                <dd>赤ちゃん向けに小さめ</dd>
+                <dt>createBackgroundMusic(options?)</dt>
+                <dd>
+                  トラックを 1 曲ランダム選択、loop、volume 設定。
+                  失敗時や空配列は <code>null</code>。
+                  play 失敗は握りつぶして視覚セッションを止めない。
+                  テスト用に tracks / random / createAudio を注入可能
+                </dd>
+              </dl>
+              <p>
+                ライフサイクル: 音ONで START 時に生成 → pause/resume/visibility で制御 →
+                finished または App unmount で dispose（src 除去 + load）。
+              </p>
+            </article>
+          </section>
+
+          <section id="a11y">
+            <h3>アクセシビリティ / フック</h3>
+
+            <article class="module">
+              <h4>
+                <span class="path">src/features/session/screen-a11y.ts</span>
+              </h4>
+              <dl class="exports">
+                <dt>SCREEN_HEADING_ID</dt>
+                <dd>各画面の見出し id（フォーカスターゲット）</dd>
+                <dt>documentTitleForStatus(status)</dt>
+                <dd>タブタイトル文字列</dd>
+                <dt>focusScreenHeading()</dt>
+                <dd><code>#screen-heading</code> に focus()</dd>
+              </dl>
+            </article>
+
+            <article class="module">
+              <h4>
+                <span class="path">src/features/session/use-focus-screen-heading-on-mount.ts</span>
+              </h4>
+              <p>
+                マウント時に見出しへフォーカス。<code>enabled=false</code> なら何もしない
+                （初回 Setup ではフォーカスを奪わない）。
+              </p>
+            </article>
+
+            <article class="module">
+              <h4>
+                <span class="path">src/features/session/use-session-document-title.ts</span>
+              </h4>
+              <p>status 変化に合わせて <code>document.title</code> を更新。App から使用。</p>
+            </article>
+          </section>
+
+          <section id="tests">
+            <h3>テスト関連</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>ファイル</th>
+                  <th>何を固定するか</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="path">session-reducer.test.ts</span></td>
+                  <td>状態遷移・不正アクション無視・時間計算</td>
+                </tr>
+                <tr>
+                  <td><span class="path">sequence.test.ts</span></td>
+                  <td>隣接色/形の非連続、duration 範囲、seed</td>
+                </tr>
+                <tr>
+                  <td><span class="path">roll.test.ts</span></td>
+                  <td>cast / pose の決定性や入場後の動き</td>
+                </tr>
+                <tr>
+                  <td><span class="path">canvas-buffer.test.ts</span></td>
+                  <td>DPR 上限</td>
+                </tr>
+                <tr>
+                  <td><span class="path">background-music.test.ts</span></td>
+                  <td>play/pause/dispose、失敗耐性</td>
+                </tr>
+                <tr>
+                  <td><span class="path">app.test.tsx</span></td>
+                  <td>画面統合・タイマー・BGM 連携</td>
+                </tr>
+                <tr>
+                  <td><span class="path">src/test/setup.ts</span></td>
+                  <td>Testing Library などの共通セットアップ</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="note">
+              状態遷移やタイミングを変えるときは
+              <a href="./testing.md">testing.md</a> に従い、先に失敗テストを足す（TDD）。
+            </div>
+          </section>
+        </section>
+
+        <section id="data-flow">
+          <h2>4. データの流れ図</h2>
+          <div class="flow">
+            <pre><code>main.tsx
+  └─ App
+       ├─ sessionReducer  ←── dispatch(アクション)
+       │     └─ SessionState (setup|playing|paused|finished)
+       │
+       ├─ sequence[sceneIndex] → Scene
+       │
+       ├─ SetupScreen ← preferences / onChange* / onStart
+       ├─ PlayerScreen ← state + scene
+       │     └─ SceneStage (memo)
+       │           └─ RollCanvas
+       │                 ├─ createRollCast / sampleActorPose  (roll.ts)
+       │                 └─ paintRollFrame                   (draw-shape.ts)
+       │                       └─ getColor/getShape 由来の色・形
+       └─ FinishScreen ← onReset
+
+副作用（App の useEffect / ハンドラ）:
+  Date.now タイマー → TICK / NEXT_SCENE
+  createBackgroundMusic → play / pause / dispose
+  document.visibilitychange → BGM</code></pre>
+          </div>
+        </section>
+
+        <section id="review-tips">
+          <h2>5. レビューの観点（次に見るとき）</h2>
+          <ol>
+            <li>
+              <strong>境界</strong> — ルールは Reducer、副作用は App、見た目は components、
+              データは content に収まっているか
+            </li>
+            <li>
+              <strong>安全制約</strong> — 初期 1 分・音 OFF・自動リピートなし・
+              finished 後は RESET のみ（product-spec）
+            </li>
+            <li>
+              <strong>タイマー二系統</strong> — pause / タブ非表示でセッション進行・シーン・
+              Canvas・BGM が止まるか
+            </li>
+            <li>
+              <strong>純粋さ</strong> — reducer / sequence / roll に DOM や
+              <code>Date.now()</code> が混ざっていないか（now はアクション引数で渡す）
+            </li>
+            <li>
+              <strong>テスト先行</strong> — 遷移変更なら失敗テストが先か
+            </li>
+          </ol>
+        </section>
+
+        <section id="glossary">
+          <h2>6. 用語メモ</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>言葉</th>
+                <th>意味</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>セッション</td>
+                <td>Setup から Finished までの 1 回のお遊び</td>
+              </tr>
+              <tr>
+                <td>シーン</td>
+                <td>色+形+dwell 時間の 1 コマ。6–8 秒で次へ</td>
+              </tr>
+              <tr>
+                <td>deadline</td>
+                <td>セッション終了予定の絶対時刻（playing 中のみ）</td>
+              </tr>
+              <tr>
+                <td>dispatch</td>
+                <td>Reducer にアクションを送ること</td>
+              </tr>
+              <tr>
+                <td>dwell</td>
+                <td>1 シーンを表示し続ける時間</td>
+              </tr>
+              <tr>
+                <td>FSM</td>
+                <td>有限状態機械。ここでは session の status 遷移</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
