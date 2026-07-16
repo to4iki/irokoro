@@ -258,15 +258,7 @@ export function RollCanvas(props: RollCanvasProps) {
       resizeObserver.disconnect();
       loopControlRef.current = null;
     };
-  }, [
-    sceneId,
-    sceneDurationMs,
-    kind,
-    shapeId,
-    shapeColor,
-    animalImage,
-    rotationStyle,
-  ]);
+  }, [sceneId, sceneDurationMs, kind, shapeId, shapeColor, animalImage, rotationStyle]);
 
   useEffect(() => {
     const control = loopControlRef.current;
