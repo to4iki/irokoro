@@ -46,5 +46,5 @@
 | 機能 | 仕様 | 状態 |
 |------|------|------|
 | どうぶつパック | [feature-animals-pack.md](./feature-animals-pack.md) | 実装済み（16 点） |
-| タッチ反応「ぽん」 | [feature-touch-pon.md](./feature-touch-pon.md) | 未実装 |
+| タッチ反応「ぽん」 | [feature-touch-pon.md](./feature-touch-pon.md) | 実装済み |
 | かおのゆるい変形 | [feature-face-expressions.md](./feature-face-expressions.md) | 未実装 |

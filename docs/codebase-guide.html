@@ -310,6 +310,7 @@
               <li><a href="#sequence">シーケンス</a></li>
               <li><a href="#components">画面コンポーネント</a></li>
               <li><a href="#canvas">転がり / Canvas</a></li>
+              <li><a href="#touch-pon">タッチ反応「ぽん」</a></li>
               <li><a href="#content">コンテンツ</a></li>
               <li><a href="#animals-pack">どうぶつパック</a></li>
               <li><a href="#audio">BGM</a></li>
@@ -750,6 +751,8 @@
               <p>
                 Canvas 2D の描画ループ。paused またはタブ非表示では rAF を止め、
                 現フレームだけ描く。リサイズは ResizeObserver。
+                playing 中の <code>pointerdown</code>（<code>isPrimary</code> のみ）で
+                「ぽん」反応を開始する（Reducer 非関与）。
               </p>
               <dl class="exports">
                 <dt>props</dt>
@@ -763,6 +766,7 @@
                   <code>createRollCast(sceneId)</code> →
                   毎フレーム <code>sampleActorPose(..., rotationStyle)</code>
                   （animals は <code>tilt</code>、colors は <code>spin</code>） →
+                  pose.scale に <code>ponScaleFactor</code> を乗算 →
                   <code>paintRollFrame</code>（<code>PaintSubject</code>）
                 </dd>
               </dl>
@@ -832,6 +836,49 @@
                 <dd>canvas.width/height 用の整数サイズと実際の ratio</dd>
               </dl>
             </article>
+          </section>
+
+          <section id="touch-pon">
+            <h3>タッチ反応「ぽん」</h3>
+            <p>
+              再生中に scene（Canvas）を触ると、近い図形が短く膨らんで戻る。
+              セッション進行・deadline・シーン切替には影響しない UI エフェクト。
+              仕様の「なぜ」は
+              <a href="./product-spec/feature-touch-pon.md">feature-touch-pon.md</a>。
+            </p>
+
+            <article class="module">
+              <h4>
+                <span class="path">src/features/session/touch-pon.ts</span>
+              </h4>
+              <div class="meta"><span class="tag">純粋</span></div>
+              <dl class="exports">
+                <dt>ponScaleFactor(elapsedMs)</dt>
+                <dd>
+                  反応開始からの経過 → スケール倍率。ピーク
+                  <code>PON_PEAK_SCALE</code>（1.15）、上昇 100ms / 復帰 220ms
+                </dd>
+                <dt>pickPonActorIndex(poses, tapX, tapY)</dt>
+                <dd>
+                  中心距離が最も近いアクター。半径
+                  <code>PON_HIT_RADIUS</code> 外なら primary（index 0）
+                </dd>
+                <dt>cssPointToPose(cssX, cssY, cssW, cssH)</dt>
+                <dd>Canvas CSS 座標 → pose 正規化座標</dd>
+                <dt>PON_RATE_LIMIT_MS = 250</dt>
+                <dd>新規反応の全体レート制限（点滅相当の連打を防ぐ）</dd>
+              </dl>
+            </article>
+
+            <div class="callout">
+              <strong>レビュー時の要点</strong>
+              <ul>
+                <li>paused では反応しないか</li>
+                <li>完了まで無視 + 250ms レート制限が入っているか</li>
+                <li>マルチタッチが <code>isPrimary</code> のみか</li>
+                <li>Reducer / タイマーに副作用がないか</li>
+              </ul>
+            </div>
           </section>
 
           <section id="content">
@@ -1055,6 +1102,7 @@
        ├─ PlayerScreen ← state + scene
        │     └─ SceneStage (memo)
        │           └─ RollCanvas (kind: shape | animal)
+       │                 ├─ pointerdown → touch-pon.ts（対象選定・scale）
        │                 ├─ createRollCast / sampleActorPose(…, spin|tilt)
        │                 └─ paintRollFrame(PaintSubject)
        │                       └─ 色+形 or getAnimalImage
@@ -1091,7 +1139,11 @@
             </li>
             <li>
               <strong>パック分岐</strong> — Scene / RollCanvas / paint の判別が
-              colors と animals で一貫しているか（どうぶつ PR）
+              colors と animals で一貫しているか
+            </li>
+            <li>
+              <strong>ぽん</strong> — 触覚反応がセッション時間やシーン進行を
+              変えていないか
             </li>
           </ol>
         </section>
@@ -1141,6 +1193,12 @@
               <tr>
                 <td>FSM</td>
                 <td>有限状態機械。ここでは session の status 遷移</td>
+              </tr>
+              <tr>
+                <td>ぽん</td>
+                <td>
+                  playing 中の短いスケール反応。Reducer 外の Canvas エフェクト
+                </td>
               </tr>
             </tbody>
           </table>
