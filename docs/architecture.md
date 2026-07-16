@@ -16,6 +16,7 @@ Setup → Playing ↔ Paused → Finished → Setup
 - `finished` からの再開は `RESET` 経由のみ（自動リピートなし）
 
 副作用（タイマー、BGM）は `src/app.tsx` に置き、Reducer は純粋に保つ。
+再生中の残り時間 TICK / シーン送りは `startTransition` で送り、一時停止・終了操作を優先する。
 
 ## ディレクトリ
 
@@ -31,7 +32,7 @@ Setup → Playing ↔ Paused → Finished → Setup
 
 - ブランド色・余白などのトークンは `src/styles.css` の `@theme`
 - レイアウトは Tailwind ユーティリティ
-- 再生中の図形モーションは Canvas 2D（`requestAnimationFrame`）。一時停止中およびタブ非表示中はループを止める
+- 再生中の図形モーションは Canvas 2D（`requestAnimationFrame`）。一時停止中およびタブ非表示中はループを止める。pause / visibility は ref で見て、ResizeObserver と cast を作り直さない
 - Player の scene 領域全体を Canvas stage とし、pose の x/y は幅・高さ基準で描画する。backing store の DPR は上限付き（`resolveCanvasBufferSize`）
 - playing 中の scene タップ「ぽん」は `src/features/session/touch-pon.ts` の純粋関数で対象選定とスケール曲線を決め、Canvas 描画時に scale を乗算する（Reducer 非関与）
 - `colors` 図形のかお（smile→surprise）は `src/features/session/face.ts` の純粋補間で進め、`draw-shape.ts` が path 描画直後に乗せる

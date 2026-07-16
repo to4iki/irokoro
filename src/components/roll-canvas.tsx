@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { getAnimalImage } from "../content/animals";
 import type { ShapeId } from "../content/packs";
 import { resolveCanvasBufferSize } from "../features/session/canvas-buffer";
@@ -43,14 +43,23 @@ function readDocumentVisible(): boolean {
   return typeof document === "undefined" || document.visibilityState !== "hidden";
 }
 
+/**
+ * Canvas motion loop. Pause / tab visibility are refs so they start/stop the
+ * rAF loop without tearing down ResizeObserver + cast (vercel
+ * rerender-use-ref-transient-values).
+ */
 export function RollCanvas(props: RollCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const elapsedRef = useRef(0);
   const sceneIdRef = useRef(props.sceneId);
   const pausedRef = useRef(props.paused);
+  const visibleRef = useRef(readDocumentVisible());
   const ponRef = useRef<ActivePon | null>(null);
   const lastPonStartMsRef = useRef<number | null>(null);
-  const [documentVisible, setDocumentVisible] = useState(readDocumentVisible);
+  const loopControlRef = useRef<{
+    start: () => void;
+    stopAndFreeze: () => void;
+  } | null>(null);
 
   const sceneId = props.sceneId;
   const paused = props.paused;
@@ -71,12 +80,6 @@ export function RollCanvas(props: RollCanvasProps) {
   }
 
   useEffect(() => {
-    const onVisibility = () => setDocumentVisible(readDocumentVisible());
-    document.addEventListener("visibilitychange", onVisibility);
-    return () => document.removeEventListener("visibilitychange", onVisibility);
-  }, []);
-
-  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) {
       return;
@@ -93,6 +96,8 @@ export function RollCanvas(props: RollCanvasProps) {
     let cssHeight = Math.max(1, canvas.clientHeight);
     let lastWidth = 0;
     let lastHeight = 0;
+    let baseElapsed = 0;
+    let loopStartedAt = 0;
 
     const syncBuffer = () => {
       const { width, height } = resolveCanvasBufferSize(
@@ -138,6 +143,38 @@ export function RollCanvas(props: RollCanvasProps) {
         poses: posesAt(elapsedMs),
       });
     };
+
+    const stopLoop = () => {
+      if (frameId !== 0) {
+        window.cancelAnimationFrame(frameId);
+        frameId = 0;
+      }
+    };
+
+    const stopAndFreeze = () => {
+      stopLoop();
+      paintAt(elapsedRef.current);
+    };
+
+    const startLoop = () => {
+      if (frameId !== 0 || pausedRef.current || !visibleRef.current) {
+        return;
+      }
+      baseElapsed = elapsedRef.current;
+      loopStartedAt = performance.now();
+      const tick = (now: number) => {
+        if (pausedRef.current || !visibleRef.current) {
+          frameId = 0;
+          return;
+        }
+        elapsedRef.current = baseElapsed + (now - loopStartedAt);
+        paintAt(elapsedRef.current);
+        frameId = window.requestAnimationFrame(tick);
+      };
+      frameId = window.requestAnimationFrame(tick);
+    };
+
+    loopControlRef.current = { start: startLoop, stopAndFreeze };
 
     const onPointerDown = (event: PointerEvent) => {
       if (pausedRef.current || !event.isPrimary) {
@@ -190,48 +227,52 @@ export function RollCanvas(props: RollCanvasProps) {
       if (nextHeight > 0) {
         cssHeight = nextHeight;
       }
-      if (paused || !documentVisible) {
+      if (pausedRef.current || !visibleRef.current) {
         paintAt(elapsedRef.current);
       }
     });
     resizeObserver.observe(canvas);
 
-    if (paused || !documentVisible) {
+    const onVisibility = () => {
+      visibleRef.current = readDocumentVisible();
+      if (visibleRef.current && !pausedRef.current) {
+        startLoop();
+        return;
+      }
+      stopAndFreeze();
+    };
+
+    document.addEventListener("visibilitychange", onVisibility);
+
+    if (pausedRef.current || !visibleRef.current) {
       paintAt(elapsedRef.current);
-      return () => {
-        canvas.removeEventListener("pointerdown", onPointerDown);
-        animalImage?.removeEventListener("load", onAnimalLoad);
-        resizeObserver.disconnect();
-      };
+    } else {
+      startLoop();
     }
 
-    const baseElapsed = elapsedRef.current;
-    const loopStartedAt = performance.now();
-
-    const tick = (now: number) => {
-      elapsedRef.current = baseElapsed + (now - loopStartedAt);
-      paintAt(elapsedRef.current);
-      frameId = window.requestAnimationFrame(tick);
-    };
-
-    frameId = window.requestAnimationFrame(tick);
     return () => {
-      window.cancelAnimationFrame(frameId);
+      document.removeEventListener("visibilitychange", onVisibility);
       canvas.removeEventListener("pointerdown", onPointerDown);
       animalImage?.removeEventListener("load", onAnimalLoad);
+      stopLoop();
       resizeObserver.disconnect();
+      loopControlRef.current = null;
     };
-  }, [
-    sceneId,
-    sceneDurationMs,
-    kind,
-    shapeId,
-    shapeColor,
-    animalImage,
-    paused,
-    documentVisible,
-    rotationStyle,
-  ]);
+  }, [sceneId, sceneDurationMs, kind, shapeId, shapeColor, animalImage, rotationStyle]);
+
+  useEffect(() => {
+    const control = loopControlRef.current;
+    if (!control) {
+      return;
+    }
+    if (paused) {
+      control.stopAndFreeze();
+      return;
+    }
+    if (visibleRef.current) {
+      control.start();
+    }
+  }, [paused]);
 
   return (
     <div aria-hidden="true" className="h-full w-full">

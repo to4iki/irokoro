@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useReducer, useRef } from "react";
+import { lazy, Suspense, startTransition, useEffect, useReducer, useRef } from "react";
 import {
   type BackgroundMusicController,
   createBackgroundMusic,
@@ -39,6 +39,8 @@ export default function App({ sequence }: AppProps) {
   const sceneRemainRef = useRef<{ id: string; remainingMs: number } | null>(null);
   /** >0 after a finished→setup hop so Setup can take focus without stealing it on first load. */
   const setupFocusEpochRef = useRef(0);
+  const statusRef = useRef(state.status);
+  statusRef.current = state.status;
 
   useSessionDocumentTitle(state.status);
 
@@ -52,13 +54,20 @@ export default function App({ sequence }: AppProps) {
 
   const status = state.status;
   const deadline = status === "playing" ? state.deadline : null;
+  // Narrow effect deps to a boolean (vercel rerender-dependencies).
+  const sessionActive = status === "playing" || status === "paused";
 
   useEffect(() => {
     if (status !== "playing" || deadline === null) {
       return;
     }
 
-    const tick = () => dispatch({ type: "TICK", now: Date.now() });
+    const tick = () => {
+      // Timer UI is non-urgent; keep pause/stop clicks snappy (vercel rerender-transitions).
+      startTransition(() => {
+        dispatch({ type: "TICK", now: Date.now() });
+      });
+    };
     tick();
     const timer = window.setInterval(tick, 250);
     return () => window.clearInterval(timer);
@@ -83,7 +92,9 @@ export default function App({ sequence }: AppProps) {
     const budget = active.remainingMs;
     const startedAt = Date.now();
     const timer = window.setTimeout(() => {
-      dispatch({ type: "NEXT_SCENE" });
+      startTransition(() => {
+        dispatch({ type: "NEXT_SCENE" });
+      });
     }, budget);
 
     return () => {
@@ -108,7 +119,7 @@ export default function App({ sequence }: AppProps) {
   }, [status]);
 
   useEffect(() => {
-    if (status !== "playing" && status !== "paused") {
+    if (!sessionActive) {
       return;
     }
 
@@ -117,14 +128,16 @@ export default function App({ sequence }: AppProps) {
         audioRef.current?.pause();
         return;
       }
-      if (status === "playing") {
+      // Read latest status via ref so playing↔paused does not re-subscribe
+      // (vercel advanced-event-handler-refs).
+      if (statusRef.current === "playing") {
         audioRef.current?.play();
       }
     };
 
     document.addEventListener("visibilitychange", onVisibility);
     return () => document.removeEventListener("visibilitychange", onVisibility);
-  }, [status]);
+  }, [sessionActive]);
 
   useEffect(
     () => () => {

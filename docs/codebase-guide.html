@@ -531,7 +531,8 @@
                 <dd>
                   <code>audioRef</code>（BGM）、
                   <code>sceneRemainRef</code>（シーン残り ms）、
-                  <code>setupFocusEpochRef</code>（Finish→Setup で見出しフォーカスするか）
+                  <code>setupFocusEpochRef</code>（Finish→Setup で見出しフォーカスするか）、
+                  <code>statusRef</code>（visibility ハンドラ用の最新 status）
                 </dd>
               </dl>
               <p><strong>やっていること</strong></p>
@@ -547,10 +548,20 @@
                 <li>
                   effects:
                   <ul>
-                    <li>playing + deadline → 250ms <code>TICK</code></li>
-                    <li>playing → シーン setTimeout → <code>NEXT_SCENE</code></li>
+                    <li>
+                      playing + deadline → 250ms <code>TICK</code>
+                      （<code>startTransition</code>）
+                    </li>
+                    <li>
+                      playing → シーン setTimeout → <code>NEXT_SCENE</code>
+                      （<code>startTransition</code>）
+                    </li>
                     <li>finished → BGM dispose・sceneRemain クリア</li>
-                    <li>playing/paused → visibilitychange で BGM pause/play</li>
+                    <li>
+                      <code>sessionActive</code>（playing|paused）のあいだだけ
+                      visibilitychange を購読。playing↔paused では張り直さず
+                      <code>statusRef</code> で最新を読む
+                    </li>
                     <li>unmount → BGM dispose</li>
                   </ul>
                 </li>
@@ -759,8 +770,9 @@
               </h4>
               <div class="meta"><span class="tag">UI + rAF ループ</span></div>
               <p>
-                Canvas 2D の描画ループ。paused またはタブ非表示では rAF を止め、
-                現フレームだけ描く。リサイズは ResizeObserver。
+                Canvas 2D の描画ループ。paused / タブ非表示は ref で見て rAF だけ
+                start/stop する（ResizeObserver と cast は作り直さない）。
+                リサイズは ResizeObserver。
                 playing 中の <code>pointerdown</code>（<code>isPrimary</code> のみ）で
                 「ぽん」反応を開始する（Reducer 非関与）。
               </p>
@@ -1164,9 +1176,9 @@
        └─ FinishScreen ← onReset
 
 副作用（App の useEffect / ハンドラ）:
-  Date.now タイマー → TICK / NEXT_SCENE
+  Date.now タイマー → startTransition(TICK / NEXT_SCENE)
   createBackgroundMusic → play / pause / dispose
-  document.visibilitychange → BGM</code></pre>
+  document.visibilitychange → BGM（sessionActive 中のみ）</code></pre>
           </div>
         </section>
 
@@ -1188,7 +1200,8 @@
             </li>
             <li>
               <strong>タイマー二系統</strong> — pause / タブ非表示でセッション進行・シーン・
-              Canvas・BGM が止まるか
+              Canvas・BGM が止まるか。<code>TICK</code> は transition で、
+              操作系 dispatch をブロックしないか
             </li>
             <li>
               <strong>純粋さ</strong> — reducer / sequence / roll に DOM や
