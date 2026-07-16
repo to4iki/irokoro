@@ -1,5 +1,5 @@
-/** Peak scale for the calm “pon” reaction (spec 1.12–1.18). */
-export const PON_PEAK_SCALE = 1.15;
+/** Peak scale for the calm “pon” reaction (spec ~1.35). */
+export const PON_PEAK_SCALE = 1.35;
 export const PON_RISE_MS = 100;
 export const PON_FALL_MS = 220;
 export const PON_TOTAL_MS = PON_RISE_MS + PON_FALL_MS;

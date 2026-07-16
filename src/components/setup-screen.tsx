@@ -1,4 +1,3 @@
-import { IRASUTOYA_SITE_URL } from "../content/animal-credits";
 import { MOMIJIBA_SITE_URL } from "../content/music-credits";
 import { PACK_CHOICES, type PackId } from "../content/packs";
 import { SCREEN_HEADING_ID } from "../features/session/screen-a11y";
@@ -135,12 +134,7 @@ export function SetupScreen({
           </fieldset>
 
           <div className="flex min-h-[58px] items-center justify-between gap-3 rounded-[15px] border border-line bg-white/60 px-3 py-2.5 max-[360px]:min-h-[54px] max-[360px]:py-1.5">
-            <div>
-              <p className="text-[0.82rem] font-extrabold text-ink">音をつける</p>
-              <p className="mt-0.5 text-[0.64rem] leading-[1.4] text-[#576b79]">
-                再生中にやさしいBGMを流します。端末音量もご確認ください。
-              </p>
-            </div>
+            <p className="text-[0.82rem] font-extrabold text-ink">音をつける</p>
             <label className="relative shrink-0 cursor-pointer">
               <span className="sr-only">音をつける</span>
               <input
@@ -178,16 +172,6 @@ export function SetupScreen({
             target="_blank"
           >
             もみじばミュージック
-          </a>
-          <br />
-          どうぶつイラスト:{" "}
-          <a
-            className="font-extrabold text-ink underline decoration-[#8aa0ae] underline-offset-2 transition-colors hover:text-coral focus-visible:text-coral"
-            href={IRASUTOYA_SITE_URL}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            いらすとや
           </a>
         </p>
 

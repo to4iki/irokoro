@@ -100,8 +100,7 @@ export function paintRollFrame(
   ctx.clearRect(0, 0, width, height);
 
   const minSide = Math.min(width, height);
-  // Animals sit a touch smaller than filled shapes so silhouettes stay clear.
-  const baseSize = minSide * (subject.kind === "animal" ? 0.42 : 0.48);
+  const baseSize = minSide * 0.56;
 
   for (const pose of poses) {
     // Pose x/y are normalized to the full scene stage (±1 ≈ edge).

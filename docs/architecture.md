@@ -36,7 +36,8 @@ Setup → Playing ↔ Paused → Finished → Setup
 - Player の scene 領域全体を Canvas stage とし、pose の x/y は幅・高さ基準で描画する。backing store の DPR は上限付き（`resolveCanvasBufferSize`）
 - playing 中の scene タップ「ぽん」は `src/features/session/touch-pon.ts` の純粋関数で対象選定とスケール曲線を決め、Canvas 描画時に scale を乗算する（Reducer 非関与）
 - シーン入場フェードと背景クロスフェードは CSS
-- Setup のクレジット表示は `src/content/music-credits.ts`（音源 import 非依存）と `src/content/animal-credits.ts`（画像 import 非依存）を参照する
+- Setup のクレジット表示は `src/content/music-credits.ts`（音源 import 非依存）を参照する
+- どうぶつイラストのクレジット定数は `src/content/animal-credits.ts` に残すが、Setup では表示しない（いらすとやは表記必須ではない）
 - どうぶつ画像は `src/content/animals.ts` から ESM import し、Canvas では `drawImage` で描画する。回転は `tilt`（±12°）
 
 ## デプロイ

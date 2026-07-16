@@ -70,10 +70,11 @@ describe("App", () => {
     expect(screen.getByRole("radio", { name: "どうぶつ" })).not.toBeChecked();
     expect(screen.getByRole("radio", { name: "1分" })).toBeChecked();
     expect(screen.getByRole("checkbox", { name: "音をつける" })).not.toBeChecked();
-    expect(screen.getByRole("link", { name: "いらすとや" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "もみじばミュージック" })).toHaveAttribute(
       "href",
-      "https://www.irasutoya.com/",
+      "https://music.storyinvention.com/",
     );
+    expect(screen.queryByRole("link", { name: "いらすとや" })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
     await flushLazyScreens();

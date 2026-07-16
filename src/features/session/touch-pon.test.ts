@@ -22,8 +22,8 @@ describe("touch pon", () => {
 
     expect(midRise).toBeGreaterThan(1);
     expect(midRise).toBeLessThan(peak);
-    expect(peak).toBeGreaterThanOrEqual(1.12);
-    expect(peak).toBeLessThanOrEqual(1.18);
+    expect(peak).toBeGreaterThanOrEqual(1.3);
+    expect(peak).toBeLessThanOrEqual(1.4);
     expect(peak).toBeCloseTo(PON_PEAK_SCALE, 5);
     expect(midFall).toBeLessThan(peak);
     expect(midFall).toBeGreaterThan(1);
