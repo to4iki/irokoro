@@ -7,6 +7,7 @@ describe("createSceneSequence", () => {
     fc.assert(
       fc.property(fc.integer(), fc.integer({ min: 2, max: 64 }), (seed, length) => {
         const scenes = createSceneSequence({
+          packId: "colors",
           length,
           random: createSeededRandom(seed),
         });
@@ -14,11 +15,36 @@ describe("createSceneSequence", () => {
         return scenes.every((scene, index) => {
           const previous = scenes[index - 1];
           return (
+            scene.packId === "colors" &&
             scene.durationMs >= SCENE_DURATION_MS.min &&
             scene.durationMs <= SCENE_DURATION_MS.max &&
-            (!previous ||
+            (previous?.packId !== "colors" ||
               (scene.colorId !== previous.colorId &&
                 scene.shapeId !== previous.shapeId))
+          );
+        });
+      }),
+    );
+  });
+
+  it("keeps calm dwell times and avoids adjacent color/animal repeats for animals pack", () => {
+    fc.assert(
+      fc.property(fc.integer(), fc.integer({ min: 2, max: 64 }), (seed, length) => {
+        const scenes = createSceneSequence({
+          packId: "animals",
+          length,
+          random: createSeededRandom(seed),
+        });
+
+        return scenes.every((scene, index) => {
+          const previous = scenes[index - 1];
+          return (
+            scene.packId === "animals" &&
+            scene.durationMs >= SCENE_DURATION_MS.min &&
+            scene.durationMs <= SCENE_DURATION_MS.max &&
+            (previous?.packId !== "animals" ||
+              (scene.colorId !== previous.colorId &&
+                scene.animalId !== previous.animalId))
           );
         });
       }),

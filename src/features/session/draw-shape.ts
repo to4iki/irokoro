@@ -67,21 +67,41 @@ function drawShapePath(ctx: CanvasRenderingContext2D, shapeId: ShapeId, size: nu
   }
 }
 
+function drawAnimalImage(
+  ctx: CanvasRenderingContext2D,
+  image: HTMLImageElement,
+  size: number,
+) {
+  if (image.naturalWidth <= 0 || image.naturalHeight <= 0) {
+    return;
+  }
+
+  const aspect = image.naturalWidth / image.naturalHeight;
+  const box = size * 0.9;
+  const width = aspect >= 1 ? box : box * aspect;
+  const height = aspect >= 1 ? box / aspect : box;
+  ctx.drawImage(image, -width / 2, -height / 2, width, height);
+}
+
+export type PaintSubject =
+  | { kind: "shape"; shapeId: ShapeId; shapeColor: string }
+  | { kind: "animal"; image: HTMLImageElement | null };
+
 export function paintRollFrame(
   ctx: CanvasRenderingContext2D,
   options: {
     width: number;
     height: number;
-    shapeId: ShapeId;
-    shapeColor: string;
+    subject: PaintSubject;
     poses: readonly ActorPose[];
   },
 ) {
-  const { width, height, shapeId, shapeColor, poses } = options;
+  const { width, height, subject, poses } = options;
   ctx.clearRect(0, 0, width, height);
 
   const minSide = Math.min(width, height);
-  const baseSize = minSide * 0.48;
+  // Animals sit a touch smaller than filled shapes so silhouettes stay clear.
+  const baseSize = minSide * (subject.kind === "animal" ? 0.42 : 0.48);
 
   for (const pose of poses) {
     // Pose x/y are normalized to the full scene stage (±1 ≈ edge).
@@ -93,9 +113,13 @@ export function paintRollFrame(
     ctx.globalAlpha = pose.opacity;
     ctx.translate(cx, cy);
     ctx.rotate(pose.rotationRad);
-    drawShapePath(ctx, shapeId, size);
-    ctx.fillStyle = shapeColor;
-    ctx.fill();
+    if (subject.kind === "shape") {
+      drawShapePath(ctx, subject.shapeId, size);
+      ctx.fillStyle = subject.shapeColor;
+      ctx.fill();
+    } else if (subject.image) {
+      drawAnimalImage(ctx, subject.image, size);
+    }
     ctx.restore();
   }
 }

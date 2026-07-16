@@ -1,25 +1,49 @@
 import { useEffect, useRef, useState } from "react";
+import { getAnimalImage } from "../content/animals";
 import type { ShapeId } from "../content/packs";
 import { resolveCanvasBufferSize } from "../features/session/canvas-buffer";
 import { paintRollFrame } from "../features/session/draw-shape";
-import { createRollCast, sampleActorPose } from "../features/session/roll";
+import {
+  createRollCast,
+  type RotationStyle,
+  sampleActorPose,
+} from "../features/session/roll";
 
-type RollCanvasProps = {
+type ShapeCanvasProps = {
+  kind: "shape";
   sceneId: string;
   shapeId: ShapeId;
   shapeColor: string;
   paused: boolean;
 };
 
+type AnimalCanvasProps = {
+  kind: "animal";
+  sceneId: string;
+  imageSrc: string;
+  paused: boolean;
+};
+
+type RollCanvasProps = ShapeCanvasProps | AnimalCanvasProps;
+
 function readDocumentVisible(): boolean {
   return typeof document === "undefined" || document.visibilityState !== "hidden";
 }
 
-export function RollCanvas({ sceneId, shapeId, shapeColor, paused }: RollCanvasProps) {
+export function RollCanvas(props: RollCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const elapsedRef = useRef(0);
-  const sceneIdRef = useRef(sceneId);
+  const sceneIdRef = useRef(props.sceneId);
   const [documentVisible, setDocumentVisible] = useState(readDocumentVisible);
+
+  const sceneId = props.sceneId;
+  const paused = props.paused;
+  const kind = props.kind;
+  const shapeId = props.kind === "shape" ? props.shapeId : null;
+  const shapeColor = props.kind === "shape" ? props.shapeColor : null;
+  const animalSrc = props.kind === "animal" ? props.imageSrc : null;
+  const rotationStyle: RotationStyle = kind === "animal" ? "tilt" : "spin";
+  const animalImage = animalSrc ? getAnimalImage(animalSrc) : null;
 
   if (sceneIdRef.current !== sceneId) {
     sceneIdRef.current = sceneId;
@@ -69,11 +93,16 @@ export function RollCanvas({ sceneId, shapeId, shapeColor, paused }: RollCanvasP
       paintRollFrame(context, {
         width: canvas.width,
         height: canvas.height,
-        shapeId,
-        shapeColor,
-        poses: cast.map((actor) => sampleActorPose(actor, elapsedMs)),
+        subject:
+          kind === "shape" && shapeId && shapeColor
+            ? { kind: "shape", shapeId, shapeColor }
+            : { kind: "animal", image: animalImage },
+        poses: cast.map((actor) => sampleActorPose(actor, elapsedMs, rotationStyle)),
       });
     };
+
+    const onAnimalLoad = () => paintAt(elapsedRef.current);
+    animalImage?.addEventListener("load", onAnimalLoad);
 
     const resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0];
@@ -97,6 +126,7 @@ export function RollCanvas({ sceneId, shapeId, shapeColor, paused }: RollCanvasP
     if (paused || !documentVisible) {
       paintAt(elapsedRef.current);
       return () => {
+        animalImage?.removeEventListener("load", onAnimalLoad);
         resizeObserver.disconnect();
       };
     }
@@ -113,9 +143,19 @@ export function RollCanvas({ sceneId, shapeId, shapeColor, paused }: RollCanvasP
     frameId = window.requestAnimationFrame(tick);
     return () => {
       window.cancelAnimationFrame(frameId);
+      animalImage?.removeEventListener("load", onAnimalLoad);
       resizeObserver.disconnect();
     };
-  }, [sceneId, shapeId, shapeColor, paused, documentVisible]);
+  }, [
+    sceneId,
+    kind,
+    shapeId,
+    shapeColor,
+    animalImage,
+    paused,
+    documentVisible,
+    rotationStyle,
+  ]);
 
   return (
     <div aria-hidden="true" className="h-full w-full">

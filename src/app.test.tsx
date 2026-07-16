@@ -11,12 +11,14 @@ vi.mock("./audio/background-music", () => ({
 const TEST_SEQUENCE: Scene[] = [
   {
     id: "blue-circle",
+    packId: "colors",
     colorId: "blue",
     shapeId: "circle",
     durationMs: 5_000,
   },
   {
     id: "yellow-triangle",
+    packId: "colors",
     colorId: "yellow",
     shapeId: "triangle",
     durationMs: 5_000,
@@ -65,13 +67,29 @@ describe("App", () => {
     render(<App sequence={TEST_SEQUENCE} />);
 
     expect(screen.getByRole("radio", { name: "いろ" })).toBeChecked();
+    expect(screen.getByRole("radio", { name: "どうぶつ" })).not.toBeChecked();
     expect(screen.getByRole("radio", { name: "1分" })).toBeChecked();
     expect(screen.getByRole("checkbox", { name: "音をつける" })).not.toBeChecked();
+    expect(screen.getByRole("link", { name: "いらすとや" })).toHaveAttribute(
+      "href",
+      "https://www.irasutoya.com/",
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
     await flushLazyScreens();
 
     expect(screen.getByRole("main", { name: "いろの再生画面" })).toBeVisible();
+    expect(createBackgroundMusic).not.toHaveBeenCalled();
+  });
+
+  it("starts the animals pack without changing safe sound defaults", async () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("radio", { name: "どうぶつ" }));
+    fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
+    await flushLazyScreens();
+
+    expect(screen.getByRole("main", { name: "どうぶつの再生画面" })).toBeVisible();
     expect(createBackgroundMusic).not.toHaveBeenCalled();
   });
 

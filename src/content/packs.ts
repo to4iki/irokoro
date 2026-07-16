@@ -1,3 +1,5 @@
+import { ANIMALS, type AnimalId } from "./animals";
+
 /** High-contrast primary pairs inspired by Sassy baby-book pages. */
 export const COLORS = [
   {
@@ -74,7 +76,7 @@ export const COLORS = [
   },
 ] as const;
 
-/** Visual variety within the colors pack. Animals pack will replace this later. */
+/** Visual variety within the colors pack. */
 export const SHAPES = [
   { id: "circle", label: "まる" },
   { id: "triangle", label: "さんかく" },
@@ -84,7 +86,7 @@ export const SHAPES = [
 
 export type ColorId = (typeof COLORS)[number]["id"];
 export type ShapeId = (typeof SHAPES)[number]["id"];
-export type PackId = "colors";
+export type PackId = "colors" | "animals";
 
 export type ContentPack = {
   id: PackId;
@@ -93,19 +95,11 @@ export type ContentPack = {
   description: string;
 };
 
-export type PackChoice =
-  | {
-      id: PackId;
-      shortLabel: string;
-      detail: string;
-      available: true;
-    }
-  | {
-      id: "animals";
-      shortLabel: string;
-      detail: string;
-      available: false;
-    };
+export type PackChoice = {
+  id: PackId;
+  shortLabel: string;
+  detail: string;
+};
 
 const colorById = new Map(COLORS.map((color) => [color.id, color]));
 const shapeById = new Map(SHAPES.map((shape) => [shape.id, shape]));
@@ -117,21 +111,25 @@ export const CONTENT_PACKS: Record<PackId, ContentPack> = {
     title: "いろを みつけよう",
     description: "背景の色を、ゆっくり声に出してみましょう。",
   },
+  animals: {
+    id: "animals",
+    shortLabel: "どうぶつ",
+    title: "どうぶつを みつけよう",
+    description: "どうぶつのなまえを、ゆっくり声に出してみましょう。",
+  },
 };
 
-/** Setup choices: only colors is playable; animals is a reserved slot. */
+/** Setup choices: colors and animals are both playable. */
 export const PACK_CHOICES: readonly PackChoice[] = [
   {
     id: "colors",
     shortLabel: "いろ",
     detail: `${COLORS.length}つの色`,
-    available: true,
   },
   {
     id: "animals",
     shortLabel: "どうぶつ",
-    detail: "もうすぐ",
-    available: false,
+    detail: `${ANIMALS.length}つのどうぶつ`,
   },
 ];
 
@@ -150,3 +148,5 @@ export function getShape(id: ShapeId) {
   }
   return shape;
 }
+
+export type { AnimalId };

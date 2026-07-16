@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { createRollCast, ENTRY_DURATION_MS, sampleActorPose } from "./roll";
+import {
+  createRollCast,
+  ENTRY_DURATION_MS,
+  sampleActorPose,
+  TILT_MAX_RAD,
+} from "./roll";
 
 describe("roll motion", () => {
   it("rolls in from off-stage with spin, then keeps moving after settle", () => {
@@ -22,6 +27,18 @@ describe("roll motion", () => {
     ).toBeLessThan(0.01);
     expect(Math.abs(settled.rotationRad)).toBeGreaterThan(Math.PI);
     expect(Math.abs(later.rotationRad)).toBeGreaterThan(Math.abs(settled.rotationRad));
+  });
+
+  it("keeps animal tilt within ±12° without spinning upside down", () => {
+    const [primary] = createRollCast("0-red-dog");
+    if (!primary) {
+      throw new Error("expected a primary actor");
+    }
+
+    for (let ms = 0; ms <= 8_000; ms += 250) {
+      const pose = sampleActorPose(primary, ms, "tilt");
+      expect(Math.abs(pose.rotationRad)).toBeLessThanOrEqual(TILT_MAX_RAD + 1e-9);
+    }
   });
 
   it("after entry, primary and companions keep traversing a much larger horizontal and vertical range", () => {
