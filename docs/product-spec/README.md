@@ -56,4 +56,3 @@
 | セッション BGM | [feature-session-bgm.md](./feature-session-bgm.md) |
 | どうぶつパック | [feature-animals-pack.md](./feature-animals-pack.md) |
 | タッチ反応「ぽん」 | [feature-touch-pon.md](./feature-touch-pon.md) |
-| かおのゆるい変形 | [feature-face-expressions.md](./feature-face-expressions.md) |

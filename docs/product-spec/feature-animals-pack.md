@@ -51,7 +51,7 @@
 ## 非スコープ（初回）
 
 鳴き声・効果音、歩行スプライト、CMS / リモート差し替え、21 点以上の追加、
-タッチ反応（[feature-touch-pon.md](./feature-touch-pon.md)）、図形への顔付け（[feature-face-expressions.md](./feature-face-expressions.md)）。
+タッチ反応（[feature-touch-pon.md](./feature-touch-pon.md)）。
 
 ## 参考（内容の要約）
 
