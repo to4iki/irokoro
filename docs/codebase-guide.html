@@ -338,6 +338,15 @@
             <a href="./product-spec/README.md">product-spec</a> /
             <a href="./code-style.md">code-style.md</a>
           </p>
+          <p>
+            product-spec は <strong>なぜその体験にするか（目的）</strong> を先に書く。
+            既存機能の入口:
+            <a href="./product-spec/feature-session.md">session</a> /
+            <a href="./product-spec/feature-colors-pack.md">colors</a> /
+            <a href="./product-spec/feature-shape-motion.md">motion</a> /
+            <a href="./product-spec/feature-session-bgm.md">BGM</a>。
+            実装の置き場所は本ガイドと architecture 側。
+          </p>
         </header>
 
         <section id="overview">
@@ -1170,7 +1179,12 @@
             </li>
             <li>
               <strong>安全制約</strong> — 初期 1 分・音 OFF・自動リピートなし・
-              finished 後は RESET のみ（product-spec）
+              finished 後は RESET のみ（
+              <a href="./product-spec/feature-session.md">feature-session.md</a>）
+            </li>
+            <li>
+              <strong>仕様の読み方</strong> — product-spec は how より why。
+              コード配置の説明を spec に戻していないか
             </li>
             <li>
               <strong>タイマー二系統</strong> — pause / タブ非表示でセッション進行・シーン・

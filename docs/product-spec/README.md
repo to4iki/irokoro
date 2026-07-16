@@ -4,7 +4,8 @@
 短時間の補助ツール。絵本や人との関わりの代替ではない。
 
 仕様ドキュメントは **なぜその体験にするか（目的）** を先に書く。
-実装の置き場所や描画手順は [architecture.md](../architecture.md) 側に寄せる。
+実装の置き場所や描画手順は [architecture.md](../architecture.md) /
+[codebase-guide.html](../codebase-guide.html) 側に寄せる。
 
 ## プロダクトの目的
 
@@ -29,13 +30,14 @@
 |------|------|
 | 初期値 | pack=`colors`、duration=`60`、sound=`false` |
 | 時間選択肢 | 60 / 120 / 180 秒 |
-| どうぶつパック | [feature-animals-pack.md](./feature-animals-pack.md) | 実装済み（16 点） |
-| タッチ反応「ぽん」 | [feature-touch-pon.md](./feature-touch-pon.md) | 実装済み |
-| かおのゆるい変形 | [feature-face-expressions.md](./feature-face-expressions.md) | 実装済み（colors） |
+| あそび | `colors` と `animals`。初期 pack は `colors` |
+| シーン dwell | 6–8 秒。隣接シーンで色・形（どうぶつ）を連続させない |
 | 色 | 原色多めの高コントラスト。点滅や赤フラッシュは使わない |
 | 動き | 再生中は動かす。一時停止・タブ非表示では止める |
 | 音 | 任意のループ BGM。初期 OFF。セッション単位で 1 曲 |
 | 終了 | 明示操作または期限到達。リセットするまで再開しない |
+
+詳細な「なぜ」は下の機能仕様を参照する。
 
 ## 非スコープ（MVP）
 
@@ -44,8 +46,14 @@
 
 ## 機能仕様
 
-| 機能 | 仕様 | 状態 |
-|------|------|------|
-| どうぶつパック | [feature-animals-pack.md](./feature-animals-pack.md) | 実装済み（16 点） |
-| タッチ反応「ぽん」 | [feature-touch-pon.md](./feature-touch-pon.md) | 実装済み |
-| かおのゆるい変形 | [feature-face-expressions.md](./feature-face-expressions.md) | 実装済み（colors） |
+### 実装済み
+
+| 機能 | 仕様 |
+|------|------|
+| セッションライフサイクル | [feature-session.md](./feature-session.md) |
+| いろパック（colors） | [feature-colors-pack.md](./feature-colors-pack.md) |
+| 図形の転がりモーション | [feature-shape-motion.md](./feature-shape-motion.md) |
+| セッション BGM | [feature-session-bgm.md](./feature-session-bgm.md) |
+| どうぶつパック | [feature-animals-pack.md](./feature-animals-pack.md) |
+| タッチ反応「ぽん」 | [feature-touch-pon.md](./feature-touch-pon.md) |
+| かおのゆるい変形 | [feature-face-expressions.md](./feature-face-expressions.md) |
