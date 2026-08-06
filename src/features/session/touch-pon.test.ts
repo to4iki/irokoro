@@ -25,9 +25,10 @@ describe("touch pon", () => {
     const peakAtHoldEnd = ponScaleFactor(PON_RISE_MS + PON_HOLD_MS);
     const midFall = ponScaleFactor(PON_RISE_MS + PON_HOLD_MS + PON_FALL_MS / 2);
 
-    expect(PON_PEAK_SCALE).toBeGreaterThanOrEqual(1.55);
-    expect(PON_PEAK_SCALE).toBeLessThanOrEqual(1.7);
-    expect(PON_HOLD_MS).toBeGreaterThanOrEqual(120);
+    expect(PON_PEAK_SCALE).toBeGreaterThanOrEqual(1.85);
+    expect(PON_PEAK_SCALE).toBeLessThanOrEqual(2.05);
+    expect(PON_HOLD_MS).toBeGreaterThanOrEqual(300);
+    expect(PON_TOTAL_MS).toBeGreaterThanOrEqual(800);
 
     expect(midRise).toBeGreaterThan(1);
     expect(midRise).toBeLessThan(peakAtRiseEnd);

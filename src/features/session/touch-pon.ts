@@ -1,9 +1,9 @@
-/** Peak scale for a clearer “pon” reaction (spec ~1.6). */
-export const PON_PEAK_SCALE = 1.6;
-export const PON_RISE_MS = 100;
-/** Hold at peak so babies can read “it got bigger”. */
-export const PON_HOLD_MS = 150;
-export const PON_FALL_MS = 220;
+/** Peak scale for a very readable “pon” reaction (spec ~1.9). */
+export const PON_PEAK_SCALE = 1.9;
+export const PON_RISE_MS = 140;
+/** Hold at peak so babies can clearly read “it got bigger”. */
+export const PON_HOLD_MS = 350;
+export const PON_FALL_MS = 400;
 export const PON_TOTAL_MS = PON_RISE_MS + PON_HOLD_MS + PON_FALL_MS;
 export const PON_RATE_LIMIT_MS = 250;
 /** Beyond this pose-space distance, fall back to the primary actor. */
