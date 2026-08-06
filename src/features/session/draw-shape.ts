@@ -87,6 +87,9 @@ export type PaintSubject =
   | { kind: "shape"; shapeId: ShapeId; shapeColor: string }
   | { kind: "animal"; image: HTMLImageElement | null };
 
+/** Fraction of the shorter canvas side used as the primary subject size. */
+export const SUBJECT_BASE_SIZE_RATIO = 0.52;
+
 export function paintRollFrame(
   ctx: CanvasRenderingContext2D,
   options: {
@@ -100,7 +103,7 @@ export function paintRollFrame(
   ctx.clearRect(0, 0, width, height);
 
   const minSide = Math.min(width, height);
-  const baseSize = minSide * 0.56;
+  const baseSize = minSide * SUBJECT_BASE_SIZE_RATIO;
 
   for (const pose of poses) {
     // Pose x/y are normalized to the full scene stage (±1 ≈ edge).
