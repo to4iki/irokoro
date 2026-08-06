@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { SUBJECT_BASE_SIZE_RATIO } from "./draw-shape";
 import {
   createRollCast,
   ENTRY_DURATION_MS,
@@ -41,22 +42,60 @@ describe("roll motion", () => {
     }
   });
 
+  it("uses a calmer entry and slower post-entry travel across a dwell", () => {
+    expect(ENTRY_DURATION_MS).toBeGreaterThanOrEqual(1_700);
+
+    const [primary] = createRollCast("0-blue-circle");
+    if (!primary) {
+      throw new Error("expected a primary actor");
+    }
+
+    const atEntry = sampleActorPose(primary, ENTRY_DURATION_MS);
+    const shortlyAfter = sampleActorPose(primary, ENTRY_DURATION_MS + 400);
+    const travel = Math.hypot(shortlyAfter.x - atEntry.x, shortlyAfter.y - atEntry.y);
+    // Slow orbit: ~400ms should not jump a large fraction of the stage.
+    expect(travel).toBeLessThan(0.22);
+  });
+
+  it("spreads primary and companions so settle centers stay apart", () => {
+    const cast = createRollCast("0-blue-circle");
+    expect(cast).toHaveLength(3);
+
+    const [primary, companionA, companionB] = cast;
+    if (!primary || !companionA || !companionB) {
+      throw new Error("expected a 3-actor cast");
+    }
+
+    const dist = (a: { settleX: number; settleY: number }, b: typeof a) =>
+      Math.hypot(a.settleX - b.settleX, a.settleY - b.settleY);
+
+    expect(dist(primary, companionA)).toBeGreaterThan(0.45);
+    expect(dist(primary, companionB)).toBeGreaterThan(0.45);
+    expect(dist(companionA, companionB)).toBeGreaterThan(0.7);
+  });
+
+  it("keeps subject base size slightly under half the short stage side for phones", () => {
+    expect(SUBJECT_BASE_SIZE_RATIO).toBeGreaterThanOrEqual(0.48);
+    expect(SUBJECT_BASE_SIZE_RATIO).toBeLessThanOrEqual(0.53);
+  });
+
   it("after entry, primary and companions keep traversing a much larger horizontal and vertical range", () => {
     const cast = createRollCast("0-blue-circle");
     expect(cast.length).toBeGreaterThan(1);
 
     for (const actor of cast) {
-      const samples = Array.from({ length: 24 }, (_, index) =>
+      // Sample across a full dwell so slower periods still show wide travel.
+      const samples = Array.from({ length: 40 }, (_, index) =>
         sampleActorPose(actor, ENTRY_DURATION_MS + index * 200),
       );
       const xs = samples.map((pose) => pose.x);
       const ys = samples.map((pose) => pose.y);
       const xRange = Math.max(...xs) - Math.min(...xs);
       const yRange = Math.max(...ys) - Math.min(...ys);
-      const minRange = actor.role === "primary" ? 0.55 : 0.4;
+      const minRange = actor.role === "primary" ? 0.5 : 0.28;
 
       // Legacy tumble radius was ~0.1 (range ≈ 0.2). Post-entry motion must
-      // cross a wide portion of the scene during a 6–8s dwell.
+      // still cross a meaningful portion of the scene during a dwell.
       expect(xRange).toBeGreaterThan(minRange);
       expect(yRange).toBeGreaterThan(minRange);
       expect(Math.max(...xs.map(Math.abs))).toBeLessThan(0.95);

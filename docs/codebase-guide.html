@@ -819,8 +819,8 @@
                 </dd>
                 <dt>sampleActorPose(actor, elapsedMs, rotationStyle?)</dt>
                 <dd>
-                  入場（ENTRY_DURATION_MS=1350）→ その後 Lissajous 風の大振幅軌道。
-                  回転は style で切替
+                  入場（ENTRY_DURATION_MS=1800）→ その後 Lissajous 風の穏やかな大振幅軌道。
+                  companion の settle は主から離す。回転は style で切替
                 </dd>
                 <dt>ENTRY_DURATION_MS / ROLL_DIRECTIONS</dt>
                 <dd>定数</dd>
@@ -841,7 +841,9 @@
                 <dt>paintRollFrame(ctx, options)</dt>
                 <dd>
                   clear → 各 pose を translate/rotate → subject に応じて path fill または
-                  <code>drawImage</code>。shapeId の網羅は <code>never</code> で保証
+                  <code>drawImage</code>。基準サイズは短辺 ×
+                  <code>SUBJECT_BASE_SIZE_RATIO</code>（0.52）。shapeId の網羅は
+                  <code>never</code> で保証
                 </dd>
               </dl>
             </article>

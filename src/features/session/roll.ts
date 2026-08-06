@@ -41,7 +41,7 @@ type Orbit = {
   directionY: number;
 };
 
-export const ENTRY_DURATION_MS = 1_350;
+export const ENTRY_DURATION_MS = 1_800;
 const SPIN_PER_DISTANCE = 2.85;
 /** Animals pack: gentle sway only (spec ±12°). */
 export const TILT_MAX_RAD = (12 * Math.PI) / 180;
@@ -105,20 +105,20 @@ export function createRollCast(sceneId: string): readonly RollActor[] {
       sceneId,
       role: "companion",
       direction: differentDirection(sceneId, 7, primaryDirection),
-      delayMs: 180,
+      delayMs: 220,
       scale: 0.55,
-      settleX: -0.18,
-      settleY: 0.14,
+      settleX: -0.42,
+      settleY: 0.34,
     },
     {
       key: `${sceneId}-b`,
       sceneId,
       role: "companion",
       direction: differentDirection(sceneId, 13, primaryDirection),
-      delayMs: 320,
+      delayMs: 380,
       scale: 0.38,
-      settleX: 0.2,
-      settleY: -0.16,
+      settleX: 0.46,
+      settleY: -0.36,
     },
   ];
 }
@@ -158,16 +158,16 @@ function orbitFor(actor: RollActor): Orbit {
   const h2 = hashScene(actor.sceneId, salt + 101);
   const h3 = hashScene(actor.sceneId, salt + 211);
 
-  const baseAmp = actor.role === "primary" ? 0.52 : 0.38;
+  const baseAmp = actor.role === "primary" ? 0.48 : 0.3;
   const ampX = baseAmp * (0.88 + (h1 % 120) / 1_000);
   const ampY = baseAmp * (0.88 + (h2 % 120) / 1_000);
 
   return {
     ampX,
     ampY,
-    // Periods span most of a 6–8s dwell so motion crosses the stage widely.
-    periodXMs: 5_200 + (h1 % 2_200),
-    periodYMs: 3_800 + (h2 % 2_600),
+    // Longer periods keep travel calm across a 6–8s dwell.
+    periodXMs: 7_500 + (h1 % 2_800),
+    periodYMs: 6_200 + (h2 % 3_000),
     directionX: (h3 & 1) === 0 ? 1 : -1,
     directionY: (h3 & 2) === 0 ? 1 : -1,
   };
@@ -201,7 +201,7 @@ function spinRotation(distance: number, sign: number): number {
 
 /** Slow sine tilt capped at ±TILT_MAX_RAD — no upside-down spins. */
 function tiltRotation(localMs: number, sign: number): number {
-  return Math.sin(localMs / 1_900) * TILT_MAX_RAD * sign;
+  return Math.sin(localMs / 2_600) * TILT_MAX_RAD * sign;
 }
 
 export function sampleActorPose(
@@ -244,7 +244,7 @@ export function sampleActorPose(
       rotationStyle === "tilt"
         ? tiltRotation(local, sign)
         : spinRotation(entryDistance + travel, sign),
-    scale: actor.scale * (1 + Math.sin(tumbleMs / 1_800) * 0.03),
+    scale: actor.scale * (1 + Math.sin(tumbleMs / 2_400) * 0.03),
     opacity: 1,
   };
 }
