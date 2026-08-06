@@ -779,13 +779,15 @@
               <dl class="exports">
                 <dt>props</dt>
                 <dd>
-                  判別 props。<code>kind: "shape"</code>（shapeId / shapeColor）または
+                  判別 props。<code>kind: "shape"</code>（shapeId / shapeColor /
+                  backgroundColor）または
                   <code>kind: "animal"</code>（imageSrc）。共通で
                   <code>sceneId</code> / <code>paused</code>
                 </dd>
                 <dt>内部の流れ</dt>
                 <dd>
                   <code>createRollCast(sceneId)</code> →
+                  colors は <code>pickShapeFillColors</code> →
                   毎フレーム <code>sampleActorPose(..., rotationStyle)</code>
                   （animals は <code>tilt</code>、colors は <code>spin</code>） →
                   pose.scale に <code>ponScaleFactor</code> を乗算 →
@@ -835,13 +837,14 @@
               <dl class="exports">
                 <dt>PaintSubject</dt>
                 <dd>
-                  <code>{ kind: "shape", shapeId, shapeColor }</code> または
+                  <code>{ kind: "shape", shapeId, shapeColors }</code> または
                   <code>{ kind: "animal", image }</code>
                 </dd>
                 <dt>paintRollFrame(ctx, options)</dt>
                 <dd>
                   clear → 各 pose を translate/rotate → subject に応じて path fill または
-                  <code>drawImage</code>。shapeId の網羅は <code>never</code> で保証
+                  <code>drawImage</code>。colors では actor ごとに
+                  <code>shapeColors[i]</code>。shapeId の網羅は <code>never</code> で保証
                 </dd>
               </dl>
             </article>

@@ -8,6 +8,7 @@ import {
   type RotationStyle,
   sampleActorPose,
 } from "../features/session/roll";
+import { pickShapeFillColors } from "../features/session/shape-fill-colors";
 import {
   canStartPon,
   cssPointToPose,
@@ -20,6 +21,7 @@ type ShapeCanvasProps = {
   sceneId: string;
   shapeId: ShapeId;
   shapeColor: string;
+  backgroundColor: string;
   paused: boolean;
 };
 
@@ -64,6 +66,7 @@ export function RollCanvas(props: RollCanvasProps) {
   const kind = props.kind;
   const shapeId = props.kind === "shape" ? props.shapeId : null;
   const shapeColor = props.kind === "shape" ? props.shapeColor : null;
+  const backgroundColor = props.kind === "shape" ? props.backgroundColor : null;
   const animalSrc = props.kind === "animal" ? props.imageSrc : null;
   const rotationStyle: RotationStyle = kind === "animal" ? "tilt" : "spin";
   const animalImage = animalSrc ? getAnimalImage(animalSrc) : null;
@@ -88,6 +91,15 @@ export function RollCanvas(props: RollCanvasProps) {
     }
 
     const cast = createRollCast(sceneId);
+    const shapeColors =
+      kind === "shape" && shapeColor && backgroundColor
+        ? pickShapeFillColors({
+            sceneId,
+            backgroundHex: backgroundColor,
+            primaryForeground: shapeColor,
+            count: cast.length,
+          })
+        : null;
     let frameId = 0;
     let cssWidth = Math.max(1, canvas.clientWidth);
     let cssHeight = Math.max(1, canvas.clientHeight);
@@ -129,8 +141,8 @@ export function RollCanvas(props: RollCanvasProps) {
         width: canvas.width,
         height: canvas.height,
         subject:
-          kind === "shape" && shapeId && shapeColor
-            ? { kind: "shape", shapeId, shapeColor }
+          kind === "shape" && shapeId && shapeColors
+            ? { kind: "shape", shapeId, shapeColors }
             : { kind: "animal", image: animalImage },
         poses: posesAt(elapsedMs),
       });
@@ -250,7 +262,7 @@ export function RollCanvas(props: RollCanvasProps) {
       resizeObserver.disconnect();
       loopControlRef.current = null;
     };
-  }, [sceneId, kind, shapeId, shapeColor, animalImage, rotationStyle]);
+  }, [sceneId, kind, shapeId, shapeColor, backgroundColor, animalImage, rotationStyle]);
 
   useEffect(() => {
     const control = loopControlRef.current;
