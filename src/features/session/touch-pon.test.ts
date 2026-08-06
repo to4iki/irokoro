@@ -2,30 +2,40 @@ import { describe, expect, it } from "vitest";
 import {
   canStartPon,
   cssPointToPose,
+  PON_FALL_MS,
+  PON_HOLD_MS,
   PON_PEAK_SCALE,
   PON_RATE_LIMIT_MS,
+  PON_RISE_MS,
   PON_TOTAL_MS,
   pickPonActorIndex,
   ponScaleFactor,
 } from "./touch-pon";
 
 describe("touch pon", () => {
-  it("scales up then returns to 1 within the calm duration window", () => {
+  it("scales up, holds the peak so it is readable, then returns to 1", () => {
     expect(ponScaleFactor(-1)).toBe(1);
     expect(ponScaleFactor(0)).toBe(1);
     expect(ponScaleFactor(PON_TOTAL_MS)).toBe(1);
     expect(ponScaleFactor(PON_TOTAL_MS + 50)).toBe(1);
 
-    const midRise = ponScaleFactor(50);
-    const peak = ponScaleFactor(100);
-    const midFall = ponScaleFactor(220);
+    const midRise = ponScaleFactor(PON_RISE_MS / 2);
+    const peakAtRiseEnd = ponScaleFactor(PON_RISE_MS);
+    const peakMidHold = ponScaleFactor(PON_RISE_MS + PON_HOLD_MS / 2);
+    const peakAtHoldEnd = ponScaleFactor(PON_RISE_MS + PON_HOLD_MS);
+    const midFall = ponScaleFactor(PON_RISE_MS + PON_HOLD_MS + PON_FALL_MS / 2);
+
+    expect(PON_PEAK_SCALE).toBeGreaterThanOrEqual(1.85);
+    expect(PON_PEAK_SCALE).toBeLessThanOrEqual(2.05);
+    expect(PON_HOLD_MS).toBeGreaterThanOrEqual(300);
+    expect(PON_TOTAL_MS).toBeGreaterThanOrEqual(800);
 
     expect(midRise).toBeGreaterThan(1);
-    expect(midRise).toBeLessThan(peak);
-    expect(peak).toBeGreaterThanOrEqual(1.3);
-    expect(peak).toBeLessThanOrEqual(1.4);
-    expect(peak).toBeCloseTo(PON_PEAK_SCALE, 5);
-    expect(midFall).toBeLessThan(peak);
+    expect(midRise).toBeLessThan(peakAtRiseEnd);
+    expect(peakAtRiseEnd).toBeCloseTo(PON_PEAK_SCALE, 5);
+    expect(peakMidHold).toBeCloseTo(PON_PEAK_SCALE, 5);
+    expect(peakAtHoldEnd).toBeCloseTo(PON_PEAK_SCALE, 5);
+    expect(midFall).toBeLessThan(PON_PEAK_SCALE);
     expect(midFall).toBeGreaterThan(1);
   });
 

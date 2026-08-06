@@ -864,7 +864,7 @@
           <section id="touch-pon">
             <h3>タッチ反応「ぽん」</h3>
             <p>
-              再生中に scene（Canvas）を触ると、近い図形が短く膨らんで戻る。
+              再生中に scene（Canvas）を触ると、近い図形が大きく膨らみ、ピークを長めに保ってから戻る。
               セッション進行・deadline・シーン切替には影響しない UI エフェクト。
               仕様の「なぜ」は
               <a href="./product-spec/feature-touch-pon.md">feature-touch-pon.md</a>。
@@ -879,7 +879,8 @@
                 <dt>ponScaleFactor(elapsedMs)</dt>
                 <dd>
                   反応開始からの経過 → スケール倍率。ピーク
-                  <code>PON_PEAK_SCALE</code>（1.15）、上昇 100ms / 復帰 220ms
+                  <code>PON_PEAK_SCALE</code>（1.9）、上昇 140ms / ホールド 350ms /
+                  復帰 400ms
                 </dd>
                 <dt>pickPonActorIndex(poses, tapX, tapY)</dt>
                 <dd>
