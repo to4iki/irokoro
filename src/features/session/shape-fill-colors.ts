@@ -1,55 +1,14 @@
 import { COLORS } from "../../content/packs";
 
-function normalizeHex(hex: string): string {
-  return hex.trim().toLowerCase();
-}
+/** Rough sRGB luminance delta — enough to keep companions readable on pack backgrounds. */
+const MIN_LUM_DELTA = 0.22;
 
-function parseRgb(hex: string): { r: number; g: number; b: number } | null {
-  const value = normalizeHex(hex).replace("#", "");
-  if (!/^[0-9a-f]{6}$/.test(value)) {
-    return null;
-  }
-  return {
-    r: Number.parseInt(value.slice(0, 2), 16),
-    g: Number.parseInt(value.slice(2, 4), 16),
-    b: Number.parseInt(value.slice(4, 6), 16),
-  };
-}
-
-function channelToLinear(channel: number): number {
-  const c = channel / 255;
-  return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-}
-
-function relativeLuminance(hex: string): number {
-  const rgb = parseRgb(hex);
-  if (!rgb) {
-    return 0;
-  }
-  const r = channelToLinear(rgb.r);
-  const g = channelToLinear(rgb.g);
-  const b = channelToLinear(rgb.b);
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-}
-
-/** WCAG contrast ratio between two hex colors. */
-export function contrastRatio(a: string, b: string): number {
-  const l1 = relativeLuminance(a);
-  const l2 = relativeLuminance(b);
-  const lighter = Math.max(l1, l2);
-  const darker = Math.min(l1, l2);
-  return (lighter + 0.05) / (darker + 0.05);
-}
-
-const MIN_CONTRAST = 3;
-
-/** Unique high-contrast swatches from the colors pack palette. */
-function paletteSwatches(): string[] {
+const PALETTE_SWATCHES: readonly string[] = (() => {
   const seen = new Set<string>();
   const swatches: string[] = [];
   for (const color of COLORS) {
     for (const hex of [color.foreground, color.background]) {
-      const key = normalizeHex(hex);
+      const key = hex.toLowerCase();
       if (seen.has(key)) {
         continue;
       }
@@ -58,6 +17,14 @@ function paletteSwatches(): string[] {
     }
   }
   return swatches;
+})();
+
+function luminance(hex: string): number {
+  const value = hex.replace("#", "");
+  const r = Number.parseInt(value.slice(0, 2), 16) / 255;
+  const g = Number.parseInt(value.slice(2, 4), 16) / 255;
+  const b = Number.parseInt(value.slice(4, 6), 16) / 255;
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
 function hashScene(sceneId: string, salt: number): number {
@@ -70,9 +37,8 @@ function hashScene(sceneId: string, salt: number): number {
 
 /**
  * Per-actor fill colors for the colors pack cast.
- * Primary keeps the scene foreground (語りかけの主色); companions pick other
- * palette swatches that contrast with the background and each other.
- * Assignment is deterministic from sceneId (ランダム風だが毎フレームは変えない).
+ * Primary keeps the scene foreground; companions take other palette swatches
+ * that differ from the background. Deterministic from sceneId.
  */
 export function pickShapeFillColors(options: {
   sceneId: string;
@@ -81,20 +47,16 @@ export function pickShapeFillColors(options: {
   count: number;
 }): string[] {
   const { sceneId, backgroundHex, primaryForeground, count } = options;
-  if (count <= 0) {
-    return [];
-  }
-
-  const bg = normalizeHex(backgroundHex);
+  const bgKey = backgroundHex.toLowerCase();
   const fills: string[] = [primaryForeground];
-  const used = new Set<string>([normalizeHex(primaryForeground), bg]);
+  const used = new Set<string>([primaryForeground.toLowerCase(), bgKey]);
 
-  const candidates = paletteSwatches().filter((hex) => {
-    const key = normalizeHex(hex);
+  const candidates = PALETTE_SWATCHES.filter((hex) => {
+    const key = hex.toLowerCase();
     if (used.has(key)) {
       return false;
     }
-    return contrastRatio(hex, backgroundHex) >= MIN_CONTRAST;
+    return Math.abs(luminance(hex) - luminance(backgroundHex)) >= MIN_LUM_DELTA;
   });
 
   for (let index = 1; index < count; index += 1) {
@@ -103,11 +65,8 @@ export function pickShapeFillColors(options: {
       continue;
     }
     const pick = hashScene(sceneId, 41 + index * 97) % candidates.length;
-    const [chosen] = candidates.splice(pick, 1);
-    fills.push(chosen ?? primaryForeground);
-    if (chosen) {
-      used.add(normalizeHex(chosen));
-    }
+    const chosen = candidates.splice(pick, 1)[0] ?? primaryForeground;
+    fills.push(chosen);
   }
 
   return fills;

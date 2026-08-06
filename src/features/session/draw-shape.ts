@@ -102,11 +102,7 @@ export function paintRollFrame(
   const minSide = Math.min(width, height);
   const baseSize = minSide * 0.56;
 
-  for (let index = 0; index < poses.length; index += 1) {
-    const pose = poses[index];
-    if (!pose) {
-      continue;
-    }
+  for (const [index, pose] of poses.entries()) {
     // Pose x/y are normalized to the full scene stage (±1 ≈ edge).
     const cx = width * 0.5 + pose.x * (width * 0.5);
     const cy = height * 0.5 + pose.y * (height * 0.5);
@@ -117,9 +113,8 @@ export function paintRollFrame(
     ctx.translate(cx, cy);
     ctx.rotate(pose.rotationRad);
     if (subject.kind === "shape") {
-      const fill = subject.shapeColors[index] ?? subject.shapeColors[0] ?? "#111111";
       drawShapePath(ctx, subject.shapeId, size);
-      ctx.fillStyle = fill;
+      ctx.fillStyle = subject.shapeColors[index] ?? subject.shapeColors[0] ?? "#111111";
       ctx.fill();
     } else if (subject.image) {
       drawAnimalImage(ctx, subject.image, size);
