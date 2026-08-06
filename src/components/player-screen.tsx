@@ -26,7 +26,6 @@ type SceneStageProps = {
   paused: boolean;
   colorLabel: string;
   subjectLabel: string;
-  shapeColor: string;
 };
 
 function formatRemaining(remainingMs: number): string {
@@ -40,7 +39,6 @@ const SceneStage = memo(function SceneStage({
   paused,
   colorLabel,
   subjectLabel,
-  shapeColor,
 }: SceneStageProps) {
   return (
     <section
@@ -59,10 +57,10 @@ const SceneStage = memo(function SceneStage({
         ) : (
           <RollCanvas
             key={scene.id}
+            colorId={scene.colorId}
             kind="shape"
             paused={paused}
             sceneId={scene.id}
-            shapeColor={shapeColor}
             shapeId={scene.shapeId}
           />
         )}
@@ -135,7 +133,6 @@ export function PlayerScreen({
         colorLabel={color.label}
         paused={paused}
         scene={scene}
-        shapeColor={color.foreground}
         subjectLabel={subjectLabel}
       />
 

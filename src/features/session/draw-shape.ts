@@ -84,7 +84,7 @@ function drawAnimalImage(
 }
 
 export type PaintSubject =
-  | { kind: "shape"; shapeId: ShapeId; shapeColor: string }
+  | { kind: "shape"; shapeId: ShapeId; shapeColors: readonly string[] }
   | { kind: "animal"; image: HTMLImageElement | null };
 
 /** Fraction of the shorter canvas side used as the primary subject size. */
@@ -105,7 +105,7 @@ export function paintRollFrame(
   const minSide = Math.min(width, height);
   const baseSize = minSide * SUBJECT_BASE_SIZE_RATIO;
 
-  for (const pose of poses) {
+  for (const [index, pose] of poses.entries()) {
     // Pose x/y are normalized to the full scene stage (±1 ≈ edge).
     const cx = width * 0.5 + pose.x * (width * 0.5);
     const cy = height * 0.5 + pose.y * (height * 0.5);
@@ -117,7 +117,7 @@ export function paintRollFrame(
     ctx.rotate(pose.rotationRad);
     if (subject.kind === "shape") {
       drawShapePath(ctx, subject.shapeId, size);
-      ctx.fillStyle = subject.shapeColor;
+      ctx.fillStyle = subject.shapeColors[index] ?? subject.shapeColors[0] ?? "#111111";
       ctx.fill();
     } else if (subject.image) {
       drawAnimalImage(ctx, subject.image, size);

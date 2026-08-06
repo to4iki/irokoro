@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { getAnimalImage } from "../content/animals";
-import type { ShapeId } from "../content/packs";
+import { type ColorId, getColor, type ShapeId } from "../content/packs";
 import { resolveCanvasBufferSize } from "../features/session/canvas-buffer";
 import { paintRollFrame } from "../features/session/draw-shape";
 import {
@@ -8,6 +8,7 @@ import {
   type RotationStyle,
   sampleActorPose,
 } from "../features/session/roll";
+import { pickShapeFillColors } from "../features/session/shape-fill-colors";
 import {
   canStartPon,
   cssPointToPose,
@@ -19,7 +20,7 @@ type ShapeCanvasProps = {
   kind: "shape";
   sceneId: string;
   shapeId: ShapeId;
-  shapeColor: string;
+  colorId: ColorId;
   paused: boolean;
 };
 
@@ -63,7 +64,7 @@ export function RollCanvas(props: RollCanvasProps) {
   const paused = props.paused;
   const kind = props.kind;
   const shapeId = props.kind === "shape" ? props.shapeId : null;
-  const shapeColor = props.kind === "shape" ? props.shapeColor : null;
+  const colorId = props.kind === "shape" ? props.colorId : null;
   const animalSrc = props.kind === "animal" ? props.imageSrc : null;
   const rotationStyle: RotationStyle = kind === "animal" ? "tilt" : "spin";
   const animalImage = animalSrc ? getAnimalImage(animalSrc) : null;
@@ -88,6 +89,15 @@ export function RollCanvas(props: RollCanvasProps) {
     }
 
     const cast = createRollCast(sceneId);
+    const sceneColor = colorId ? getColor(colorId) : null;
+    const shapeColors = sceneColor
+      ? pickShapeFillColors({
+          sceneId,
+          backgroundHex: sceneColor.background,
+          primaryForeground: sceneColor.foreground,
+          count: cast.length,
+        })
+      : null;
     let frameId = 0;
     let cssWidth = Math.max(1, canvas.clientWidth);
     let cssHeight = Math.max(1, canvas.clientHeight);
@@ -129,8 +139,8 @@ export function RollCanvas(props: RollCanvasProps) {
         width: canvas.width,
         height: canvas.height,
         subject:
-          kind === "shape" && shapeId && shapeColor
-            ? { kind: "shape", shapeId, shapeColor }
+          kind === "shape" && shapeId && shapeColors
+            ? { kind: "shape", shapeId, shapeColors }
             : { kind: "animal", image: animalImage },
         poses: posesAt(elapsedMs),
       });
@@ -250,7 +260,7 @@ export function RollCanvas(props: RollCanvasProps) {
       resizeObserver.disconnect();
       loopControlRef.current = null;
     };
-  }, [sceneId, kind, shapeId, shapeColor, animalImage, rotationStyle]);
+  }, [sceneId, kind, shapeId, colorId, animalImage, rotationStyle]);
 
   useEffect(() => {
     const control = loopControlRef.current;

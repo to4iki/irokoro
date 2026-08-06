@@ -779,13 +779,14 @@
               <dl class="exports">
                 <dt>props</dt>
                 <dd>
-                  判別 props。<code>kind: "shape"</code>（shapeId / shapeColor）または
+                  判別 props。<code>kind: "shape"</code>（shapeId / colorId）または
                   <code>kind: "animal"</code>（imageSrc）。共通で
                   <code>sceneId</code> / <code>paused</code>
                 </dd>
                 <dt>内部の流れ</dt>
                 <dd>
                   <code>createRollCast(sceneId)</code> →
+                  colors は <code>pickShapeFillColors</code> →
                   毎フレーム <code>sampleActorPose(..., rotationStyle)</code>
                   （animals は <code>tilt</code>、colors は <code>spin</code>） →
                   pose.scale に <code>ponScaleFactor</code> を乗算 →
@@ -829,21 +830,40 @@
 
             <article class="module">
               <h4>
+                <span class="path">src/features/session/shape-fill-colors.ts</span>
+              </h4>
+              <div class="meta"><span class="tag">純粋</span></div>
+              <p>
+                colors パックの cast 塗り色。仕様の「なぜ」は
+                <a href="./product-spec/feature-colors-pack.md">feature-colors-pack.md</a>。
+              </p>
+              <dl class="exports">
+                <dt>pickShapeFillColors({ sceneId, backgroundHex, primaryForeground, count })</dt>
+                <dd>
+                  actor ごとの hex 配列。index 0 はシーン前景色（語りかけの主色）、
+                  companion はパレット swatch から背景と輝度差のある別色を
+                  sceneId ハッシュで決定的に選ぶ（毎フレーム乱数なし）
+                </dd>
+              </dl>
+            </article>
+
+            <article class="module">
+              <h4>
                 <span class="path">src/features/session/draw-shape.ts</span>
               </h4>
               <div class="meta"><span class="tag">Canvas 描画</span></div>
               <dl class="exports">
                 <dt>PaintSubject</dt>
                 <dd>
-                  <code>{ kind: "shape", shapeId, shapeColor }</code> または
+                  <code>{ kind: "shape", shapeId, shapeColors }</code> または
                   <code>{ kind: "animal", image }</code>
                 </dd>
                 <dt>paintRollFrame(ctx, options)</dt>
                 <dd>
                   clear → 各 pose を translate/rotate → subject に応じて path fill または
                   <code>drawImage</code>。基準サイズは短辺 ×
-                  <code>SUBJECT_BASE_SIZE_RATIO</code>（0.52）。shapeId の網羅は
-                  <code>never</code> で保証
+                  <code>SUBJECT_BASE_SIZE_RATIO</code>（0.52）。colors では actor ごとに
+                  <code>shapeColors[i]</code>。shapeId の網羅は <code>never</code> で保証
                 </dd>
               </dl>
             </article>
@@ -1130,8 +1150,9 @@
        │           └─ RollCanvas (kind: shape | animal)
        │                 ├─ pointerdown → touch-pon.ts（対象選定・scale）
        │                 ├─ createRollCast / sampleActorPose(…, spin|tilt)
+       │                 ├─ colors: pickShapeFillColors(colorId → 前景/背景)
        │                 └─ paintRollFrame(PaintSubject)
-       │                       └─ 色+形 or getAnimalImage
+       │                       └─ shapeColors[i] + 形 or getAnimalImage
        └─ FinishScreen ← onReset
 
 副作用（App の useEffect / ハンドラ）:
@@ -1172,6 +1193,10 @@
             <li>
               <strong>パック分岐</strong> — Scene / RollCanvas / paint の判別が
               colors と animals で一貫しているか
+            </li>
+            <li>
+              <strong>いろの塗り分け</strong> — colors cast が同色一色になっていないか。
+              主はシーン前景色、副は決定的な別色か
             </li>
             <li>
               <strong>ぽん</strong> — 触覚反応がセッション時間やシーン進行を
@@ -1230,6 +1255,13 @@
                 <td>ぽん</td>
                 <td>
                   playing 中の短いスケール反応。Reducer 外の Canvas エフェクト
+                </td>
+              </tr>
+              <tr>
+                <td>shapeColors</td>
+                <td>
+                  colors cast の actor ごと塗り色。主はシーン前景、副は
+                  <code>pickShapeFillColors</code> で決定
                 </td>
               </tr>
             </tbody>
