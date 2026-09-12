@@ -4,4 +4,4 @@ globs: src/**/*.{ts,tsx,css}
 alwaysApply: false
 ---
 
-@docs/code-style.md
+../../docs/code-style.md を参照すること。

@@ -4,4 +4,4 @@ globs: src/**/*.{test,spec}.{ts,tsx}
 alwaysApply: false
 ---
 
-@docs/testing.md
+../../docs/testing.md を参照すること。

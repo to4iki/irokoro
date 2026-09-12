@@ -4,4 +4,4 @@ globs: src/**
 alwaysApply: false
 ---
 
-@docs/architecture.md
+../../docs/architecture.md を参照すること。
