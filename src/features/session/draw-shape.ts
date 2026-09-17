@@ -88,7 +88,7 @@ export type PaintSubject =
   | { kind: "animal"; image: HTMLImageElement | null };
 
 /** Fraction of the shorter canvas side used as the primary subject size. */
-export const SUBJECT_BASE_SIZE_RATIO = 0.52;
+const SUBJECT_BASE_SIZE_RATIO = 0.52;
 
 export function paintRollFrame(
   ctx: CanvasRenderingContext2D,

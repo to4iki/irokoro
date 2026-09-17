@@ -40,22 +40,13 @@ describe("App", () => {
     document.dispatchEvent(new Event("visibilitychange"));
   }
 
-  async function flushLazyScreens() {
-    await act(async () => {
-      await Promise.resolve();
-    });
-  }
-
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-11T08:00:00Z"));
     vi.mocked(createBackgroundMusic).mockReturnValue(music);
     setDocumentVisibility("visible");
     document.title = "いろころ｜親子で色あそび";
-    // Resolve lazy screen chunks before interactions (fake timers + Suspense).
-    await import("./components/player-screen");
-    await import("./components/finish-screen");
   });
 
   afterEach(() => {
@@ -63,7 +54,7 @@ describe("App", () => {
     vi.useRealTimers();
   });
 
-  it("starts from safe defaults without unlocking audio", async () => {
+  it("starts from safe defaults without unlocking audio", () => {
     render(<App sequence={TEST_SEQUENCE} />);
 
     expect(screen.getByRole("radio", { name: "いろ" })).toBeChecked();
@@ -77,43 +68,39 @@ describe("App", () => {
     expect(screen.queryByRole("link", { name: "いらすとや" })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
-    await flushLazyScreens();
 
     expect(screen.getByRole("main", { name: "いろの再生画面" })).toBeVisible();
     expect(createBackgroundMusic).not.toHaveBeenCalled();
   });
 
-  it("starts the animals pack without changing safe sound defaults", async () => {
+  it("starts the animals pack without changing safe sound defaults", () => {
     render(<App />);
 
     fireEvent.click(screen.getByRole("radio", { name: "どうぶつ" }));
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
-    await flushLazyScreens();
 
     expect(screen.getByRole("main", { name: "どうぶつの再生画面" })).toBeVisible();
     expect(createBackgroundMusic).not.toHaveBeenCalled();
   });
 
-  it("keeps the session usable when BGM cannot be created", async () => {
+  it("keeps the session usable when BGM cannot be created", () => {
     vi.mocked(createBackgroundMusic).mockReturnValue(null);
     render(<App sequence={TEST_SEQUENCE} />);
 
     fireEvent.click(screen.getByRole("checkbox", { name: "音をつける" }));
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
-    await flushLazyScreens();
 
     expect(screen.getByRole("main", { name: "いろの再生画面" })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "一時停止" }));
     expect(screen.getByRole("heading", { name: "ひとやすみ" })).toBeVisible();
   });
 
-  it("runs one BGM session across pause, tab hide, scene change, and stop", async () => {
+  it("runs one BGM session across pause, tab hide, scene change, and stop", () => {
     render(<App sequence={TEST_SEQUENCE} />);
 
     fireEvent.click(screen.getByRole("radio", { name: "3分" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "音をつける" }));
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
-    await flushLazyScreens();
 
     expect(screen.getByRole("main", { name: "いろの再生画面" })).toBeVisible();
     expect(createBackgroundMusic).toHaveBeenCalledOnce();
@@ -128,20 +115,17 @@ describe("App", () => {
     });
 
     act(() => vi.advanceTimersByTime(3_000));
-    // Scene advanced, but the same controller must keep running.
     expect(createBackgroundMusic).toHaveBeenCalledOnce();
 
     fireEvent.click(screen.getByRole("button", { name: "おしまい" }));
-    await flushLazyScreens();
     expect(music.dispose).toHaveBeenCalled();
     expect(screen.getByRole("heading", { name: "おしまい" })).toBeVisible();
   });
 
-  it("does not restart BGM when a paused session is foregrounded", async () => {
+  it("does not restart BGM when a paused session is foregrounded", () => {
     render(<App sequence={TEST_SEQUENCE} />);
     fireEvent.click(screen.getByRole("checkbox", { name: "音をつける" }));
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
-    await flushLazyScreens();
     fireEvent.click(screen.getByRole("button", { name: "一時停止" }));
     music.play.mockClear();
 
@@ -154,11 +138,10 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "ひとやすみ" })).toBeVisible();
   });
 
-  it("freezes while paused, finishes without auto-repeat, and resets to safe defaults", async () => {
+  it("freezes while paused, finishes without auto-repeat, and resets to safe defaults", () => {
     render(<App sequence={TEST_SEQUENCE} />);
     fireEvent.click(screen.getByRole("checkbox", { name: "音をつける" }));
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
-    await flushLazyScreens();
 
     act(() => vi.advanceTimersByTime(5_000));
     fireEvent.click(screen.getByRole("button", { name: "一時停止" }));
@@ -173,7 +156,6 @@ describe("App", () => {
     expect(screen.queryByRole("heading", { name: "おしまい" })).not.toBeInTheDocument();
 
     act(() => vi.advanceTimersByTime(1));
-    await flushLazyScreens();
     expect(screen.getByRole("heading", { name: "おしまい" })).toBeVisible();
     expect(music.dispose).toHaveBeenCalled();
 
@@ -184,14 +166,13 @@ describe("App", () => {
     expect(screen.getByRole("checkbox", { name: "音をつける" })).not.toBeChecked();
   });
 
-  it("updates the document title and moves focus across major screen hops only", async () => {
+  it("updates the document title and moves focus across major screen hops only", () => {
     render(<App sequence={TEST_SEQUENCE} />);
 
     expect(document.title).toBe("いろころ｜親子で色あそび");
     expect(screen.getByRole("heading", { name: "いろころ" })).not.toHaveFocus();
 
     fireEvent.click(screen.getByRole("button", { name: "はじめる" }));
-    await flushLazyScreens();
     expect(document.title).toBe("再生中｜いろころ");
     expect(screen.getByRole("heading", { name: "いろを みつけよう" })).toHaveFocus();
 
@@ -200,7 +181,6 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "ひとやすみ" })).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: "おしまい" }));
-    await flushLazyScreens();
     expect(document.title).toBe("おしまい｜いろころ");
     expect(screen.getByRole("heading", { name: "おしまい" })).toHaveFocus();
 

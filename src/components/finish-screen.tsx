@@ -1,5 +1,7 @@
-import { SCREEN_HEADING_ID } from "../features/session/screen-a11y";
-import { useFocusScreenHeadingOnMount } from "../features/session/use-focus-screen-heading-on-mount";
+import {
+  SCREEN_HEADING_ID,
+  useFocusScreenHeadingOnMount,
+} from "../features/session/screen-a11y";
 
 type FinishScreenProps = {
   onReset: () => void;

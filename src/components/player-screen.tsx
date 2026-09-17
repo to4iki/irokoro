@@ -1,10 +1,12 @@
 import { type CSSProperties, memo } from "react";
 import { getAnimal } from "../content/animals";
 import { CONTENT_PACKS, getColor, getShape } from "../content/packs";
-import { SCREEN_HEADING_ID } from "../features/session/screen-a11y";
+import {
+  SCREEN_HEADING_ID,
+  useFocusScreenHeadingOnMount,
+} from "../features/session/screen-a11y";
 import type { Scene } from "../features/session/sequence";
 import type { SessionState } from "../features/session/session-reducer";
-import { useFocusScreenHeadingOnMount } from "../features/session/use-focus-screen-heading-on-mount";
 import { RollCanvas } from "./roll-canvas";
 
 type PlayerState = Extract<SessionState, { status: "playing" | "paused" }>;
@@ -46,24 +48,7 @@ const SceneStage = memo(function SceneStage({
       className="scene relative min-h-0 overflow-hidden"
     >
       <div className="roll-stage absolute inset-0">
-        {scene.packId === "animals" ? (
-          <RollCanvas
-            key={scene.id}
-            imageSrc={getAnimal(scene.animalId).src}
-            kind="animal"
-            paused={paused}
-            sceneId={scene.id}
-          />
-        ) : (
-          <RollCanvas
-            key={scene.id}
-            colorId={scene.colorId}
-            kind="shape"
-            paused={paused}
-            sceneId={scene.id}
-            shapeId={scene.shapeId}
-          />
-        )}
+        <RollCanvas key={scene.id} paused={paused} scene={scene} />
       </div>
     </section>
   );

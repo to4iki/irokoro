@@ -1,4 +1,4 @@
-import { ANIMALS, type AnimalId } from "./animals";
+import { ANIMALS } from "./animals";
 
 /** High-contrast primary pairs inspired by Sassy baby-book pages. */
 export const COLORS = [
@@ -88,50 +88,29 @@ export type ColorId = (typeof COLORS)[number]["id"];
 export type ShapeId = (typeof SHAPES)[number]["id"];
 export type PackId = "colors" | "animals";
 
-export type ContentPack = {
-  id: PackId;
-  shortLabel: string;
-  title: string;
-  description: string;
-};
-
-export type PackChoice = {
-  id: PackId;
-  shortLabel: string;
-  detail: string;
-};
-
 const colorById = new Map(COLORS.map((color) => [color.id, color]));
 const shapeById = new Map(SHAPES.map((shape) => [shape.id, shape]));
 
-export const CONTENT_PACKS: Record<PackId, ContentPack> = {
+export const CONTENT_PACKS = {
   colors: {
     id: "colors",
     shortLabel: "いろ",
     title: "いろを みつけよう",
-    description: "背景の色を、ゆっくり声に出してみましょう。",
+    detail: `${COLORS.length}つの色`,
   },
   animals: {
     id: "animals",
     shortLabel: "どうぶつ",
     title: "どうぶつを みつけよう",
-    description: "どうぶつのなまえを、ゆっくり声に出してみましょう。",
-  },
-};
-
-/** Setup choices: colors and animals are both playable. */
-export const PACK_CHOICES: readonly PackChoice[] = [
-  {
-    id: "colors",
-    shortLabel: "いろ",
-    detail: `${COLORS.length}つの色`,
-  },
-  {
-    id: "animals",
-    shortLabel: "どうぶつ",
     detail: `${ANIMALS.length}つのどうぶつ`,
   },
-];
+} as const satisfies Record<
+  PackId,
+  { id: PackId; shortLabel: string; title: string; detail: string }
+>;
+
+/** Setup radio order. Labels live on CONTENT_PACKS. */
+export const PACK_CHOICES = [CONTENT_PACKS.colors, CONTENT_PACKS.animals] as const;
 
 export function getColor(id: ColorId) {
   const color = colorById.get(id);
@@ -148,5 +127,3 @@ export function getShape(id: ShapeId) {
   }
   return shape;
 }
-
-export type { AnimalId };

@@ -1,13 +1,13 @@
 import { useEffect, useRef } from "react";
-import { getAnimalImage } from "../content/animals";
-import { type ColorId, getColor, type ShapeId } from "../content/packs";
-import { resolveCanvasBufferSize } from "../features/session/canvas-buffer";
+import { getAnimal, getAnimalImage } from "../content/animals";
+import { getColor } from "../content/packs";
 import { paintRollFrame } from "../features/session/draw-shape";
 import {
   createRollCast,
   type RotationStyle,
   sampleActorPose,
 } from "../features/session/roll";
+import type { Scene } from "../features/session/sequence";
 import { pickShapeFillColors } from "../features/session/shape-fill-colors";
 import {
   canStartPon,
@@ -16,43 +16,28 @@ import {
   ponScaleFactor,
 } from "../features/session/touch-pon";
 
-type ShapeCanvasProps = {
-  kind: "shape";
-  sceneId: string;
-  shapeId: ShapeId;
-  colorId: ColorId;
+type RollCanvasProps = {
+  scene: Scene;
   paused: boolean;
 };
-
-type AnimalCanvasProps = {
-  kind: "animal";
-  sceneId: string;
-  imageSrc: string;
-  paused: boolean;
-};
-
-type RollCanvasProps = ShapeCanvasProps | AnimalCanvasProps;
 
 type ActivePon = {
   actorIndex: number;
   startElapsedMs: number;
 };
 
-function readDocumentVisible(): boolean {
-  return typeof document === "undefined" || document.visibilityState !== "hidden";
-}
+/** Cap backing-store density so full-scene canvases stay affordable on retina. */
+const MAX_CANVAS_DEVICE_PIXEL_RATIO = 2;
 
 /**
  * Canvas motion loop. Pause / tab visibility are refs so they start/stop the
- * rAF loop without tearing down ResizeObserver + cast (vercel
- * rerender-use-ref-transient-values).
+ * rAF loop without tearing down ResizeObserver + cast.
  */
-export function RollCanvas(props: RollCanvasProps) {
+export function RollCanvas({ scene, paused }: RollCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const elapsedRef = useRef(0);
-  const sceneIdRef = useRef(props.sceneId);
-  const pausedRef = useRef(props.paused);
-  const visibleRef = useRef(readDocumentVisible());
+  const pausedRef = useRef(paused);
+  const visibleRef = useRef(document.visibilityState !== "hidden");
   const ponRef = useRef<ActivePon | null>(null);
   const lastPonStartMsRef = useRef<number | null>(null);
   const loopControlRef = useRef<{
@@ -60,22 +45,7 @@ export function RollCanvas(props: RollCanvasProps) {
     stopAndFreeze: () => void;
   } | null>(null);
 
-  const sceneId = props.sceneId;
-  const paused = props.paused;
-  const kind = props.kind;
-  const shapeId = props.kind === "shape" ? props.shapeId : null;
-  const colorId = props.kind === "shape" ? props.colorId : null;
-  const animalSrc = props.kind === "animal" ? props.imageSrc : null;
-  const rotationStyle: RotationStyle = kind === "animal" ? "tilt" : "spin";
-  const animalImage = animalSrc ? getAnimalImage(animalSrc) : null;
-
   pausedRef.current = paused;
-
-  if (sceneIdRef.current !== sceneId) {
-    sceneIdRef.current = sceneId;
-    elapsedRef.current = 0;
-    ponRef.current = null;
-  }
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -88,11 +58,15 @@ export function RollCanvas(props: RollCanvasProps) {
       return;
     }
 
-    const cast = createRollCast(sceneId);
-    const sceneColor = colorId ? getColor(colorId) : null;
+    const rotationStyle: RotationStyle = scene.packId === "animals" ? "tilt" : "spin";
+    const animalImage =
+      scene.packId === "animals" ? getAnimalImage(getAnimal(scene.animalId).src) : null;
+    const sceneColor = scene.packId === "colors" ? getColor(scene.colorId) : null;
+    const shapeId = scene.packId === "colors" ? scene.shapeId : null;
+    const cast = createRollCast(scene.id);
     const shapeColors = sceneColor
       ? pickShapeFillColors({
-          sceneId,
+          sceneId: scene.id,
           backgroundHex: sceneColor.background,
           primaryForeground: sceneColor.foreground,
           count: cast.length,
@@ -107,11 +81,12 @@ export function RollCanvas(props: RollCanvasProps) {
     let loopStartedAt = 0;
 
     const syncBuffer = () => {
-      const { width, height } = resolveCanvasBufferSize(
-        cssWidth,
-        cssHeight,
-        window.devicePixelRatio || 1,
+      const ratio = Math.min(
+        Math.max(window.devicePixelRatio || 1, 1),
+        MAX_CANVAS_DEVICE_PIXEL_RATIO,
       );
+      const width = Math.max(1, Math.floor(cssWidth * ratio));
+      const height = Math.max(1, Math.floor(cssHeight * ratio));
       if (width !== lastWidth || height !== lastHeight) {
         canvas.width = width;
         canvas.height = height;
@@ -139,7 +114,7 @@ export function RollCanvas(props: RollCanvasProps) {
         width: canvas.width,
         height: canvas.height,
         subject:
-          kind === "shape" && shapeId && shapeColors
+          shapeId && shapeColors
             ? { kind: "shape", shapeId, shapeColors }
             : { kind: "animal", image: animalImage },
         poses: posesAt(elapsedMs),
@@ -236,7 +211,7 @@ export function RollCanvas(props: RollCanvasProps) {
     resizeObserver.observe(canvas);
 
     const onVisibility = () => {
-      visibleRef.current = readDocumentVisible();
+      visibleRef.current = document.visibilityState !== "hidden";
       if (visibleRef.current && !pausedRef.current) {
         startLoop();
         return;
@@ -260,7 +235,7 @@ export function RollCanvas(props: RollCanvasProps) {
       resizeObserver.disconnect();
       loopControlRef.current = null;
     };
-  }, [sceneId, kind, shapeId, colorId, animalImage, rotationStyle]);
+  }, [scene]);
 
   useEffect(() => {
     const control = loopControlRef.current;
