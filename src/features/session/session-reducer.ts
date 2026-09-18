@@ -70,41 +70,34 @@ function finish(state: PlayingState | PausedState): FinishedState {
   };
 }
 
+function withSetupPreferences(
+  state: SessionState,
+  patch: Partial<SessionPreferences>,
+): SessionState {
+  return state.status === "setup"
+    ? {
+        ...state,
+        preferences: {
+          ...state.preferences,
+          ...patch,
+        },
+      }
+    : state;
+}
+
 export function sessionReducer(
   state: SessionState,
   action: SessionAction,
 ): SessionState {
   switch (action.type) {
     case "SET_PACK":
-      return state.status === "setup"
-        ? {
-            ...state,
-            preferences: {
-              ...state.preferences,
-              packId: action.packId,
-            },
-          }
-        : state;
+      return withSetupPreferences(state, { packId: action.packId });
     case "SET_DURATION":
-      return state.status === "setup"
-        ? {
-            ...state,
-            preferences: {
-              ...state.preferences,
-              durationSeconds: action.durationSeconds,
-            },
-          }
-        : state;
+      return withSetupPreferences(state, {
+        durationSeconds: action.durationSeconds,
+      });
     case "SET_SOUND":
-      return state.status === "setup"
-        ? {
-            ...state,
-            preferences: {
-              ...state.preferences,
-              soundEnabled: action.soundEnabled,
-            },
-          }
-        : state;
+      return withSetupPreferences(state, { soundEnabled: action.soundEnabled });
     case "START": {
       if (state.status !== "setup") {
         return state;

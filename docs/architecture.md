@@ -33,12 +33,12 @@ Setup → Playing ↔ Paused → Finished → Setup
 - ブランド色・余白などのトークンは `src/styles.css` の `@theme`
 - レイアウトは Tailwind ユーティリティ
 - 再生中の図形モーションは Canvas 2D（`requestAnimationFrame`）。一時停止中およびタブ非表示中はループを止める。pause / visibility は ref で見て、ResizeObserver と cast を作り直さない
-- Player の scene 領域全体を Canvas stage とし、pose の x/y は幅・高さ基準で描画する。backing store の DPR は上限付き（`resolveCanvasBufferSize`）
+- Player の scene 領域全体を Canvas stage とし、pose の x/y は幅・高さ基準で描画する。backing store の DPR は上限 2
 - playing 中の scene タップ「ぽん」は `src/features/session/touch-pon.ts` の純粋関数で対象選定とスケール曲線を決め、Canvas 描画時に scale を乗算する（Reducer 非関与）
 - colors の複数図形塗りは `pickShapeFillColors` で actor ごとに決め、主はシーン前景色・副はパレットから背景とコントラストの取れる別色（シーン ID で決定的）
 - シーン入場フェードと背景クロスフェードは CSS
 - Setup のクレジット表示は `src/content/music-credits.ts`（音源 import 非依存）を参照する
-- どうぶつイラストのクレジット定数は `src/content/animal-credits.ts` に残すが、Setup では表示しない（いらすとやは表記必須ではない）
+- どうぶつイラストのクレジットは [animal-credits.md](./animal-credits.md) に残し、Setup では表示しない（いらすとやは表記必須ではない）
 - どうぶつ画像は `src/content/animals.ts` から ESM import し、Canvas では `drawImage` で描画する。回転は `tilt`（±12°）
 
 ## デプロイ

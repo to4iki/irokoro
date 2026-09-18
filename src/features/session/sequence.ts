@@ -32,7 +32,7 @@ export const SCENE_DURATION_MS = {
 } as const;
 
 type SequenceOptions = {
-  packId?: PackId;
+  packId: PackId;
   length: number;
   /** Must return values in [0, 1), like Math.random. */
   random?: () => number;
@@ -48,7 +48,7 @@ function differentIndex(previous: number, size: number, random: () => number): n
 }
 
 export function createSceneSequence({
-  packId = "colors",
+  packId,
   length,
   random = Math.random,
 }: SequenceOptions): Scene[] {
@@ -97,15 +97,4 @@ export function createSceneSequence({
   }
 
   return scenes;
-}
-
-export function createSeededRandom(seed: number): () => number {
-  let state = seed >>> 0;
-  return () => {
-    state += 0x6d2b79f5;
-    let value = state;
-    value = Math.imul(value ^ (value >>> 15), value | 1);
-    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
-    return ((value ^ (value >>> 14)) >>> 0) / 4_294_967_296;
-  };
 }

@@ -1,4 +1,4 @@
-import { BACKGROUND_TRACKS, type BackgroundTrack } from "../content/music";
+import { BACKGROUND_TRACKS } from "../content/music";
 
 export type BackgroundMusicController = {
   play: () => void;
@@ -9,7 +9,7 @@ export type BackgroundMusicController = {
 type CreateAudio = (src: string) => HTMLAudioElement;
 
 type CreateBackgroundMusicOptions = {
-  tracks?: readonly BackgroundTrack[];
+  tracks?: readonly string[];
   random?: () => number;
   createAudio?: CreateAudio;
 };
@@ -17,16 +17,13 @@ type CreateBackgroundMusicOptions = {
 /** Quiet enough for baby-facing play; still audible when device volume is up. */
 export const BACKGROUND_MUSIC_VOLUME = 0.25;
 
-function pickTrack(
-  tracks: readonly BackgroundTrack[],
-  random: () => number,
-): BackgroundTrack {
+function pickSrc(tracks: readonly string[], random: () => number): string {
   const index = Math.min(tracks.length - 1, Math.floor(random() * tracks.length));
-  const track = tracks[index];
-  if (!track) {
+  const src = tracks[index];
+  if (!src) {
     throw new RangeError("Unable to pick a background track.");
   }
-  return track;
+  return src;
 }
 
 /** HTMLMediaElement BGM boundary. One track per controller, looped quietly. */
@@ -42,8 +39,7 @@ export function createBackgroundMusic(
   }
 
   try {
-    const track = pickTrack(tracks, random);
-    const audio = createAudio(track.src);
+    const audio = createAudio(pickSrc(tracks, random));
     audio.loop = true;
     audio.volume = BACKGROUND_MUSIC_VOLUME;
 

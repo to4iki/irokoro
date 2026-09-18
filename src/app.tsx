@@ -1,27 +1,14 @@
-import { lazy, Suspense, startTransition, useEffect, useReducer, useRef } from "react";
+import { startTransition, useEffect, useReducer, useRef } from "react";
 import {
   type BackgroundMusicController,
   createBackgroundMusic,
 } from "./audio/background-music";
+import { FinishScreen } from "./components/finish-screen";
+import { PlayerScreen } from "./components/player-screen";
 import { SetupScreen } from "./components/setup-screen";
+import { useSessionDocumentTitle } from "./features/session/screen-a11y";
 import { createSceneSequence, type Scene } from "./features/session/sequence";
 import { createInitialState, sessionReducer } from "./features/session/session-reducer";
-import { useSessionDocumentTitle } from "./features/session/use-session-document-title";
-
-const PlayerScreen = lazy(async () => {
-  const module = await import("./components/player-screen");
-  return { default: module.PlayerScreen };
-});
-
-const FinishScreen = lazy(async () => {
-  const module = await import("./components/finish-screen");
-  return { default: module.FinishScreen };
-});
-
-function prefetchSessionScreens(): void {
-  void import("./components/player-screen");
-  void import("./components/finish-screen");
-}
 
 const DEFAULT_SEQUENCES = {
   colors: createSceneSequence({ packId: "colors", length: 64 }),
@@ -37,8 +24,8 @@ export default function App({ sequence }: AppProps) {
   const [state, dispatch] = useReducer(sessionReducer, undefined, createInitialState);
   const audioRef = useRef<BackgroundMusicController | null>(null);
   const sceneRemainRef = useRef<{ id: string; remainingMs: number } | null>(null);
-  /** >0 after a finished→setup hop so Setup can take focus without stealing it on first load. */
-  const setupFocusEpochRef = useRef(0);
+  /** After finished→setup, Setup takes heading focus. First load does not. */
+  const focusSetupRef = useRef(false);
   const statusRef = useRef(state.status);
   statusRef.current = state.status;
 
@@ -54,7 +41,6 @@ export default function App({ sequence }: AppProps) {
 
   const status = state.status;
   const deadline = status === "playing" ? state.deadline : null;
-  // Narrow effect deps to a boolean (vercel rerender-dependencies).
   const sessionActive = status === "playing" || status === "paused";
 
   useEffect(() => {
@@ -63,7 +49,6 @@ export default function App({ sequence }: AppProps) {
     }
 
     const tick = () => {
-      // Timer UI is non-urgent; keep pause/stop clicks snappy (vercel rerender-transitions).
       startTransition(() => {
         dispatch({ type: "TICK", now: Date.now() });
       });
@@ -128,8 +113,6 @@ export default function App({ sequence }: AppProps) {
         audioRef.current?.pause();
         return;
       }
-      // Read latest status via ref so playing↔paused does not re-subscribe
-      // (vercel advanced-event-handler-refs).
       if (statusRef.current === "playing") {
         audioRef.current?.play();
       }
@@ -149,7 +132,7 @@ export default function App({ sequence }: AppProps) {
   if (state.status === "setup") {
     return (
       <SetupScreen
-        moveFocus={setupFocusEpochRef.current > 0}
+        moveFocus={focusSetupRef.current}
         onDurationChange={(durationSeconds) =>
           dispatch({ type: "SET_DURATION", durationSeconds })
         }
@@ -164,7 +147,6 @@ export default function App({ sequence }: AppProps) {
           }
           dispatch({ type: "START", now: Date.now() });
         }}
-        onStartIntent={prefetchSessionScreens}
         preferences={state.preferences}
       />
     );
@@ -172,32 +154,28 @@ export default function App({ sequence }: AppProps) {
 
   if (state.status === "finished") {
     return (
-      <Suspense fallback={null}>
-        <FinishScreen
-          onReset={() => {
-            setupFocusEpochRef.current += 1;
-            dispatch({ type: "RESET" });
-          }}
-        />
-      </Suspense>
+      <FinishScreen
+        onReset={() => {
+          focusSetupRef.current = true;
+          dispatch({ type: "RESET" });
+        }}
+      />
     );
   }
 
   return (
-    <Suspense fallback={null}>
-      <PlayerScreen
-        onPause={() => {
-          audioRef.current?.pause();
-          dispatch({ type: "PAUSE", now: Date.now() });
-        }}
-        onResume={() => {
-          audioRef.current?.play();
-          dispatch({ type: "RESUME", now: Date.now() });
-        }}
-        onStop={() => dispatch({ type: "STOP" })}
-        scene={scene}
-        state={state}
-      />
-    </Suspense>
+    <PlayerScreen
+      onPause={() => {
+        audioRef.current?.pause();
+        dispatch({ type: "PAUSE", now: Date.now() });
+      }}
+      onResume={() => {
+        audioRef.current?.play();
+        dispatch({ type: "RESUME", now: Date.now() });
+      }}
+      onStop={() => dispatch({ type: "STOP" })}
+      scene={scene}
+      state={state}
+    />
   );
 }

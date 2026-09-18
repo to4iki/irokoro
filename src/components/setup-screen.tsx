@@ -1,11 +1,13 @@
 import { MOMIJIBA_SITE_URL } from "../content/music-credits";
 import { PACK_CHOICES, type PackId } from "../content/packs";
-import { SCREEN_HEADING_ID } from "../features/session/screen-a11y";
+import {
+  SCREEN_HEADING_ID,
+  useFocusScreenHeadingOnMount,
+} from "../features/session/screen-a11y";
 import type {
   DurationSeconds,
   SessionPreferences,
 } from "../features/session/session-reducer";
-import { useFocusScreenHeadingOnMount } from "../features/session/use-focus-screen-heading-on-mount";
 
 type SetupScreenProps = {
   preferences: SessionPreferences;
@@ -14,8 +16,6 @@ type SetupScreenProps = {
   onSoundChange: (enabled: boolean) => void;
   onStart: () => void;
   moveFocus?: boolean;
-  /** Prefetch player/finish chunks (vercel bundle-preload). */
-  onStartIntent?: () => void;
 };
 
 const DURATIONS = [
@@ -34,7 +34,6 @@ export function SetupScreen({
   onSoundChange,
   onStart,
   moveFocus = false,
-  onStartIntent,
 }: SetupScreenProps) {
   useFocusScreenHeadingOnMount(moveFocus);
 
@@ -154,8 +153,6 @@ export function SetupScreen({
 
           <button
             className="flex min-h-[54px] w-full items-center justify-center gap-3 rounded-2xl bg-coral font-black tracking-[0.04em] text-white shadow-[0_9px_20px_rgb(182_73_44_/_24%)] transition-[translate,box-shadow,background-color] duration-150 hover:translate-y-[-1px] hover:bg-[#db5f40] focus-visible:translate-y-[-1px] focus-visible:bg-[#db5f40] max-[430px]:min-h-[52px]"
-            onFocus={onStartIntent}
-            onPointerEnter={onStartIntent}
             type="submit"
           >
             <span>はじめる</span>

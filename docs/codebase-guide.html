@@ -530,7 +530,7 @@
                 <dd>
                   <code>audioRef</code>（BGM）、
                   <code>sceneRemainRef</code>（シーン残り ms）、
-                  <code>setupFocusEpochRef</code>（Finish→Setup で見出しフォーカスするか）、
+                  <code>focusSetupRef</code>（Finish→Setup で見出しフォーカスするか）、
                   <code>statusRef</code>（visibility ハンドラ用の最新 status）
                 </dd>
               </dl>
@@ -542,7 +542,6 @@
                 </li>
                 <li>
                   status に応じて Setup / Player / Finish を描画
-                  （Player・Finish は lazy）
                 </li>
                 <li>
                   effects:
@@ -684,14 +683,12 @@
                 </dd>
                 <dt>SCENE_DURATION_MS</dt>
                 <dd>min 6000 / max 8000（赤ちゃん向けの落ち着いた dwell）</dd>
-                <dt>createSceneSequence({ packId?, length, random? })</dt>
+                <dt>createSceneSequence({ packId, length, random? })</dt>
                 <dd>
                   隣接シーンで色と subject（形 or どうぶつ）が連続しない並びを生成。
                   App は pack ごとに length 64 を起動時に一度作る
                   （<code>DEFAULT_SEQUENCES.colors / .animals</code>）
                 </dd>
-                <dt>createSeededRandom(seed)</dt>
-                <dd>テスト用の決定的乱数</dd>
               </dl>
             </article>
           </section>
@@ -715,7 +712,6 @@
                   <code>preferences</code>、
                   <code>onPackChange</code> / <code>onDurationChange</code> /
                   <code>onSoundChange</code> / <code>onStart</code>、
-                  <code>onStartIntent</code>（Player/Finish の prefetch）、
                   <code>moveFocus</code>（Finish から戻ったとき見出しへフォーカス）
                 </dd>
               </dl>
@@ -779,9 +775,8 @@
               <dl class="exports">
                 <dt>props</dt>
                 <dd>
-                  判別 props。<code>kind: "shape"</code>（shapeId / colorId）または
-                  <code>kind: "animal"</code>（imageSrc）。共通で
-                  <code>sceneId</code> / <code>paused</code>
+                  <code>scene</code>（判別共用体）と <code>paused</code>。
+                  <code>key={scene.id}</code> でシーン入場フェードを掛け直す
                 </dd>
                 <dt>内部の流れ</dt>
                 <dd>
@@ -790,7 +785,8 @@
                   毎フレーム <code>sampleActorPose(..., rotationStyle)</code>
                   （animals は <code>tilt</code>、colors は <code>spin</code>） →
                   pose.scale に <code>ponScaleFactor</code> を乗算 →
-                  <code>paintRollFrame</code>（<code>PaintSubject</code>）
+                  <code>paintRollFrame</code>（<code>PaintSubject</code>）。
+                  backing store の DPR は上限 2
                 </dd>
               </dl>
             </article>
@@ -861,23 +857,9 @@
                 <dt>paintRollFrame(ctx, options)</dt>
                 <dd>
                   clear → 各 pose を translate/rotate → subject に応じて path fill または
-                  <code>drawImage</code>。基準サイズは短辺 ×
-                  <code>SUBJECT_BASE_SIZE_RATIO</code>（0.52）。colors では actor ごとに
+                  <code>drawImage</code>。基準サイズは短辺 × 0.52。colors では actor ごとに
                   <code>shapeColors[i]</code>。shapeId の網羅は <code>never</code> で保証
                 </dd>
-              </dl>
-            </article>
-
-            <article class="module">
-              <h4>
-                <span class="path">src/features/session/canvas-buffer.ts</span>
-              </h4>
-              <div class="meta"><span class="tag">純粋</span></div>
-              <dl class="exports">
-                <dt>MAX_CANVAS_DEVICE_PIXEL_RATIO = 2</dt>
-                <dd>Retina でも backing store を抑えめに</dd>
-                <dt>resolveCanvasBufferSize(cssW, cssH, dpr)</dt>
-                <dd>canvas.width/height 用の整数サイズと実際の ratio</dd>
               </dl>
             </article>
           </section>
@@ -941,9 +923,9 @@
                 <dt>ColorId / ShapeId / PackId</dt>
                 <dd>型。PackId は <code>"colors" | "animals"</code></dd>
                 <dt>CONTENT_PACKS</dt>
-                <dd>両パックのタイトル・説明（Player 見出し用）</dd>
+                <dd>両パックのタイトル・Setup 用 detail（Player 見出し / ラジオ）</dd>
                 <dt>PACK_CHOICES</dt>
-                <dd>Setup 用。colors / animals とも選択可</dd>
+                <dd>Setup の表示順。<code>CONTENT_PACKS</code> への参照</dd>
                 <dt>getColor / getShape</dt>
                 <dd>ID → 定義。未知 ID は RangeError</dd>
               </dl>
@@ -955,10 +937,8 @@
               <dl class="exports">
                 <dt>BACKGROUND_TRACKS</dt>
                 <dd>
-                  もみじば 3 曲。Vite 経由の mp3 URL。セッション開始時に 1 曲選択
+                  もみじば 3 曲の Vite 経由 mp3 URL。セッション開始時に 1 曲選択
                 </dd>
-                <dt>BackgroundTrack</dt>
-                <dd>id / title / artist / src / pageUrl</dd>
               </dl>
             </article>
 
@@ -999,18 +979,6 @@
                   Canvas の <code>drawImage</code> 用
                 </dd>
               </dl>
-            </article>
-
-            <article class="module">
-              <h4>
-                <span class="path">src/content/animal-credits.ts</span>
-              </h4>
-              <div class="meta"><span class="tag">定数（画像 import 非依存）</span></div>
-              <p>
-                いらすとや公式 URL 定数。Setup では表示しない（表記必須ではない）。
-                素材一覧・確認日は
-                <a href="./animal-credits.md">animal-credits.md</a>。
-              </p>
             </article>
 
             <div class="callout">
@@ -1061,28 +1029,14 @@
               <dl class="exports">
                 <dt>SCREEN_HEADING_ID</dt>
                 <dd>各画面の見出し id（フォーカスターゲット）</dd>
-                <dt>documentTitleForStatus(status)</dt>
-                <dd>タブタイトル文字列</dd>
-                <dt>focusScreenHeading()</dt>
-                <dd><code>#screen-heading</code> に focus()</dd>
+                <dt>useFocusScreenHeadingOnMount(enabled?)</dt>
+                <dd>
+                  マウント時に見出しへフォーカス。<code>enabled=false</code> なら何もしない
+                  （初回 Setup ではフォーカスを奪わない）
+                </dd>
+                <dt>useSessionDocumentTitle(status)</dt>
+                <dd>status 変化に合わせて <code>document.title</code> を更新。App から使用</dd>
               </dl>
-            </article>
-
-            <article class="module">
-              <h4>
-                <span class="path">src/features/session/use-focus-screen-heading-on-mount.ts</span>
-              </h4>
-              <p>
-                マウント時に見出しへフォーカス。<code>enabled=false</code> なら何もしない
-                （初回 Setup ではフォーカスを奪わない）。
-              </p>
-            </article>
-
-            <article class="module">
-              <h4>
-                <span class="path">src/features/session/use-session-document-title.ts</span>
-              </h4>
-              <p>status 変化に合わせて <code>document.title</code> を更新。App から使用。</p>
             </article>
           </section>
 
@@ -1107,10 +1061,6 @@
                 <tr>
                   <td><span class="path">roll.test.ts</span></td>
                   <td>cast / pose の決定性や入場後の動き</td>
-                </tr>
-                <tr>
-                  <td><span class="path">canvas-buffer.test.ts</span></td>
-                  <td>DPR 上限</td>
                 </tr>
                 <tr>
                   <td><span class="path">background-music.test.ts</span></td>
@@ -1147,7 +1097,7 @@
        ├─ SetupScreen ← preferences / onChange* / onStart
        ├─ PlayerScreen ← state + scene
        │     └─ SceneStage (memo)
-       │           └─ RollCanvas (kind: shape | animal)
+       │           └─ RollCanvas (scene + paused)
        │                 ├─ pointerdown → touch-pon.ts（対象選定・scale）
        │                 ├─ createRollCast / sampleActorPose(…, spin|tilt)
        │                 ├─ colors: pickShapeFillColors(colorId → 前景/背景)

@@ -32,29 +32,7 @@ class FakeAudio {
   }
 }
 
-const TRACKS = [
-  {
-    id: "a",
-    title: "Track A",
-    artist: "Artist",
-    src: "track-a.mp3",
-    pageUrl: "https://example.com/a/",
-  },
-  {
-    id: "b",
-    title: "Track B",
-    artist: "Artist",
-    src: "track-b.mp3",
-    pageUrl: "https://example.com/b/",
-  },
-  {
-    id: "c",
-    title: "Track C",
-    artist: "Artist",
-    src: "track-c.mp3",
-    pageUrl: "https://example.com/c/",
-  },
-] as const;
+const TRACKS = ["track-a.mp3", "track-b.mp3", "track-c.mp3"] as const;
 
 describe("createBackgroundMusic", () => {
   it("picks different tracks for different random inputs, loops quietly, and preserves currentTime across pause/resume", () => {

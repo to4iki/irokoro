@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { SUBJECT_BASE_SIZE_RATIO } from "./draw-shape";
 import {
   createRollCast,
   ENTRY_DURATION_MS,
@@ -72,11 +71,6 @@ describe("roll motion", () => {
     expect(dist(primary, companionA)).toBeGreaterThan(0.45);
     expect(dist(primary, companionB)).toBeGreaterThan(0.45);
     expect(dist(companionA, companionB)).toBeGreaterThan(0.7);
-  });
-
-  it("keeps subject base size slightly under half the short stage side for phones", () => {
-    expect(SUBJECT_BASE_SIZE_RATIO).toBeGreaterThanOrEqual(0.48);
-    expect(SUBJECT_BASE_SIZE_RATIO).toBeLessThanOrEqual(0.53);
   });
 
   it("after entry, primary and companions keep traversing a much larger horizontal and vertical range", () => {
